@@ -1,4 +1,4 @@
-name: Update Events from Website
+name: Update Events and News from Website
 
 on:
   schedule:
@@ -6,13 +6,14 @@ on:
   push:
     paths:
       - 'scripts/scrapeEventsPage.js'
+      - 'scripts/scrapeNewsPage.js'
   workflow_dispatch:  # Allow manual triggering
 
 permissions:
   contents: write
 
 jobs:
-  update-events:
+  update-content:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -29,10 +30,13 @@ jobs:
       - name: Scrape events from website
         run: node scripts/scrapeEventsPage.js
         
+      - name: Scrape news from website
+        run: node scripts/scrapeNewsPage.js
+        
       - name: Commit and push if there are changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add public/data/events.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update events from website scraping"
+          git add public/data/events.json public/data/news.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update events and news from website scraping"
           git push
