@@ -28,7 +28,7 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
   const slides: Slide[] = [
     {
       id: 1,
-      title: "Parkside Barbershop Harmony",
+      title: "Parkside Hershey, PA",
       description: "The Hershey Chapter of the Barbershop Harmony Society, featuring Parkside Harmony and Parkside Melody a cappella choruses.",
       imageUrl: "/images/slideshow/slide1-main.jpg",
       fallbackImageUrl: "/images/hero-bg.jpg",
