@@ -16,7 +16,7 @@ const { v4: uuidv4 } = require('uuid');
 const ChoirGenius = require('choirgenius');
 
 // Configuration
-const CHOIR_GENIUS_URL = 'https://parksideharmony.org/'; // Replace with your actual ChoirGenius URL
+const CHOIR_GENIUS_URL = 'https://parksideharmony.org'; // Custom domain for Parkside Harmony Groupanizer
 const OUTPUT_FILE = path.join(__dirname, '..', 'public', 'data', 'events.json');
 
 // Default image paths for different chorus types

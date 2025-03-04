@@ -5,6 +5,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/ui/PageTransition";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
+import EventsList from "@/components/events/EventsList";
 
 export const metadata: Metadata = {
   title: "Parkside - Hershey Chapter of the Barbershop Harmony Society",
@@ -55,91 +56,13 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* Featured Events Section */}
-          <section className="py-16 bg-gray-50">
-            <div className="container mx-auto px-4">
-              <ScrollAnimation>
-                <h2 className="text-3xl font-bold text-gray-900 mb-8">Upcoming Performances</h2>
-              </ScrollAnimation>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {/* Event Card 1 */}
-                <ScrollAnimation delay={0.1}>
-                  <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div className="relative h-48">
-                      <Image
-                        src="/images/event1.jpg"
-                        alt="Spring Concert"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="p-6">
-                      <div className="text-sm font-medium text-indigo-600 mb-1">March 15, 2025</div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">Spring Harmony Concert</h3>
-                      <p className="text-gray-600 mb-4">Join us for our annual Spring Concert featuring both Parkside Harmony and Parkside Melody choruses.</p>
-                      <Link 
-                        href="/events/spring-concert"
-                        className="text-indigo-600 font-medium hover:text-indigo-500"
-                      >
-                        Learn More →
-                      </Link>
-                    </div>
-                  </div>
-                </ScrollAnimation>
-                
-                {/* Event Card 2 */}
-                <ScrollAnimation delay={0.2}>
-                  <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div className="relative h-48">
-                      <Image
-                        src="/images/event2.jpg"
-                        alt="Barbershop Competition"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="p-6">
-                      <div className="text-sm font-medium text-indigo-600 mb-1">April 5-7, 2025</div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">Mid-Atlantic District Competition</h3>
-                      <p className="text-gray-600 mb-4">Cheer on Parkside Harmony as they compete in the Mid-Atlantic District Barbershop Competition.</p>
-                      <Link 
-                        href="/events/district-competition"
-                        className="text-indigo-600 font-medium hover:text-indigo-500"
-                      >
-                        Learn More →
-                      </Link>
-                    </div>
-                  </div>
-                </ScrollAnimation>
-                
-                {/* Event Card 3 */}
-                <ScrollAnimation delay={0.3}>
-                  <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div className="relative h-48">
-                      <Image
-                        src="/images/event3.jpg"
-                        alt="Community Performance"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="p-6">
-                      <div className="text-sm font-medium text-indigo-600 mb-1">March 28, 2025</div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">Community Outreach Performance</h3>
-                      <p className="text-gray-600 mb-4">Parkside Melody will be performing at the Hershey Community Center to support local charities.</p>
-                      <Link 
-                        href="/events/community-performance"
-                        className="text-indigo-600 font-medium hover:text-indigo-500"
-                      >
-                        Learn More →
-                      </Link>
-                    </div>
-                  </div>
-                </ScrollAnimation>
-              </div>
-            </div>
-          </section>
+          {/* Events Section */}
+          <EventsList 
+            title="Upcoming Events" 
+            maxEvents={3} 
+            dataSource="json" 
+            jsonUrl="/data/events.json" 
+          />
 
           {/* Recent News Section */}
           <section className="py-16">

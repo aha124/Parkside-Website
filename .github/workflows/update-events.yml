@@ -1,1 +1,48 @@
- 
+name: Update Events from ChoirGenius
+
+on:
+  # Run on a schedule (every day at midnight)
+  schedule:
+    - cron: '0 0 * * *'
+  
+  # Allow manual triggering
+  workflow_dispatch:
+  
+  # Run when changes are pushed to master branch
+  push:
+    branches:
+      - master
+    paths:
+      - 'scripts/fetchChoirGeniusEvents.js'
+
+jobs:
+  update-events:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          npm ci
+          npm install github:hcamusic/choirgenius uuid
+      
+      - name: Fetch events from ChoirGenius
+        env:
+          CHOIR_GENIUS_USERNAME: ${{ secrets.CHOIR_GENIUS_USERNAME }}
+          CHOIR_GENIUS_PASSWORD: ${{ secrets.CHOIR_GENIUS_PASSWORD }}
+        run: node scripts/fetchChoirGeniusEvents.js
+      
+      - name: Commit and push if events changed
+        run: |
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions@github.com'
+          git add public/data/events.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update events from ChoirGenius" && git push) 

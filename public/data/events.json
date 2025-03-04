@@ -1,1 +1,52 @@
- 
+[
+  {
+    "id": "1",
+    "title": "Spring Harmony Concert",
+    "date": "March 15, 2025",
+    "description": "Join us for our annual Spring Concert featuring both Parkside Harmony and Parkside Melody choruses.",
+    "imageUrl": "/images/event1.jpg",
+    "url": "/events/spring-concert",
+    "location": "Hershey Theatre",
+    "chorus": "Both"
+  },
+  {
+    "id": "2",
+    "title": "Mid-Atlantic District Competition",
+    "date": "April 5-7, 2025",
+    "description": "Cheer on Parkside Harmony as they compete in the Mid-Atlantic District Barbershop Competition.",
+    "imageUrl": "/images/event2.jpg",
+    "url": "/events/district-competition",
+    "location": "Baltimore Convention Center",
+    "chorus": "Harmony"
+  },
+  {
+    "id": "3",
+    "title": "Community Outreach Performance",
+    "date": "March 28, 2025",
+    "description": "Parkside Melody will be performing at the Hershey Community Center to support local charities.",
+    "imageUrl": "/images/event3.jpg",
+    "url": "/events/community-performance",
+    "location": "Hershey Community Center",
+    "chorus": "Melody"
+  },
+  {
+    "id": "4",
+    "title": "Holiday Concert Series",
+    "date": "December 10-12, 2025",
+    "description": "Our annual holiday concert series featuring seasonal favorites and barbershop classics.",
+    "imageUrl": "/images/event4.jpg",
+    "url": "/events/holiday-concert",
+    "location": "Hershey Public Library",
+    "chorus": "Both"
+  },
+  {
+    "id": "5",
+    "title": "Summer Workshop",
+    "date": "July 15, 2025",
+    "description": "Join us for a day of learning and singing with guest clinicians and coaches.",
+    "imageUrl": "/images/event5.jpg",
+    "url": "/events/summer-workshop",
+    "location": "Hershey Middle School",
+    "chorus": "Both"
+  }
+] 
