@@ -1,27 +1,28 @@
-# ChoirGenius Integration for Parkside Website
+# Events Integration for Parkside Website
 
-This directory contains scripts for integrating events from your ChoirGenius Groupanizer account with the Parkside website.
+This directory contains scripts for integrating events from your Parkside Harmony website into your new Parkside website.
 
 ## Overview
 
 The integration works by:
 
-1. Fetching events from ChoirGenius using an unofficial API library
+1. Scraping events directly from the public events page at parksideharmony.org/events
 2. Converting the events to the format used by the website
 3. Updating the JSON file that powers the events display
 
-## Important Note About the ChoirGenius Library
+## Web Scraping Approach
 
-The unofficial ChoirGenius library we're using has some limitations:
+We've switched to a direct web scraping approach that:
 
-- It doesn't have a direct `getEvents` method as initially expected
-- The script now tries multiple approaches to fetch events:
-  1. First tries `getCalendarEvents` if available
-  2. Then tries `getUpcomingEvents` if available
-  3. Falls back to a custom scraping function
-  4. If no events are found, creates dummy events for testing
+1. Uses Puppeteer to load the events page in a headless browser
+2. Extracts event information from the HTML using Cheerio
+3. Formats the data to match our website's requirements
+4. Falls back to dummy events if no events are found or if there's an error
 
-This ensures the integration is resilient to changes in the library or website structure.
+This approach is more reliable than the previous ChoirGenius API library because:
+- It doesn't require authentication credentials
+- It uses the same data that's already publicly displayed on your website
+- It's not dependent on the internal structure of ChoirGenius
 
 ## Setup Instructions
 
@@ -31,25 +32,12 @@ To run the script manually:
 
 1. Install the required dependencies:
    ```bash
-   npm install github:hcamusic/choirgenius uuid
+   npm install puppeteer cheerio uuid
    ```
 
-2. Set your ChoirGenius credentials as environment variables:
+2. Run the script:
    ```bash
-   # On Windows
-   set CHOIR_GENIUS_USERNAME=your_username
-   set CHOIR_GENIUS_PASSWORD=your_password
-   
-   # On macOS/Linux
-   export CHOIR_GENIUS_USERNAME=your_username
-   export CHOIR_GENIUS_PASSWORD=your_password
-   ```
-
-3. The script is already configured to use the Parkside Harmony custom domain (https://parksideharmony.org). If you need to change this for any reason, update the `CHOIR_GENIUS_URL` in `fetchChoirGeniusEvents.js`.
-
-4. Run the script:
-   ```bash
-   node scripts/fetchChoirGeniusEvents.js
+   node scripts/scrapeEventsPage.js
    ```
 
 ### Automated Setup with GitHub Actions
@@ -58,14 +46,7 @@ For automatic updates using GitHub Actions:
 
 1. Push your code to GitHub
 
-2. Add your ChoirGenius credentials as GitHub Secrets:
-   - Go to your GitHub repository
-   - Navigate to Settings > Secrets and variables > Actions
-   - Add two new repository secrets:
-     - `CHOIR_GENIUS_USERNAME`: Your ChoirGenius username
-     - `CHOIR_GENIUS_PASSWORD`: Your ChoirGenius password
-
-3. The GitHub Actions workflow will:
+2. The GitHub Actions workflow will:
    - Run automatically every day at midnight
    - Run when you push changes to the script
    - Allow manual triggering from the Actions tab
@@ -81,23 +62,23 @@ The script assigns default images to events based on which chorus they belong to
 
 ### Chorus Detection
 
-The script determines which chorus an event belongs to by looking for keywords in the event title and description. You can customize these keywords by modifying the `harmonyKeywords` and `melodyKeywords` arrays in the `determineChorus` function.
+The script determines which chorus an event belongs to by looking for keywords in the event title and description. You can customize this logic in the `determineChorus` function.
 
 ### Dummy Events
 
-If no events are found in ChoirGenius, the script will create dummy events to ensure the website always has content to display. You can customize these dummy events in the `main` function.
+If no events are found on the website, the script will create dummy events to ensure the website always has content to display. You can customize these dummy events by modifying the `createDummyEvents` function.
 
 ## Troubleshooting
 
 If you encounter issues:
 
-- **Login Failures**: Ensure your username and password are correct
-- **No Events Found**: Check that your ChoirGenius account has upcoming events. The script will create dummy events if none are found.
-- **Script Errors**: The unofficial API may break if ChoirGenius changes their website structure. Check for updates to the library.
-- **URL Issues**: If the login URL changes, update the `CHOIR_GENIUS_URL` in the script
-- **Library Method Issues**: If you see errors about missing methods, the library may have changed. The script tries multiple approaches to handle this.
+- **Scraping Errors**: If the structure of the events page changes, you may need to update the selectors in the `scrapeEvents` function
+- **Date Parsing Errors**: If the date format on the events page changes, you may need to update the regex in the `parseDateTime` function
+- **No Events Found**: The script will automatically create dummy events if none are found
+- **Script Errors**: The script is designed to handle errors gracefully and will create dummy events if anything goes wrong
 
 ## Resources
 
-- [ChoirGenius API Library](https://github.com/hcamusic/choirgenius)
+- [Puppeteer Documentation](https://pptr.dev/)
+- [Cheerio Documentation](https://cheerio.js.org/)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions) 

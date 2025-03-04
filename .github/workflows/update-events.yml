@@ -1,48 +1,38 @@
-name: Update Events from ChoirGenius
+name: Update Events from Website
 
 on:
-  # Run on a schedule (every day at midnight)
   schedule:
-    - cron: '0 0 * * *'
-  
-  # Allow manual triggering
-  workflow_dispatch:
-  
-  # Run when changes are pushed to master branch
+    - cron: '0 0 * * *'  # Run daily at midnight
   push:
-    branches:
-      - master
     paths:
-      - 'scripts/fetchChoirGeniusEvents.js'
+      - 'scripts/scrapeEventsPage.js'
+  workflow_dispatch:  # Allow manual triggering
+
+permissions:
+  contents: write
 
 jobs:
   update-events:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
-      - name: Set up Node.js
+        
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'
-      
+          
       - name: Install dependencies
+        run: npm install puppeteer cheerio uuid
+        
+      - name: Scrape events from website
+        run: node scripts/scrapeEventsPage.js
+        
+      - name: Commit and push if there are changes
         run: |
-          npm ci
-          npm install github:hcamusic/choirgenius uuid
-      
-      - name: Fetch events from ChoirGenius
-        env:
-          CHOIR_GENIUS_USERNAME: ${{ secrets.CHOIR_GENIUS_USERNAME }}
-          CHOIR_GENIUS_PASSWORD: ${{ secrets.CHOIR_GENIUS_PASSWORD }}
-        run: node scripts/fetchChoirGeniusEvents.js
-      
-      - name: Commit and push if events changed
-        run: |
-          git config --global user.name 'GitHub Actions Bot'
-          git config --global user.email 'actions@github.com'
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
           git add public/data/events.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update events from ChoirGenius" && git push) 
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update events from website scraping"
+          git push
