@@ -81,4 +81,46 @@ If you encounter issues:
 
 - [Puppeteer Documentation](https://pptr.dev/)
 - [Cheerio Documentation](https://cheerio.js.org/)
-- [GitHub Actions Documentation](https://docs.github.com/en/actions) 
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+
+# Parkside Website Scripts
+
+This directory contains utility scripts for the Parkside Website.
+
+## News Fetching Script
+
+The `fetch-news.js` script is used to fetch news articles from the Parkside Harmony website and save them to the local `public/data/news.json` file. This ensures that the news displayed on your website matches the actual news on the Parkside Harmony website.
+
+### Prerequisites
+
+Before running the script, make sure you have installed the required dependencies:
+
+```bash
+npm install
+```
+
+### Running the Script
+
+To fetch the latest news articles, run:
+
+```bash
+npm run fetch-news
+```
+
+This will:
+1. Fetch the news articles from https://parksideharmony.org/news
+2. Parse the HTML to extract article information (title, date, summary, image URL, and link URL)
+3. Save the data to `public/data/news.json`
+
+### Troubleshooting
+
+If you encounter any issues:
+
+1. Make sure you have an internet connection
+2. Check that the Parkside Harmony website is accessible
+3. Verify that the HTML structure of the Parkside Harmony website hasn't changed
+4. If the script fails, you can manually update the `public/data/news.json` file
+
+### Automatic Updates
+
+Consider setting up a scheduled task or GitHub Action to run this script periodically to keep your news data up to date. 

@@ -1,16 +1,19 @@
 name: Update Events and News from Website
 
+# This workflow automatically fetches the latest events and news from the Parkside Harmony website
+# It runs daily at midnight, when the scripts are modified, or when manually triggered
+
 on:
   schedule:
     - cron: '0 0 * * *'  # Run daily at midnight
   push:
     paths:
       - 'scripts/scrapeEventsPage.js'
-      - 'scripts/scrapeNewsPage.js'
+      - 'scripts/fetch-news.js'
   workflow_dispatch:  # Allow manual triggering
 
 permissions:
-  contents: write
+  contents: write  # Needed to commit and push changes
 
 jobs:
   update-content:
@@ -23,20 +26,29 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'  # Cache npm dependencies
           
       - name: Install dependencies
-        run: npm install puppeteer cheerio uuid
+        run: npm install puppeteer cheerio uuid jsdom
         
       - name: Scrape events from website
         run: node scripts/scrapeEventsPage.js
+        continue-on-error: true  # Continue even if this step fails
         
-      - name: Scrape news from website
-        run: node scripts/scrapeNewsPage.js
+      - name: Fetch news from website
+        run: node scripts/fetch-news.js
+        continue-on-error: true  # Continue even if this step fails
         
       - name: Commit and push if there are changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add public/data/events.json public/data/news.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update events and news from website scraping"
-          git push
+          
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update events and news from website scraping"
+            git push
+          fi

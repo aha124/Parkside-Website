@@ -82,6 +82,20 @@ export default function NewsList({
     return "/images/news1.jpg";
   };
 
+  // Helper function to get the correct URL for news items
+  const getNewsUrl = (url: string) => {
+    // If it's an external URL, use it directly
+    if (isExternalUrl(url)) return url;
+    
+    // If it's a node URL from Parkside Harmony (e.g., /node/6061)
+    if (url.startsWith('/node/')) {
+      return `https://parksideharmony.org${url}`;
+    }
+    
+    // If it's a local URL, use it as is
+    return url;
+  };
+
   useEffect(() => {
     const fetchNews = async () => {
       setLoading(true);
@@ -96,10 +110,12 @@ export default function NewsList({
         
         // If we have news data, use it
         if (fetchedNews && fetchedNews.length > 0) {
-          // Map over the fetched news and ensure each item has a valid imageUrl
+          // Map over the fetched news and ensure each item has valid URLs
           const processedNews = fetchedNews.map((item: NewsItem) => ({
             ...item,
-            imageUrl: getValidImageUrl(item.imageUrl)
+            imageUrl: getValidImageUrl(item.imageUrl),
+            // Ensure the URL is properly formatted
+            url: item.url || '/news'
           }));
           
           setNewsItems(processedNews.slice(0, maxItems));
@@ -190,12 +206,23 @@ export default function NewsList({
                     <p className="text-gray-600 mb-4">{item.summary}</p>
                   </div>
                   <div className="px-6 pb-6">
-                    <Link 
-                      href={item.url}
-                      className="text-indigo-600 font-medium hover:text-indigo-500"
-                    >
-                      Read More →
-                    </Link>
+                    {isExternalUrl(item.url) || item.url.startsWith('/node/') ? (
+                      <a 
+                        href={getNewsUrl(item.url)}
+                        className="text-indigo-600 font-medium hover:text-indigo-500"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Read More →
+                      </a>
+                    ) : (
+                      <Link 
+                        href={item.url}
+                        className="text-indigo-600 font-medium hover:text-indigo-500"
+                      >
+                        Read More →
+                      </Link>
+                    )}
                   </div>
                 </article>
               </ScrollAnimation>

@@ -18,6 +18,12 @@ A modern website for Parkside featuring a split-screen landing page and a clean,
 - Recent news section with article previews
 - Fully responsive design for all devices
 
+### Automated Content Updates
+- Automatic fetching of news articles from the Parkside Harmony website
+- Automatic fetching of events from the Parkside Harmony website
+- GitHub Actions workflow to keep content up-to-date
+- Daily updates and manual trigger options
+
 ## Tech Stack
 
 - **Next.js**: React framework for server-rendered applications
@@ -25,6 +31,7 @@ A modern website for Parkside featuring a split-screen landing page and a clean,
 - **Tailwind CSS**: Utility-first CSS framework
 - **Shadcn UI**: Reusable UI components
 - **Framer Motion**: Animation library
+- **GitHub Actions**: Automated workflows for content updates
 
 ## Getting Started
 
@@ -60,6 +67,29 @@ npm run dev
   - `splash`: Components for the splash page
   - `ui`: UI components from Shadcn UI
 - `public`: Static assets like images
+- `scripts`: Utility scripts for content updates
+  - `fetch-news.js`: Script to fetch news from the Parkside Harmony website
+  - `scrapeEventsPage.js`: Script to fetch events from the Parkside Harmony website
+- `.github/workflows`: GitHub Actions workflow configurations
+
+## Automated Content Updates
+
+The website uses GitHub Actions to automatically fetch and update content from the Parkside Harmony website:
+
+### News Updates
+- News articles are fetched from https://parksideharmony.org/news
+- The script extracts titles, dates, summaries, images, and URLs
+- Updates are saved to `public/data/news.json`
+
+### Event Updates
+- Events are fetched from https://parksideharmony.org/events
+- The script extracts event details, dates, locations, and images
+- Updates are saved to `public/data/events.json`
+
+### Update Schedule
+- Updates run automatically every day at midnight
+- Updates also run when the scripts are modified
+- Manual updates can be triggered from the GitHub Actions tab
 
 ## License
 
