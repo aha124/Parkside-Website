@@ -59,9 +59,11 @@ export default function HomePage() {
           {/* Events Section */}
           <EventsList 
             title="Upcoming Events" 
-            maxEvents={3} 
+            maxEvents={4} 
             dataSource="json" 
             jsonUrl="/data/events.json" 
+            showViewAllButton={true}
+            viewAllUrl="/events"
           />
 
           {/* Recent News Section */}
