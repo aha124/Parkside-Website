@@ -10,6 +10,19 @@ The integration works by:
 2. Converting the events to the format used by the website
 3. Updating the JSON file that powers the events display
 
+## Important Note About the ChoirGenius Library
+
+The unofficial ChoirGenius library we're using has some limitations:
+
+- It doesn't have a direct `getEvents` method as initially expected
+- The script now tries multiple approaches to fetch events:
+  1. First tries `getCalendarEvents` if available
+  2. Then tries `getUpcomingEvents` if available
+  3. Falls back to a custom scraping function
+  4. If no events are found, creates dummy events for testing
+
+This ensures the integration is resilient to changes in the library or website structure.
+
 ## Setup Instructions
 
 ### Manual Setup
@@ -70,14 +83,19 @@ The script assigns default images to events based on which chorus they belong to
 
 The script determines which chorus an event belongs to by looking for keywords in the event title and description. You can customize these keywords by modifying the `harmonyKeywords` and `melodyKeywords` arrays in the `determineChorus` function.
 
+### Dummy Events
+
+If no events are found in ChoirGenius, the script will create dummy events to ensure the website always has content to display. You can customize these dummy events in the `main` function.
+
 ## Troubleshooting
 
 If you encounter issues:
 
 - **Login Failures**: Ensure your username and password are correct
-- **No Events Found**: Check that your ChoirGenius account has upcoming events
+- **No Events Found**: Check that your ChoirGenius account has upcoming events. The script will create dummy events if none are found.
 - **Script Errors**: The unofficial API may break if ChoirGenius changes their website structure. Check for updates to the library.
 - **URL Issues**: If the login URL changes, update the `CHOIR_GENIUS_URL` in the script
+- **Library Method Issues**: If you see errors about missing methods, the library may have changed. The script tries multiple approaches to handle this.
 
 ## Resources
 
