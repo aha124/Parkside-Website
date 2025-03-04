@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Parkside Website
+
+A modern website for Parkside featuring a split-screen landing page and a clean, responsive design.
+
+## Features
+
+### Splash Page
+- Split-screen landing page with two sides: "Parkside Harmony" and "Parkside Melody"
+- Interactive hover effects with smooth animations
+- Background image zoom/pan animations on hover
+- Center logo with zoom animation that links to the main website
+
+### Main Website
+- Clean, modern design with intuitive navigation
+- Responsive navigation bar with mobile menu
+- Hero section with background image
+- Featured events section with cards
+- Recent news section with article previews
+- Fully responsive design for all devices
+
+## Tech Stack
+
+- **Next.js**: React framework for server-rendered applications
+- **TypeScript**: Type-safe JavaScript
+- **Tailwind CSS**: Utility-first CSS framework
+- **Shadcn UI**: Reusable UI components
+- **Framer Motion**: Animation library
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18.17 or later
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yourusername/parkside-website.git
+cd parkside-website
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Run the development server:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+- `src/app`: Next.js app router pages
+- `src/components`: Reusable React components
+  - `layout`: Layout components (Header, Footer)
+  - `splash`: Components for the splash page
+  - `ui`: UI components from Shadcn UI
+- `public`: Static assets like images
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Deploy on Vercel
+## Acknowledgments
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Design inspiration from modern split-screen layouts
+- Shadcn UI for the component system
+- Next.js team for the amazing framework
