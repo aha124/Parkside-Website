@@ -4,12 +4,15 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Modal from '@/components/ui/Modal';
 
+type ChorusAffiliation = 'harmony' | 'melody' | 'both';
+
 interface LeadershipProfileProps {
   name: string;
   title: string;
   bio?: string;
   photoUrl?: string;
   size?: 'large' | 'medium' | 'small';
+  chorusAffiliation?: ChorusAffiliation;
 }
 
 export default function LeadershipProfile({
@@ -17,14 +20,23 @@ export default function LeadershipProfile({
   title,
   bio,
   photoUrl,
-  size = 'medium'
+  size = 'medium',
+  chorusAffiliation
 }: LeadershipProfileProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const sizeClasses = {
-    large: 'w-48 h-48',
-    medium: 'w-40 h-40',
-    small: 'w-32 h-32'
+    large: 'w-72 h-72',
+    medium: 'w-56 h-56',
+    small: 'w-40 h-40'
+  };
+
+  // Split bio into paragraphs
+  const bioParagraphs = bio?.split('\n\n') || [];
+
+  const getAffiliationBadge = () => {
+    // Keeping the function but returning null to hide badges
+    return null;
   };
 
   return (
@@ -32,15 +44,16 @@ export default function LeadershipProfile({
       <div className="text-center">
         <button
           onClick={() => setIsModalOpen(true)}
-          className="group relative mx-auto mb-4 rounded-full overflow-hidden bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          className="group relative mx-auto mb-4 rounded-lg overflow-hidden bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
         >
-          <div className={sizeClasses[size]}>
+          <div className={`${sizeClasses[size]} relative`}>
             {photoUrl ? (
               <Image
                 src={photoUrl}
                 alt={name}
                 fill
-                className="object-cover transition-transform duration-300 group-hover:scale-110"
+                className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                sizes={size === 'large' ? '288px' : size === 'medium' ? '224px' : '160px'}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-gray-400">
@@ -51,16 +64,15 @@ export default function LeadershipProfile({
           </div>
         </button>
         <h3 className="text-xl font-semibold text-gray-900">{name}</h3>
-        <p className="text-gray-600">{title}</p>
-        {bio && <p className="mt-2 text-gray-700 text-sm md:hidden">{bio}</p>}
+        <p className="text-indigo-600 font-medium">{title}</p>
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div className="p-6 md:p-8">
+        <div className="p-6 md:p-8 max-w-3xl mx-auto">
           <div className="flex items-start justify-between mb-6">
             <div>
               <h3 className="text-2xl font-bold text-gray-900">{name}</h3>
-              <p className="text-lg text-indigo-600">{title}</p>
+              <p className="text-lg text-indigo-600 font-medium">{title}</p>
             </div>
             <button
               onClick={() => setIsModalOpen(false)}
@@ -73,13 +85,15 @@ export default function LeadershipProfile({
             </button>
           </div>
 
-          <div className="aspect-[4/3] relative rounded-lg overflow-hidden mb-6">
+          <div className="aspect-[4/5] relative rounded-lg overflow-hidden mb-8">
             {photoUrl ? (
               <Image
                 src={photoUrl}
                 alt={name}
                 fill
-                className="object-cover"
+                className="object-cover object-top"
+                sizes="(min-width: 768px) 32rem, 100vw"
+                priority
               />
             ) : (
               <div className="absolute inset-0 bg-gray-200 flex items-center justify-center text-gray-400">
@@ -88,11 +102,13 @@ export default function LeadershipProfile({
             )}
           </div>
 
-          {bio && (
-            <div className="prose prose-lg max-w-none">
-              <p>{bio}</p>
-            </div>
-          )}
+          <div className="prose prose-lg max-w-none">
+            {bioParagraphs.map((paragraph, index) => (
+              <p key={index} className="mb-4 text-gray-700 leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
+          </div>
         </div>
       </Modal>
     </>

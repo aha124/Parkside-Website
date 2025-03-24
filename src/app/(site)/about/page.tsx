@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
+import HeroSection from "@/components/ui/HeroSection";
 
 const PageTransition = dynamic(() => import("@/components/ui/PageTransition"), {
   ssr: true
@@ -16,38 +17,12 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <PageTransition>
-      {/* Hero Section */}
-      <section className="relative h-[90vh] bg-gradient-to-br from-gray-900 to-indigo-900">
-        <div className="absolute inset-0">
-          <Image
-            src="/images/placeholder-hero.jpg"
-            alt="Parkside Chorus in Performance"
-            fill
-            className="object-cover opacity-40"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-transparent" />
-        </div>
-        
-        <div className="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center">
-          <ScrollAnimation direction="down">
-            <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 tracking-tight">
-              ABOUT PARKSIDE
-            </h1>
-          </ScrollAnimation>
-          <ScrollAnimation direction="up" delay={0.2}>
-            <p className="text-xl md:text-2xl text-white/90 max-w-2xl font-light">
-              Celebrating barbershop excellence in Hershey since 2015
-            </p>
-          </ScrollAnimation>
-          
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </div>
-        </div>
-      </section>
+      <HeroSection
+        title="ABOUT PARKSIDE"
+        subtitle="Celebrating barbershop excellence in Hershey since 2015"
+        imagePath="/images/placeholder-hero.jpg"
+        imageAlt="Parkside Chorus in Performance"
+      />
 
       {/* Our Story Section */}
       <section className="py-24">
