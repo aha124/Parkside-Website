@@ -85,7 +85,7 @@ export default function LeadershipPage() {
                 Our Leadership Team
               </h1>
               <p className="text-xl text-gray-600 text-center max-w-3xl mx-auto">
-                Meet the passionate individuals who guide and inspire Parkside Harmony
+                Meet the passionate individuals who guide and inspire Parkside
                 towards musical excellence and organizational success.
               </p>
             </ScrollAnimation>

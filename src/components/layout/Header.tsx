@@ -82,8 +82,11 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/splash" className="flex items-center mr-6" title="Return to Splash Page">
-              <div className="relative h-14 w-14 mr-2">
+            <Link
+              href="/splash"
+              className="flex items-center gap-2"
+            >
+              <div className="relative h-10 w-10">
                 <Image
                   src="/images/parkside-logo.png"
                   alt="Parkside Logo"
@@ -91,7 +94,7 @@ export default function Header() {
                   className="object-contain"
                 />
               </div>
-              <span className="text-2xl font-bold text-gray-800">Parkside</span>
+              <span className="text-xl font-bold">Parkside</span>
             </Link>
             <div className="hidden sm:block text-xs text-gray-500">
               <div>Hershey Chapter</div>
