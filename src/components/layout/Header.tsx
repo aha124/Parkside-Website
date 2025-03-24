@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
   { name: "Home", href: "/home" },
-  { name: "About", href: "/about" },
+  {
+    name: "About",
+    href: "/about",
+    submenu: [
+      { name: "About Us", href: "/about" },
+      { name: "Leadership", href: "/about/leadership" },
+    ],
+  },
   { name: "Join", href: "/join" },
   { name: "Media", href: "/media" },
   { name: "Donate", href: "/donate" },
@@ -18,6 +25,56 @@ const navItems = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+  const menuItemRef = useRef<HTMLDivElement>(null);
+  const submenuRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = (itemName: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setActiveSubmenu(itemName);
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!menuItemRef.current || !submenuRef.current) return;
+
+    const menuRect = menuItemRef.current.getBoundingClientRect();
+    const submenuRect = submenuRef.current.getBoundingClientRect();
+
+    const isOverMenuItem = 
+      e.clientX >= menuRect.left &&
+      e.clientX <= menuRect.right &&
+      e.clientY >= menuRect.top &&
+      e.clientY <= menuRect.bottom;
+
+    const isOverSubmenu =
+      e.clientX >= submenuRect.left &&
+      e.clientX <= submenuRect.right &&
+      e.clientY >= submenuRect.top - 10 &&
+      e.clientY <= submenuRect.bottom;
+
+    if (!isOverMenuItem && !isOverSubmenu) {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        setActiveSubmenu(null);
+      }, 100) as unknown as NodeJS.Timeout;
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <header className="bg-white shadow-md">
@@ -45,13 +102,57 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-6">
             {navItems.map((item) => (
-              <Link
+              <div
                 key={item.name}
-                href={item.href}
-                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                ref={item.submenu ? menuItemRef : undefined}
+                className="relative"
+                onMouseEnter={() => item.submenu && handleMouseEnter(item.name)}
               >
-                {item.name}
-              </Link>
+                <Link
+                  href={item.href}
+                  className="text-gray-600 hover:text-gray-900 font-medium transition-colors inline-flex items-center py-2"
+                >
+                  {item.name}
+                  {item.submenu && (
+                    <svg
+                      className="w-4 h-4 ml-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  )}
+                </Link>
+                <AnimatePresence>
+                  {item.submenu && activeSubmenu === item.name && (
+                    <motion.div
+                      ref={submenuRef}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute left-0 top-full mt-0 w-48 bg-white rounded-md shadow-lg py-2 z-50"
+                    >
+                      <div className="absolute h-2 w-full -top-2 bg-transparent" />
+                      {item.submenu.map((subItem) => (
+                        <Link
+                          key={subItem.name}
+                          href={subItem.href}
+                          className="block px-4 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                        >
+                          {subItem.name}
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             ))}
             <Link
               href="/splash"
@@ -111,14 +212,29 @@ export default function Header() {
           >
             <div className="flex flex-col space-y-4 pb-4">
               {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
+                <div key={item.name}>
+                  <Link
+                    href={item.href}
+                    className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                    onClick={() => !item.submenu && setMobileMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                  {item.submenu && (
+                    <div className="ml-4 mt-2 space-y-2">
+                      {item.submenu.map((subItem) => (
+                        <Link
+                          key={subItem.name}
+                          href={subItem.href}
+                          className="block text-gray-500 hover:text-gray-900 font-medium transition-colors"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          {subItem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
               <Link
                 href="/splash"

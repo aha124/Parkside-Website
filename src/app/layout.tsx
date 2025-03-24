@@ -7,7 +7,14 @@ import ErrorBoundary from "@/components/shared/ErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = defaultMetadata;
+export const metadata: Metadata = {
+  metadataBase: new URL('http://localhost:3000'),
+  title: {
+    template: '%s | Parkside',
+    default: 'Parkside - Hershey Chapter of the Barbershop Harmony Society'
+  },
+  description: 'Welcome to Parkside - home of Parkside Harmony and Parkside Melody a cappella choruses.',
+};
 
 export default function RootLayout({
   children,
