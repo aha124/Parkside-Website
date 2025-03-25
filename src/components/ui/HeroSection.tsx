@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
+import ScrollAnimation from './ScrollAnimation';
 
 interface HeroSectionProps {
   title: string;
@@ -26,34 +27,31 @@ export default function HeroSection({
 
   useEffect(() => {
     const handleScroll = () => {
-      if (heroRef.current) {
-        const rect = heroRef.current.getBoundingClientRect();
-        const scrollPercent = Math.max(0, Math.min(1, 1 - (rect.bottom / (rect.height + window.innerHeight))));
-        setScrollY(scrollPercent);
-      }
+      const scrolled = window.scrollY;
+      const vh = window.innerHeight;
+      const scrollProgress = Math.min(scrolled / vh, 1);
+      setScrollY(scrollProgress);
     };
 
     window.addEventListener('scroll', handleScroll);
-    handleScroll();
-
+    handleScroll(); // Initial check
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <div 
       ref={heroRef}
-      className="relative min-h-[50vh] flex items-center justify-center overflow-hidden"
+      className="relative flex items-center justify-center overflow-hidden transition-[height] duration-300"
       style={{ 
-        height: `calc(100vh - ${Math.min(scrollY * 300, 250)}px)`,
-        minHeight: '400px'
+        height: `${Math.max(70 - (scrollY * 40), 30)}vh`,
+        minHeight: '300px',
       }}
     >
       {/* Background Media */}
       <div 
         className="absolute inset-0 w-full h-full"
         style={{
-          opacity: 1 - scrollY * 0.8,
-          transform: `scale(${1 + scrollY * 0.1})`,
+          transform: `translateY(${scrollY * 50}px)`,
         }}
       >
         {videoId ? (
@@ -83,48 +81,57 @@ export default function HeroSection({
             )}
           </>
         ) : imagePath ? (
-          <Image
-            src={imagePath}
-            alt={imageAlt || "Hero background"}
-            fill
-            className="object-cover"
-            priority
-          />
+          <div className="relative w-full h-full">
+            <div className="absolute inset-0">
+              <div className="relative w-full h-full transform-gpu animate-subtle-zoom">
+                <Image
+                  src={imagePath}
+                  alt={imageAlt || "Hero background"}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            </div>
+            <div className="absolute inset-0 bg-black/40" />
+          </div>
         ) : null}
         
         {/* Overlay gradient */}
         <div 
           className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/20"
           style={{
-            opacity: 0.7 + scrollY * 0.3,
+            opacity: 0.6 + scrollY * 0.4,
           }}
         />
       </div>
 
       {/* Content */}
       <div 
-        className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto"
+        className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto transition-transform duration-300"
         style={{
-          transform: `translateY(${scrollY * 50}px)`,
-          opacity: 1 - scrollY * 0.5,
+          transform: `translateY(${scrollY * 30}px)`,
+          opacity: Math.max(1 - scrollY * 1.5, 0),
         }}
       >
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="text-lg md:text-xl lg:text-2xl text-gray-200">
-            {subtitle}
-          </p>
-        )}
-        {children}
+        <ScrollAnimation>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="text-lg md:text-xl lg:text-2xl text-gray-200">
+              {subtitle}
+            </p>
+          )}
+          {children}
+        </ScrollAnimation>
       </div>
 
       {/* Scroll indicator */}
       <div 
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce transition-opacity duration-300"
         style={{
-          opacity: 1 - scrollY * 2,
+          opacity: Math.max(1 - scrollY * 2, 0),
         }}
       >
         <svg 
