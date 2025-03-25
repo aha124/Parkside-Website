@@ -103,21 +103,21 @@ export default function JoinPage() {
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
               {/* Harmony Image */}
-              <div className="relative h-64 rounded-lg overflow-hidden">
+              <div className="relative h-64 rounded-lg overflow-hidden group">
                 <Image
                   src="/images/harmony-performance.jpg"
                   alt="Parkside Harmony Performance"
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>
               {/* Melody Image */}
-              <div className="relative h-64 rounded-lg overflow-hidden">
+              <div className="relative h-64 rounded-lg overflow-hidden group">
                 <Image
                   src="/images/melody-performance.jpg"
                   alt="Parkside Melody Performance"
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>
             </div>
