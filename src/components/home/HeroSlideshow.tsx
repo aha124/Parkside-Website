@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useChorus } from "@/contexts/ChorusContext";
 
 // Define the slide interface
 interface Slide {
@@ -24,14 +25,42 @@ interface HeroSlideshowProps {
 }
 
 export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
+  const { selectedChorus } = useChorus();
+  
+  // Get the appropriate path for slideshow images based on selected chorus
+  const getSlideshowPath = () => {
+    if (selectedChorus === 'harmony') {
+      return '/images/harmony/slideshow/';
+    } else if (selectedChorus === 'melody') {
+      return '/images/melody/slideshow/';
+    } else {
+      return '/images/both/slideshow/';
+    }
+  };
+  
+  // Get the slideshow path
+  const slideshowPath = getSlideshowPath();
+  
   // Define the slides
   const slides: Slide[] = [
     {
       id: 1,
-      title: "Parkside Hershey, PA",
-      description: "The Hershey Chapter of the Barbershop Harmony Society, featuring Parkside Harmony and Parkside Melody a cappella choruses.",
-      imageUrl: "/images/slideshow/slide1-main.jpg",
-      fallbackImageUrl: "/images/hero-bg.jpg",
+      title: selectedChorus === 'harmony' 
+        ? "Parkside Harmony" 
+        : selectedChorus === 'melody' 
+          ? "Parkside Melody" 
+          : "Parkside Hershey, PA",
+      description: selectedChorus === 'harmony'
+        ? "Award-winning men's a cappella chorus performing in the barbershop tradition."
+        : selectedChorus === 'melody'
+          ? "Exceptional treble chorus bringing vibrant a cappella performances to the Hershey area."
+          : "The Hershey Chapter of the Barbershop Harmony Society, featuring Parkside Harmony and Parkside Melody a cappella choruses.",
+      imageUrl: `${slideshowPath}slide1-main.jpg`,
+      fallbackImageUrl: selectedChorus === 'harmony' 
+        ? "/images/harmony-bg.jpg" 
+        : selectedChorus === 'melody' 
+          ? "/images/melody-bg.jpg" 
+          : "/images/hero-bg.jpg",
       buttonText: "Learn More",
       buttonUrl: "/about",
       secondaryButtonText: "Join Us",
@@ -39,28 +68,48 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
     },
     {
       id: 2,
-      title: "Parkside Progression",
-      description: "Support our mission to bring barbershop harmony to the Hershey community through your generous donations.",
-      imageUrl: "/images/slideshow/slide2-donate.jpg",
-      fallbackImageUrl: "/images/harmony-bg.jpg",
+      title: "Support Our Mission",
+      description: "Help us bring a cappella harmony to the Hershey community through your generous donations.",
+      imageUrl: `${slideshowPath}slide2-donate.jpg`,
+      fallbackImageUrl: selectedChorus === 'harmony' 
+        ? "/images/harmony-bg.jpg" 
+        : selectedChorus === 'melody' 
+          ? "/images/melody-bg.jpg" 
+          : "/images/hero-bg.jpg",
       buttonText: "Donate Now",
       buttonUrl: "/donate"
     },
     {
       id: 3,
       title: "Join Our Rehearsals",
-      description: "Interested in singing with us? Come to our rehearsals as a guest and experience the joy of barbershop harmony.",
-      imageUrl: "/images/slideshow/slide3-events.jpg",
-      fallbackImageUrl: "/images/melody-bg.jpg",
+      description: selectedChorus === 'harmony'
+        ? "Interested in singing with Parkside Harmony? Come to our rehearsals as a guest and experience the joy of barbershop."
+        : selectedChorus === 'melody'
+          ? "Interested in singing with Parkside Melody? Come to our rehearsals as a guest and experience the joy of a cappella."
+          : "Interested in singing with us? Come to our rehearsals as a guest and experience the joy of a cappella harmony.",
+      imageUrl: `${slideshowPath}slide3-events.jpg`,
+      fallbackImageUrl: selectedChorus === 'harmony' 
+        ? "/images/harmony-bg.jpg" 
+        : selectedChorus === 'melody' 
+          ? "/images/melody-bg.jpg" 
+          : "/images/hero-bg.jpg",
       buttonText: "Upcoming Events",
       buttonUrl: "/events"
     },
     {
       id: 4,
-      title: "Parkside Gear",
-      description: "Show your support for Parkside Harmony and Melody with our branded merchandise.",
-      imageUrl: "/images/slideshow/slide4-shop.jpg",
-      fallbackImageUrl: "/images/harmony-bg.jpg",
+      title: selectedChorus === 'harmony' 
+        ? "Harmony Gear" 
+        : selectedChorus === 'melody' 
+          ? "Melody Gear" 
+          : "Parkside Gear",
+      description: "Show your support with our branded merchandise.",
+      imageUrl: `${slideshowPath}slide4-shop.jpg`,
+      fallbackImageUrl: selectedChorus === 'harmony' 
+        ? "/images/harmony-bg.jpg" 
+        : selectedChorus === 'melody' 
+          ? "/images/melody-bg.jpg" 
+          : "/images/hero-bg.jpg",
       buttonText: "Shop Now",
       buttonUrl: "/shop"
     },
@@ -68,8 +117,12 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
       id: 5,
       title: "Get In Touch",
       description: "Have questions or want to book us for your event? We'd love to hear from you!",
-      imageUrl: "/images/slideshow/slide5-contact.jpg",
-      fallbackImageUrl: "/images/melody-bg.jpg",
+      imageUrl: `${slideshowPath}slide5-contact.jpg`,
+      fallbackImageUrl: selectedChorus === 'harmony' 
+        ? "/images/harmony-bg.jpg" 
+        : selectedChorus === 'melody' 
+          ? "/images/melody-bg.jpg" 
+          : "/images/hero-bg.jpg",
       buttonText: "Contact Us",
       buttonUrl: "/contact"
     }
@@ -80,6 +133,11 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
   const [imageSources, setImageSources] = useState<string[]>(
     slides.map(slide => slide.imageUrl)
   );
+
+  // Reset image sources when selectedChorus changes
+  useEffect(() => {
+    setImageSources(slides.map(slide => slide.imageUrl));
+  }, [selectedChorus]);
 
   // Auto-advance slides
   useEffect(() => {
@@ -111,9 +169,23 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
 
   // Handle image error
   const handleImageError = (index: number) => {
+    console.log(`Error loading image for slide ${index + 1}: ${imageSources[index]}`);
     setImageSources(prev => {
       const newSources = [...prev];
+      
+      // If the current path isn't working, try a different path
+      if (newSources[index].includes(slideshowPath)) {
+        // Try the default slideshow path first
+        if (!slideshowPath.includes('/images/slideshow/')) {
+          newSources[index] = `/images/slideshow/${newSources[index].split('/').pop() || ''}`;
+          console.log(`Trying original slideshow path: ${newSources[index]}`);
+          return newSources;
+        }
+      }
+      
+      // If we're already using a fallback path or the above didn't work, use the fallback image
       newSources[index] = slides[index].fallbackImageUrl;
+      console.log(`Using fallback image: ${newSources[index]}`);
       return newSources;
     });
   };

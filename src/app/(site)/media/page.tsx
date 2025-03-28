@@ -2,10 +2,11 @@
 
 import PageTransition from "@/components/ui/PageTransition";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
-import HeroSection from "@/components/ui/HeroSection";
+import ChorusHero from "@/components/ui/ChorusHero";
 import dynamic from "next/dynamic";
 import type { YouTubeProps } from "react-youtube";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useChorus } from "@/contexts/ChorusContext";
 
 // Dynamically import YouTube component to avoid SSR issues
 const YouTube = dynamic(() => import("react-youtube"), { ssr: false });
@@ -18,6 +19,7 @@ interface VideoData {
   chorus: "harmony" | "melody" | "both";
   competition?: string;
   placement?: string;
+  featured?: boolean; // Mark videos that should be featured
 }
 
 const videos: VideoData[] = [
@@ -29,7 +31,8 @@ const videos: VideoData[] = [
     year: 2023,
     chorus: "harmony",
     competition: "BHS International",
-    placement: "2nd Place"
+    placement: "2nd Place",
+    featured: true
   },
   {
     id: "vyOippZCn-s",
@@ -128,14 +131,16 @@ const videos: VideoData[] = [
     title: "Parkside Melody - How Can I Keep From Singing",
     description: "Performance at the STAR Center in Havre de Grace, MD",
     year: 2023,
-    chorus: "melody"
+    chorus: "melody",
+    featured: true
   },
   {
     id: "zDLIifqs0nU",
     title: "Parkside Melody - Shine",
     description: "Competition Performance",
     year: 2023,
-    chorus: "melody"
+    chorus: "melody",
+    featured: true
   },
   {
     id: "2DUhWo6sXLE",
@@ -206,21 +211,56 @@ const videos: VideoData[] = [
     title: "Parkside Virtual Performance - The Way We Were",
     description: "Special virtual collaboration between Parkside Harmony and Parkside Melody during the pandemic",
     year: 2020,
-    chorus: "both"
+    chorus: "both",
+    featured: true
   }
 ];
 
 type FilterType = "all" | "harmony" | "melody" | "both" | "competition";
 
 export default function MediaPage() {
+  const { selectedChorus } = useChorus();
   const [filter, setFilter] = useState<FilterType>("all");
   const [visibleCount, setVisibleCount] = useState(6);
 
-  // Randomly select a featured video for the hero background
-  const heroVideo = useMemo(() => {
-    const randomIndex = Math.floor(Math.random() * videos.length);
-    return videos[randomIndex];
-  }, []); // Empty dependency array means this only runs once when component mounts
+  // Set initial filter based on selected chorus
+  useEffect(() => {
+    if (selectedChorus) {
+      setFilter(selectedChorus);
+    } else {
+      setFilter("all");
+    }
+  }, [selectedChorus]);
+
+  // Get a featured video for the hero background based on chorus selection
+  const getFeaturedVideo = () => {
+    // Filter videos based on the selected chorus
+    let eligibleVideos = videos;
+    
+    if (selectedChorus) {
+      // If a chorus is selected, only show videos from that chorus or combined videos
+      eligibleVideos = videos.filter(v => v.chorus === selectedChorus || v.chorus === 'both');
+    }
+    
+    // Further filter to featured videos if available
+    const featuredVideos = eligibleVideos.filter(v => v.featured);
+    
+    if (featuredVideos.length > 0) {
+      // Randomly select a featured video
+      const randomIndex = Math.floor(Math.random() * featuredVideos.length);
+      return featuredVideos[randomIndex];
+    } else if (eligibleVideos.length > 0) {
+      // Fallback to any eligible video
+      const randomIndex = Math.floor(Math.random() * eligibleVideos.length);
+      return eligibleVideos[randomIndex];
+    }
+    
+    // Fallback to the first video if nothing else matches
+    return videos[0];
+  };
+
+  // Get a featured video for display in the hero section
+  const heroVideo = useMemo(() => getFeaturedVideo(), [selectedChorus]);
 
   const opts: YouTubeProps['opts'] = {
     height: '100%',
@@ -234,8 +274,19 @@ export default function MediaPage() {
   // Filter and sort videos
   const filteredVideos = videos
     .filter(video => {
-      if (filter === "all") return true;
-      if (filter === "competition") return !!video.competition;
+      if (filter === "all") {
+        // If a chorus is selected in the global context, still respect that
+        if (selectedChorus) {
+          return video.chorus === selectedChorus || video.chorus === 'both';
+        }
+        return true;
+      }
+      if (filter === "competition") {
+        if (selectedChorus) {
+          return !!video.competition && (video.chorus === selectedChorus || video.chorus === 'both');
+        }
+        return !!video.competition;
+      }
       return video.chorus === filter;
     })
     .sort((a, b) => b.year - a.year);
@@ -256,22 +307,50 @@ export default function MediaPage() {
   return (
     <PageTransition>
       <div className="bg-white">
-        <HeroSection
+        <ChorusHero
+          page="media"
           title="Media Gallery"
-          subtitle={`Featuring: ${heroVideo.title}`}
-          imagePath="/images/media-hero.jpg"
-          imageAlt="Parkside Performance"
-          videoId={heroVideo.id}
+          description={`Featuring performances by Parkside${selectedChorus ? ' ' + selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1) : ''}`}
+          videoId={heroVideo.id} // Pass video ID to potentially use as background
         />
 
+        {/* Featured Video Section */}
+        <section className="py-12 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <ScrollAnimation>
+              <div className="max-w-4xl mx-auto">
+                <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
+                  Featured Performance
+                </h2>
+                <div className="aspect-video relative rounded-lg overflow-hidden shadow-xl">
+                  <YouTube
+                    videoId={heroVideo.id}
+                    opts={opts}
+                    className="absolute inset-0"
+                    iframeClassName="w-full h-full"
+                  />
+                </div>
+                <div className="mt-4 text-center">
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    {heroVideo.title}
+                  </h3>
+                  <p className="text-gray-600 mt-2">
+                    {heroVideo.description}
+                  </p>
+                </div>
+              </div>
+            </ScrollAnimation>
+          </div>
+        </section>
+
         {/* Filter Section */}
-        <section className="py-8 bg-gray-50">
+        <section className="py-8">
           <div className="container mx-auto px-4">
             <div className="flex flex-wrap justify-center gap-4">
               {[
                 { label: "All Performances", value: "all" },
-                { label: "Parkside Harmony", value: "harmony" },
-                { label: "Parkside Melody", value: "melody" },
+                ...((!selectedChorus || selectedChorus === "harmony") ? [{ label: "Parkside Harmony", value: "harmony" }] : []),
+                ...((!selectedChorus || selectedChorus === "melody") ? [{ label: "Parkside Melody", value: "melody" }] : []),
                 { label: "Combined", value: "both" },
                 { label: "Competition Sets", value: "competition" },
               ].map((option) => (
@@ -297,55 +376,61 @@ export default function MediaPage() {
             <ScrollAnimation>
               <div className="max-w-7xl mx-auto">
                 <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-                  Featured Performances
+                  All Performances
                 </h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {visibleVideos.map((video) => (
-                    <div 
-                      key={video.id}
-                      className="bg-white rounded-xl shadow-lg overflow-hidden transition-transform hover:scale-105 duration-300"
-                    >
-                      <div className="aspect-video relative">
-                        <YouTube
-                          videoId={video.id}
-                          opts={opts}
-                          className="absolute inset-0"
-                          iframeClassName="w-full h-full"
-                        />
-                      </div>
-                      <div className="p-6">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                          {video.title}
-                        </h3>
-                        <p className="text-gray-600 mb-4">
-                          {video.description}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-500">
-                            {video.year}
-                          </span>
-                          <div className="flex gap-2">
-                            {video.placement && (
-                              <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                {video.placement}
-                              </span>
-                            )}
-                            <span className="px-3 py-1 rounded-full text-sm font-medium capitalize" 
-                              style={{
-                                backgroundColor: video.chorus === 'harmony' ? '#4F46E5' : 
-                                              video.chorus === 'melody' ? '#EC4899' : '#6366F1',
-                                color: 'white'
-                              }}
-                            >
-                              {video.chorus === 'both' ? 'Combined' : video.chorus}
+                {visibleVideos.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {visibleVideos.map((video) => (
+                      <div 
+                        key={video.id}
+                        className="bg-white rounded-xl shadow-lg overflow-hidden transition-transform hover:scale-105 duration-300"
+                      >
+                        <div className="aspect-video relative">
+                          <YouTube
+                            videoId={video.id}
+                            opts={opts}
+                            className="absolute inset-0"
+                            iframeClassName="w-full h-full"
+                          />
+                        </div>
+                        <div className="p-6">
+                          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                            {video.title}
+                          </h3>
+                          <p className="text-gray-600 mb-4">
+                            {video.description}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-500">
+                              {video.year}
                             </span>
+                            <div className="flex gap-2">
+                              {video.placement && (
+                                <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                  {video.placement}
+                                </span>
+                              )}
+                              <span className="px-3 py-1 rounded-full text-sm font-medium capitalize" 
+                                style={{
+                                  backgroundColor: video.chorus === 'harmony' ? '#4F46E5' : 
+                                                video.chorus === 'melody' ? '#EC4899' : '#6366F1',
+                                  color: 'white'
+                                }}
+                              >
+                                {video.chorus === 'both' ? 'Combined' : video.chorus}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-8">
+                    <p className="text-lg text-gray-600">No videos match the selected filter.</p>
+                  </div>
+                )}
 
                 {/* Show More Button */}
                 {hasMore && (

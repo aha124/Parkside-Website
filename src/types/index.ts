@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { ChorusType } from "@/data/chorusContent";
 
 export interface NavLink {
   href: string;
@@ -33,6 +34,36 @@ export interface FeatureType {
   title: string;
   description: string;
   icon?: ReactNode;
+}
+
+export interface EventType {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  image?: string;
+  chorus: ChorusType | 'both';
+}
+
+export interface LeaderType {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  image: string;
+  chorus?: ChorusType | 'both';
+}
+
+export interface VideoType {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  thumbnail: string;
+  date: string;
+  chorus: ChorusType | 'both';
 }
 
 export interface SectionProps {
