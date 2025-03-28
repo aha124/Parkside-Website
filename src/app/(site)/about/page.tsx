@@ -1,26 +1,91 @@
-import { Metadata } from "next";
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import ChorusHero from "@/components/ui/ChorusHero";
+import { useChorus } from "@/contexts/ChorusContext";
+import chorusContent from "@/data/chorusContent";
+
+// Since we're using client component with "use client", metadata must be in a separate file
+// See metadata.ts in the same directory
 
 const PageTransition = dynamic(() => import("@/components/ui/PageTransition"), {
   ssr: true
 });
 
-export const metadata: Metadata = {
-  title: "About Parkside Barbershop Harmony",
-  description: "Learn about the Hershey Chapter of the Barbershop Harmony Society - our history, mission, and values since 2015.",
-};
-
 export default function AboutPage() {
+  const { selectedChorus } = useChorus();
+  
+  // Get the appropriate content based on the selected chorus
+  const getStoryContent = () => {
+    if (selectedChorus === 'harmony') {
+      return {
+        image: "/images/harmony/about/story.jpg",
+        title: "Our Story",
+        paragraphs: [
+          "Founded in 2009, Parkside Harmony has grown from a small group of passionate singers into one of the premier men's choruses in the mid-atlantic region.",
+          "Our journey began with a vision to create a space where singers could pursue musical excellence in the barbershop style while fostering meaningful connections within our community. Today, that vision has blossomed into a thriving organization that continues to push the boundaries of a cappella performance."
+        ]
+      };
+    } else if (selectedChorus === 'melody') {
+      return {
+        image: "/images/melody/about/story.jpg",
+        title: "Our Story",
+        paragraphs: [
+          "Established as a sister chorus to Parkside Harmony, Parkside Melody has quickly become a vibrant community of treble voices dedicated to musical excellence.",
+          "We've created a welcoming space for singers of all experience levels to explore the joy of a cappella harmony. Our chorus celebrates diversity and inclusivity, while focusing on developing musical skills and creating memorable performances."
+        ]
+      };
+    } else {
+      return {
+        image: "/images/both/about/story.jpg",
+        title: "Our Story",
+        paragraphs: [
+          "Founded in 2015, Parkside has grown from a small group of passionate singers into two vibrant choruses that represent the very best of barbershop harmony in the mid-atlantic region.",
+          "Our journey began with a vision to create a space where singers could pursue musical excellence while fostering meaningful connections within our community. Today, that vision has blossomed into a thriving organization that continues to push the boundaries of a cappella performance."
+        ]
+      };
+    }
+  };
+  
+  // Get achievement gallery images
+  const getAchievementGallery = () => {
+    const prefix = selectedChorus 
+      ? `/images/${selectedChorus}/about/achievements/`
+      : "/images/both/about/achievements/";
+      
+    return [
+      `${prefix}gallery1.jpg`,
+      `${prefix}gallery2.jpg`,
+      `${prefix}gallery3.jpg`,
+      `${prefix}gallery4.jpg`
+    ];
+  };
+  
+  // Get the join text
+  const getJoinText = () => {
+    if (selectedChorus === 'harmony') {
+      return "Join Our Harmony";
+    } else if (selectedChorus === 'melody') {
+      return "Join Our Melody";
+    } else {
+      return "Join Our Family";
+    }
+  };
+  
+  const storyContent = getStoryContent();
+  const achievementGallery = getAchievementGallery();
+  const joinText = getJoinText();
+
   return (
     <PageTransition>
       <ChorusHero
         page="about"
         title="About Parkside"
         description="Celebrating barbershop excellence in Hershey since 2015"
+        height="500px"
       />
 
       {/* Our Story Section */}
@@ -30,7 +95,7 @@ export default function AboutPage() {
             <ScrollAnimation direction="right">
               <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
-                  src="/images/placeholder-story.jpg"
+                  src={storyContent.image}
                   alt="Parkside Chorus History"
                   fill
                   className="object-cover"
@@ -40,14 +105,11 @@ export default function AboutPage() {
             
             <ScrollAnimation direction="left">
               <div>
-                <h2 className="text-4xl font-bold text-gray-900 mb-6">Our Story</h2>
+                <h2 className="text-4xl font-bold text-gray-900 mb-6">{storyContent.title}</h2>
                 <div className="prose prose-lg">
-                  <p>
-                    Founded in 2015, Parkside has grown from a small group of passionate singers into two vibrant choruses that represent the very best of barbershop harmony in the mid-atlantic region.
-                  </p>
-                  <p>
-                    Our journey began with a vision to create a space where singers could pursue musical excellence while fostering meaningful connections within our community. Today, that vision has blossomed into a thriving organization that continues to push the boundaries of a cappella performance.
-                  </p>
+                  {storyContent.paragraphs.map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
                 </div>
               </div>
             </ScrollAnimation>
@@ -134,46 +196,18 @@ export default function AboutPage() {
 
           {/* Photo Gallery */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
-            <ScrollAnimation delay={0.1}>
-              <div className="relative h-[200px] rounded-xl overflow-hidden">
-                <Image
-                  src="/images/placeholder-gallery-1.jpg"
-                  alt="Parkside Performance Moment"
-                  fill
-                  className="object-cover hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-            </ScrollAnimation>
-            <ScrollAnimation delay={0.2}>
-              <div className="relative h-[200px] rounded-xl overflow-hidden">
-                <Image
-                  src="/images/placeholder-gallery-2.jpg"
-                  alt="Parkside Behind the Scenes"
-                  fill
-                  className="object-cover hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-            </ScrollAnimation>
-            <ScrollAnimation delay={0.3}>
-              <div className="relative h-[200px] rounded-xl overflow-hidden">
-                <Image
-                  src="/images/placeholder-gallery-3.jpg"
-                  alt="Parkside Celebration"
-                  fill
-                  className="object-cover hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-            </ScrollAnimation>
-            <ScrollAnimation delay={0.4}>
-              <div className="relative h-[200px] rounded-xl overflow-hidden">
-                <Image
-                  src="/images/placeholder-gallery-4.jpg"
-                  alt="Parkside Community Event"
-                  fill
-                  className="object-cover hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-            </ScrollAnimation>
+            {achievementGallery.map((image, index) => (
+              <ScrollAnimation key={image} delay={index * 0.1}>
+                <div className="relative h-[200px] rounded-xl overflow-hidden">
+                  <Image
+                    src={image}
+                    alt={`Parkside ${selectedChorus || ''} Achievement ${index + 1}`}
+                    fill
+                    className="object-cover hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+              </ScrollAnimation>
+            ))}
           </div>
         </div>
       </section>
@@ -201,7 +235,7 @@ export default function AboutPage() {
       <section className="py-24">
         <div className="container mx-auto px-4 text-center">
           <ScrollAnimation>
-            <h2 className="text-4xl font-bold text-gray-900 mb-8">Join Our Harmony</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-8">{joinText}</h2>
             <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
               Be part of something extraordinary. Join us in creating unforgettable musical experiences.
             </p>

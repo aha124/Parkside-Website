@@ -5,7 +5,7 @@ import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import ChorusHero from "@/components/ui/ChorusHero";
 import dynamic from "next/dynamic";
 import type { YouTubeProps } from "react-youtube";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useChorus } from "@/contexts/ChorusContext";
 
 // Dynamically import YouTube component to avoid SSR issues
@@ -217,6 +217,11 @@ const videos: VideoData[] = [
 ];
 
 type FilterType = "all" | "harmony" | "melody" | "both" | "competition";
+type FilterOption = {
+  label: string;
+  value: FilterType;
+  tooltip: string;
+};
 
 export default function MediaPage() {
   const { selectedChorus } = useChorus();
@@ -232,62 +237,171 @@ export default function MediaPage() {
     }
   }, [selectedChorus]);
 
+  // Add a key state to force re-render and new random selection
+  const [reloadCounter, setReloadCounter] = useState(0);
+  
   // Get a featured video for the hero background based on chorus selection
   const getFeaturedVideo = () => {
     // Filter videos based on the selected chorus
-    let eligibleVideos = videos;
+    let eligibleVideos = [];
     
-    if (selectedChorus) {
-      // If a chorus is selected, only show videos from that chorus or combined videos
-      eligibleVideos = videos.filter(v => v.chorus === selectedChorus || v.chorus === 'both');
+    if (selectedChorus === 'harmony') {
+      // Only harmony videos when harmony is selected
+      eligibleVideos = videos.filter(v => v.chorus === 'harmony');
+      console.log(`Found ${eligibleVideos.length} harmony videos`);
+    } else if (selectedChorus === 'melody') {
+      // Only melody videos when melody is selected
+      eligibleVideos = videos.filter(v => v.chorus === 'melody');
+      console.log(`Found ${eligibleVideos.length} melody videos`);
+    } else {
+      // When no chorus is selected, use all videos but prioritize "both" videos
+      const bothVideos = videos.filter(v => v.chorus === 'both');
+      if (bothVideos.length > 0) {
+        eligibleVideos = bothVideos;
+        console.log(`Found ${eligibleVideos.length} "both" chorus videos to choose from`);
+      } else {
+        eligibleVideos = videos;
+        console.log(`No "both" chorus videos found, using all ${eligibleVideos.length} videos`);
+      }
     }
     
-    // Further filter to featured videos if available
-    const featuredVideos = eligibleVideos.filter(v => v.featured);
-    
-    if (featuredVideos.length > 0) {
-      // Randomly select a featured video
-      const randomIndex = Math.floor(Math.random() * featuredVideos.length);
-      return featuredVideos[randomIndex];
-    } else if (eligibleVideos.length > 0) {
-      // Fallback to any eligible video
-      const randomIndex = Math.floor(Math.random() * eligibleVideos.length);
-      return eligibleVideos[randomIndex];
+    // Safety check - if no videos are available for some reason
+    if (eligibleVideos.length === 0) {
+      console.warn(`No videos found for selected chorus: ${selectedChorus}`);
+      return videos[0]; // Fallback to first video as a last resort
     }
     
-    // Fallback to the first video if nothing else matches
-    return videos[0];
+    // Create a copy of eligible videos to shuffle
+    const shuffledVideos = [...eligibleVideos];
+    
+    // Fisher-Yates shuffle algorithm
+    for (let i = shuffledVideos.length - 1; i > 0; i--) {
+      // Generate a random index between 0 and i
+      // Use a combination of timestamp and Math.random() for better entropy
+      const timestamp = new Date().getTime();
+      const j = Math.floor((Math.random() * timestamp) % (i + 1));
+      
+      // Swap elements
+      [shuffledVideos[i], shuffledVideos[j]] = [shuffledVideos[j], shuffledVideos[i]];
+    }
+    
+    // Take the first video from the shuffled array
+    const selectedVideo = shuffledVideos[0];
+    console.log(`Selected video: "${selectedVideo.title}" (${selectedVideo.chorus}) from ${eligibleVideos.length} choices`);
+    
+    return selectedVideo;
   };
 
-  // Get a featured video for display in the hero section
-  const heroVideo = useMemo(() => getFeaturedVideo(), [selectedChorus]);
+  // Generate a random video each time the component mounts, not just when chorus changes
+  const [heroVideo, setHeroVideo] = useState<VideoData>(() => {
+    console.log("Initializing hero video on page load");
+    return getFeaturedVideo();
+  });
+  
+  // Update the hero video when the chorus changes or reload is triggered
+  useEffect(() => {
+    const newHeroVideo = getFeaturedVideo();
+    console.log(`Selected hero video: "${newHeroVideo.title}" (Chorus: ${newHeroVideo.chorus}) - Selected chorus: ${selectedChorus || 'none'}`);
+    setHeroVideo(newHeroVideo);
+  }, [selectedChorus, reloadCounter]);
+  
+  // Add a function that can be called to force reselection of a video (for manual testing)
+  const reloadVideo = useCallback(() => {
+    console.log("Manually reloading video selection");
+    setReloadCounter(prev => prev + 1);
+  }, []);
 
-  const opts: YouTubeProps['opts'] = {
+  // Video options for hero background
+  const [heroOpts, setHeroOpts] = useState<YouTubeProps['opts']>({
     height: '100%',
     width: '100%',
     playerVars: {
       modestbranding: 1,
       rel: 0,
+      autoplay: 1,
+      mute: 1,
+      controls: 0,
+      showinfo: 0,
+      loop: 1,
+      disablekb: 1,
+      fs: 0,
+      iv_load_policy: 3, // Hide video annotations
+      color: 'white'
+    },
+  });
+  
+  // Update playlist parameter when hero video changes
+  useEffect(() => {
+    setHeroOpts((prev: YouTubeProps['opts']) => ({
+      ...prev,
+      playerVars: {
+        ...(prev.playerVars || {}),
+        playlist: heroVideo.id, // Required for looping
+      }
+    }));
+  }, [heroVideo]);
+  
+  // Video options for featured video section (user-controlled)
+  const featuredOpts: YouTubeProps['opts'] = {
+    height: '100%',
+    width: '100%',
+    playerVars: {
+      modestbranding: 1,
+      rel: 0,
+      autoplay: 0, // Don't autoplay
+      controls: 1, // Show controls
+      showinfo: 1, // Show video info
+      fs: 1, // Allow fullscreen
+      color: 'red'
+    },
+  };
+  
+  // Video options for grid videos
+  const gridOpts: YouTubeProps['opts'] = {
+    height: '100%',
+    width: '100%',
+    playerVars: {
+      modestbranding: 1,
+      rel: 0,
+      autoplay: 0,
+      controls: 1,
     },
   };
 
   // Filter and sort videos
   const filteredVideos = videos
     .filter(video => {
-      if (filter === "all") {
-        // If a chorus is selected in the global context, still respect that
-        if (selectedChorus) {
-          return video.chorus === selectedChorus || video.chorus === 'both';
-        }
-        return true;
-      }
+      // Apply filter logic with improved handling of combinations
+      
+      // Handle special case of competition filter - this is independent of chorus
       if (filter === "competition") {
+        // When filtering by competition, still respect the global chorus selection
         if (selectedChorus) {
-          return !!video.competition && (video.chorus === selectedChorus || video.chorus === 'both');
+          return !!video.competition && video.chorus === selectedChorus;
         }
         return !!video.competition;
       }
-      return video.chorus === filter;
+      
+      // Handle "both" filter - only show combined performances 
+      if (filter === "both") {
+        return video.chorus === "both";
+      }
+      
+      // For specific chorus filters (harmony/melody)
+      if (filter === "harmony" || filter === "melody") {
+        return video.chorus === filter;
+      }
+      
+      // For "all" filter, respect the global chorus selection
+      if (filter === "all") {
+        if (selectedChorus) {
+          return video.chorus === selectedChorus;
+        }
+        return true; // Show all videos when no chorus is selected
+      }
+      
+      // Fallback case
+      return true;
     })
     .sort((a, b) => b.year - a.year);
 
@@ -300,6 +414,7 @@ export default function MediaPage() {
 
   // Reset visible count when filter changes
   const handleFilterChange = (newFilter: FilterType) => {
+    console.log(`Changing filter to: ${newFilter}`);
     setFilter(newFilter);
     setVisibleCount(6);
   };
@@ -309,9 +424,11 @@ export default function MediaPage() {
       <div className="bg-white">
         <ChorusHero
           page="media"
-          title="Media Gallery"
+          title={selectedChorus ? `${selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1)} Media Gallery` : "Media Gallery"}
           description={`Featuring performances by Parkside${selectedChorus ? ' ' + selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1) : ''}`}
-          videoId={heroVideo.id} // Pass video ID to potentially use as background
+          videoId={heroVideo.id} // Pass video ID to use as background
+          height="70vh" // Set an initial height that matches our dynamic calculation
+          youtubeOpts={heroOpts} // Pass the hero video options
         />
 
         {/* Featured Video Section */}
@@ -320,12 +437,14 @@ export default function MediaPage() {
             <ScrollAnimation>
               <div className="max-w-4xl mx-auto">
                 <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
-                  Featured Performance
+                  {selectedChorus 
+                    ? `Featured ${selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1)} Performance` 
+                    : "Featured Performance"}
                 </h2>
                 <div className="aspect-video relative rounded-lg overflow-hidden shadow-xl">
                   <YouTube
                     videoId={heroVideo.id}
-                    opts={opts}
+                    opts={featuredOpts}
                     className="absolute inset-0"
                     iframeClassName="w-full h-full"
                   />
@@ -337,6 +456,33 @@ export default function MediaPage() {
                   <p className="text-gray-600 mt-2">
                     {heroVideo.description}
                   </p>
+                  <div className="mt-3 flex flex-col items-center">
+                    <div className="flex justify-center mb-4">
+                      <span className="px-3 py-1 rounded-full text-sm font-medium capitalize" 
+                        style={{
+                          backgroundColor: heroVideo.chorus === 'harmony' ? '#4F46E5' : 
+                                        heroVideo.chorus === 'melody' ? '#EC4899' : '#6366F1',
+                          color: 'white'
+                        }}
+                      >
+                        {heroVideo.chorus === 'both' ? 'Combined' : `Parkside ${heroVideo.chorus.charAt(0).toUpperCase()}${heroVideo.chorus.slice(1)}`}
+                      </span>
+                      {heroVideo.placement && (
+                        <span className="ml-2 px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                          {heroVideo.placement}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={reloadVideo}
+                      className="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Show Different Video
+                    </button>
+                  </div>
                 </div>
               </div>
             </ScrollAnimation>
@@ -346,26 +492,129 @@ export default function MediaPage() {
         {/* Filter Section */}
         <section className="py-8">
           <div className="container mx-auto px-4">
-            <div className="flex flex-wrap justify-center gap-4">
-              {[
-                { label: "All Performances", value: "all" },
-                ...((!selectedChorus || selectedChorus === "harmony") ? [{ label: "Parkside Harmony", value: "harmony" }] : []),
-                ...((!selectedChorus || selectedChorus === "melody") ? [{ label: "Parkside Melody", value: "melody" }] : []),
-                { label: "Combined", value: "both" },
-                { label: "Competition Sets", value: "competition" },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handleFilterChange(option.value as FilterType)}
-                  className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-                    filter === option.value
-                      ? "bg-indigo-600 text-white"
-                      : "bg-white text-gray-600 hover:bg-gray-100"
-                  }`}
+            <div className="flex flex-wrap justify-center items-center gap-4">
+              <div className="flex items-center mr-2">
+                <span className="text-sm font-medium text-gray-700 mr-2">Current Videos:</span>
+                <span className="px-3 py-1 rounded-full text-sm font-medium" 
+                  style={{
+                    backgroundColor: selectedChorus === 'harmony' ? '#4F46E5' : 
+                                  selectedChorus === 'melody' ? '#EC4899' : '#6366F1',
+                    color: 'white'
+                  }}
                 >
-                  {option.label}
-                </button>
-              ))}
+                  {selectedChorus === 'harmony' ? 'Harmony Only' : 
+                   selectedChorus === 'melody' ? 'Melody Only' : 
+                   'All Choruses'}
+                </span>
+              </div>
+              <div className="h-8 w-px bg-gray-300 mx-2"></div>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: "All Videos", value: "all", tooltip: selectedChorus ? `All ${selectedChorus} videos` : "All videos from both choruses" },
+                  ...((!selectedChorus || selectedChorus === "harmony") ? [{ label: "Harmony Only", value: "harmony", tooltip: "Videos featuring only Parkside Harmony" }] : []),
+                  ...((!selectedChorus || selectedChorus === "melody") ? [{ label: "Melody Only", value: "melody", tooltip: "Videos featuring only Parkside Melody" }] : []),
+                  // Only show Combined button when no chorus is selected
+                  ...(!selectedChorus ? [{ label: "Combined Performances", value: "both", tooltip: "Special performances featuring both Harmony and Melody choruses" }] : []),
+                  { label: "Competition Videos", value: "competition", tooltip: selectedChorus ? `${selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1)} competition performances` : "Competition performances from both choruses" },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => handleFilterChange(option.value as FilterType)}
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                      filter === option.value
+                        ? "bg-indigo-600 text-white"
+                        : "bg-white text-gray-600 hover:bg-gray-100"
+                    }`}
+                    title={option.tooltip}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Filter Summary Section */}
+        <section className="bg-gray-50 py-6">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-white p-6 rounded-xl shadow-sm">
+                {filter === "competition" ? (
+                  <div className="flex items-start">
+                    <div className="mr-4 bg-indigo-100 p-3 rounded-full">
+                      <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Competition Performances</h3>
+                      <p className="text-gray-600 mt-1">
+                        {selectedChorus 
+                          ? `Watch Parkside ${selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1)}'s competition sets from various barbershop competitions and events.` 
+                          : "Watch competition sets from both of our choruses, showcasing our best performances on the barbershop competition stage."}
+                      </p>
+                    </div>
+                  </div>
+                ) : filter === "both" ? (
+                  <div className="flex items-start">
+                    <div className="mr-4 bg-purple-100 p-3 rounded-full">
+                      <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Combined Performances</h3>
+                      <p className="text-gray-600 mt-1">
+                        Special collaborations where Parkside Harmony and Parkside Melody perform together, creating unique musical experiences.
+                      </p>
+                    </div>
+                  </div>
+                ) : selectedChorus === "harmony" || filter === "harmony" ? (
+                  <div className="flex items-start">
+                    <div className="mr-4 bg-blue-100 p-3 rounded-full">
+                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Parkside Harmony Performances</h3>
+                      <p className="text-gray-600 mt-1">
+                        Showcasing our men's chorus with their award-winning performances and heartfelt barbershop arrangements.
+                      </p>
+                    </div>
+                  </div>
+                ) : selectedChorus === "melody" || filter === "melody" ? (
+                  <div className="flex items-start">
+                    <div className="mr-4 bg-pink-100 p-3 rounded-full">
+                      <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Parkside Melody Performances</h3>
+                      <p className="text-gray-600 mt-1">
+                        Experience our women's chorus with their beautiful harmonies and engaging performances across various styles.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start">
+                    <div className="mr-4 bg-indigo-100 p-3 rounded-full">
+                      <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">All Parkside Performances</h3>
+                      <p className="text-gray-600 mt-1">
+                        Browse our complete collection of performances from both Parkside Harmony and Parkside Melody across various years and events.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>
@@ -389,7 +638,7 @@ export default function MediaPage() {
                         <div className="aspect-video relative">
                           <YouTube
                             videoId={video.id}
-                            opts={opts}
+                            opts={gridOpts}
                             className="absolute inset-0"
                             iframeClassName="w-full h-full"
                           />
@@ -418,7 +667,10 @@ export default function MediaPage() {
                                   color: 'white'
                                 }}
                               >
-                                {video.chorus === 'both' ? 'Combined' : video.chorus}
+                                {video.chorus === 'both' ? 'Combined' : 
+                                 video.chorus === 'harmony' ? 'Parkside Harmony' : 
+                                 video.chorus === 'melody' ? 'Parkside Melody' : 
+                                 video.chorus}
                               </span>
                             </div>
                           </div>

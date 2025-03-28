@@ -146,9 +146,9 @@ export default function NewsList({
             {showViewAllButton && (
               <Link 
                 href={viewAllUrl}
-                className="text-indigo-600 font-medium hover:text-indigo-500"
+                className="text-indigo-600 font-medium hover:text-indigo-500 inline-flex items-center group"
               >
-                View All News →
+                View All News <svg className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
               </Link>
             )}
           </div>
@@ -171,14 +171,14 @@ export default function NewsList({
           ) : (
             newsItems.map((item) => (
               <ScrollAnimation key={item.id} delay={0.1}>
-                <article className="flex flex-col h-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                  <div className="relative h-48">
+                <article className="flex flex-col h-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                  <div className="relative h-48 overflow-hidden">
                     {isExternalUrl(item.imageUrl) ? (
                       // For external URLs, use img tag instead of Next.js Image
                       <img
                         src={item.imageUrl}
                         alt={item.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                         onError={(e) => {
                           // Fallback to a default image if the image fails to load
                           const target = e.target as HTMLImageElement;
@@ -191,7 +191,7 @@ export default function NewsList({
                         src={item.imageUrl}
                         alt={item.title}
                         fill
-                        className="object-cover"
+                        className="object-cover transition-transform duration-500 hover:scale-105"
                         onError={(e) => {
                           // Fallback to a default image if the image fails to load
                           const target = e.target as HTMLImageElement;
@@ -209,18 +209,18 @@ export default function NewsList({
                     {isExternalUrl(item.url) || item.url.startsWith('/node/') ? (
                       <a 
                         href={getNewsUrl(item.url)}
-                        className="text-indigo-600 font-medium hover:text-indigo-500"
+                        className="text-indigo-600 font-medium hover:text-indigo-500 inline-flex items-center group"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        Read More →
+                        Read More <svg className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
                       </a>
                     ) : (
                       <Link 
                         href={item.url}
-                        className="text-indigo-600 font-medium hover:text-indigo-500"
+                        className="text-indigo-600 font-medium hover:text-indigo-500 inline-flex items-center group"
                       >
-                        Read More →
+                        Read More <svg className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
                       </Link>
                     )}
                   </div>

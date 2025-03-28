@@ -37,7 +37,7 @@ const chorusContent: Record<string, ChorusContent> = {
     primaryColor: '#1E40AF', // indigo-800
     bannerImages: {
       home: '/images/harmony-bg.jpg', // Tagged as "harmony"
-      about: '/images/about-harmony.jpg', // New image for harmony about
+      about: '/images/harmony/about/hero.jpg', // Updated image for harmony about
       events: '/images/harmony/hero/events-hero.jpg', // Hero image for harmony events
       media: '/images/harmony/hero/media-hero.jpg', // Hero image for harmony media
       join: '/images/join-hero.jpg', // Tagged as "both"
@@ -73,7 +73,7 @@ const chorusContent: Record<string, ChorusContent> = {
     primaryColor: '#BE185D', // pink-700
     bannerImages: {
       home: '/images/melody-bg.jpg', // Tagged as "melody"
-      about: '/images/about-melody.jpg', // New image for melody about
+      about: '/images/melody/about/hero.jpg', // Updated image for melody about
       events: '/images/melody/hero/events-hero.jpg', // Hero image for melody events
       media: '/images/melody/hero/media-hero.jpg', // Hero image for melody media
       join: '/images/join-hero.jpg', // Tagged as "both"

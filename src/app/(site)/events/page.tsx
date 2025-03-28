@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import PageTransition from "@/components/ui/PageTransition";
 import EventsList from "@/components/events/EventsList";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
+import ChorusHero from "@/components/ui/ChorusHero";
 
 export const metadata: Metadata = {
   title: "Events - Parkside Barbershop Harmony",
@@ -12,16 +13,12 @@ export default function EventsPage() {
   return (
     <PageTransition>
       {/* Page Header */}
-      <section className="bg-gray-900 py-16">
-        <div className="container mx-auto px-4">
-          <ScrollAnimation>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Events Calendar</h1>
-            <p className="text-xl text-white/80 max-w-3xl">
-              Find upcoming performances, competitions, and community events featuring Parkside Harmony and Parkside Melody choruses.
-            </p>
-          </ScrollAnimation>
-        </div>
-      </section>
+      <ChorusHero
+        page="events"
+        title="Events Calendar"
+        description="Find upcoming performances, competitions, and community events featuring Parkside Harmony and Parkside Melody choruses."
+        height="70vh"
+      />
       
       {/* Events List */}
       <EventsList 

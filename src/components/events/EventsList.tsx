@@ -110,7 +110,7 @@ export default function EventsList({
   const applyFilters = (allEvents: Event[], filter: string) => {
     if (filter === "All") {
       // If auto-filtering is enabled and a chorus is selected, only show relevant events
-      if (autoFilter && selectedChorus && filter === "All") {
+      if (autoFilter && selectedChorus !== null && filter === "All") {
         return allEvents.filter(event => 
           event.chorus === selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1) || 
           event.chorus === "Both"
@@ -127,6 +127,7 @@ export default function EventsList({
         return event.chorus === "Melody" || event.chorus === "Both";
       }
       if (filter === "Both") {
+        // When filtering for "Both" events, always show only joint events
         return event.chorus === "Both";
       }
       return true;
@@ -135,9 +136,14 @@ export default function EventsList({
 
   // Set initial filter based on selected chorus
   useEffect(() => {
-    if (autoFilter && selectedChorus) {
-      const chorusName = selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1);
-      setActiveFilter(chorusName);
+    if (autoFilter) {
+      if (selectedChorus) {
+        const chorusName = selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1);
+        setActiveFilter(chorusName);
+      } else {
+        // When selectedChorus is null (both choruses selected), reset to "All"
+        setActiveFilter("All");
+      }
     }
   }, [selectedChorus, autoFilter]);
 
@@ -197,20 +203,26 @@ export default function EventsList({
     };
 
     fetchEvents();
-  }, [dataSource, jsonUrl, apiUrl, maxEvents, activeFilter]);
+  }, [dataSource, jsonUrl, apiUrl, maxEvents]);
 
-  // Update filtered events when filter changes
+  // Update filtered events when filter changes or when events are loaded
   useEffect(() => {
     setFilteredEvents(applyFilters(events, activeFilter).slice(0, maxEvents));
   }, [activeFilter, events, maxEvents, selectedChorus]);
 
   // Get dynamic title based on selected chorus if auto-filtering
   const getTitle = () => {
-    if (autoFilter && selectedChorus && title === "Upcoming Events") {
-      if (selectedChorus === 'harmony') {
+    if (activeFilter === "Both") {
+      return "Upcoming Joint Events";
+    }
+    
+    if (autoFilter && title === "Upcoming Events") {
+      if (selectedChorus === 'harmony' && activeFilter === "All") {
         return "Upcoming Harmony Events";
-      } else if (selectedChorus === 'melody') {
+      } else if (selectedChorus === 'melody' && activeFilter === "All") {
         return "Upcoming Melody Events";
+      } else if (selectedChorus === null && activeFilter === "All") {
+        return "All Upcoming Events";
       }
     }
     return title;
@@ -225,9 +237,9 @@ export default function EventsList({
             {showViewAllButton && (
               <Link 
                 href={viewAllUrl}
-                className="text-indigo-600 font-medium hover:text-indigo-500"
+                className="text-indigo-600 font-medium hover:text-indigo-500 inline-flex items-center group"
               >
-                View All Events →
+                View All Events <svg className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
               </Link>
             )}
           </div>
@@ -289,13 +301,13 @@ export default function EventsList({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredEvents.map((event, index) => (
               <ScrollAnimation key={event.id} delay={0.1 * index}>
-                <div className="bg-white rounded-lg shadow-md overflow-hidden h-full flex flex-col">
-                  <div className="relative h-48">
+                <div className="bg-white rounded-lg shadow-md overflow-hidden h-full flex flex-col transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                  <div className="relative h-48 overflow-hidden">
                     <Image
                       src={event.imageUrl}
                       alt={event.title}
                       fill
-                      className="object-cover"
+                      className="object-cover transition-transform duration-500 hover:scale-105"
                     />
                     {event.chorus && (
                       <div className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-medium ${
@@ -325,11 +337,11 @@ export default function EventsList({
                     <div className="px-6 pb-6">
                       <Link 
                         href={event.url}
-                        className="text-indigo-600 font-medium hover:text-indigo-500"
+                        className="text-indigo-600 font-medium hover:text-indigo-500 inline-flex items-center group"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        Learn More →
+                        Learn More <svg className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
                       </Link>
                     </div>
                   )}

@@ -27,6 +27,7 @@ export default function HomePage() {
         showViewAllButton={true}
         viewAllUrl="/events"
         autoFilter={true}
+        showFilters={true}
       />
 
       {/* News Section */}
@@ -38,7 +39,7 @@ export default function HomePage() {
       />
 
       {/* Choruses Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-gray-50 relative overflow-hidden">
         <div className="container mx-auto px-4">
           <ScrollAnimation>
             <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Our Choruses</h2>
@@ -47,13 +48,13 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             {/* Parkside Harmony */}
             <ScrollAnimation delay={0.1} direction="left">
-              <div className="bg-white p-8 rounded-lg shadow-md">
+              <div className="bg-white p-8 rounded-lg shadow-md transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
                 <div className="relative h-64 mb-6 rounded-lg overflow-hidden">
                   <Image
                     src="/images/harmony-bg.jpg"
                     alt="Parkside Harmony"
                     fill
-                    className="object-cover"
+                    className="object-cover transform transition-transform duration-700 hover:scale-105"
                   />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Parkside Harmony</h3>
@@ -62,22 +63,22 @@ export default function HomePage() {
                 </p>
                 <Link 
                   href="/choruses/harmony"
-                  className="text-indigo-600 font-medium hover:text-indigo-500"
+                  className="text-indigo-600 font-medium hover:text-indigo-500 inline-flex items-center group"
                 >
-                  Learn More →
+                  Learn More <svg className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
                 </Link>
               </div>
             </ScrollAnimation>
             
             {/* Parkside Melody */}
             <ScrollAnimation delay={0.2} direction="right">
-              <div className="bg-white p-8 rounded-lg shadow-md">
+              <div className="bg-white p-8 rounded-lg shadow-md transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
                 <div className="relative h-64 mb-6 rounded-lg overflow-hidden">
                   <Image
                     src="/images/melody-bg.jpg"
                     alt="Parkside Melody"
                     fill
-                    className="object-cover"
+                    className="object-cover transform transition-transform duration-700 hover:scale-105"
                   />
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Parkside Melody</h3>
@@ -86,9 +87,9 @@ export default function HomePage() {
                 </p>
                 <Link 
                   href="/choruses/melody"
-                  className="text-indigo-600 font-medium hover:text-indigo-500"
+                  className="text-indigo-600 font-medium hover:text-indigo-500 inline-flex items-center group"
                 >
-                  Learn More →
+                  Learn More <svg className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
                 </Link>
               </div>
             </ScrollAnimation>

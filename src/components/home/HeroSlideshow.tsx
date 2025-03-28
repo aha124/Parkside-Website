@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,6 +26,10 @@ interface HeroSlideshowProps {
 
 export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
   const { selectedChorus } = useChorus();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [scrollY, setScrollY] = useState(0);
+  const heroRef = useRef<HTMLDivElement>(null);
   
   // Get the appropriate path for slideshow images based on selected chorus
   const getSlideshowPath = () => {
@@ -128,11 +132,23 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
     }
   ];
 
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [imageSources, setImageSources] = useState<string[]>(
     slides.map(slide => slide.imageUrl)
   );
+
+  // Handle scroll events for dynamic height and parallax
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolled = window.scrollY;
+      const vh = window.innerHeight;
+      const scrollProgress = Math.min(scrolled / vh, 1);
+      setScrollY(scrollProgress);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Reset image sources when selectedChorus changes
   useEffect(() => {
@@ -192,7 +208,12 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
 
   return (
     <section 
-      className="relative h-[500px] bg-gray-900"
+      ref={heroRef}
+      className="relative bg-gray-900 transition-all duration-300"
+      style={{ 
+        height: `${Math.max(70 - (scrollY * 40), 30)}vh`,
+        minHeight: '300px',
+      }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -205,6 +226,9 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
           className="absolute inset-0"
+          style={{
+            transform: `translateY(${scrollY * 50}px)`,
+          }}
         >
           <Image
             src={imageSources[currentSlide]}
@@ -219,7 +243,13 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
       </AnimatePresence>
       
       {/* Content */}
-      <div className="relative container mx-auto px-4 h-full flex flex-col justify-center">
+      <div 
+        className="relative container mx-auto px-4 h-full flex flex-col justify-center"
+        style={{
+          transform: `translateY(${scrollY * 30}px)`,
+          opacity: Math.max(1 - scrollY * 1.5, 0),
+        }}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
@@ -259,6 +289,9 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
         onClick={goToPrevSlide}
         className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors"
         aria-label="Previous slide"
+        style={{
+          opacity: Math.max(1 - scrollY * 2, 0),
+        }}
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -269,6 +302,9 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
         onClick={goToNextSlide}
         className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full transition-colors"
         aria-label="Next slide"
+        style={{
+          opacity: Math.max(1 - scrollY * 2, 0),
+        }}
       >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -276,7 +312,12 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
       </button>
       
       {/* Dots Navigation */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+      <div 
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2"
+        style={{
+          opacity: Math.max(1 - scrollY * 2, 0),
+        }}
+      >
         {slides.map((_, index) => (
           <button
             key={index}
@@ -287,6 +328,26 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
+      </div>
+      
+      {/* Scroll indicator */}
+      <div 
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce transition-opacity duration-300"
+        style={{
+          opacity: Math.max(1 - scrollY * 2, 0),
+        }}
+      >
+        <svg 
+          className="w-6 h-6 text-white"
+          fill="none" 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth="2" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
+        >
+          <path d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+        </svg>
       </div>
     </section>
   );
