@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { useChorus } from "@/contexts/ChorusContext";
+import chorusContent from "@/data/chorusContent";
 
 const navItems = [
   { name: "Home", href: "/home" },
@@ -26,9 +28,12 @@ const navItems = [
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+  const [chorusDropdownOpen, setChorusDropdownOpen] = useState(false);
   const menuItemRef = useRef<HTMLDivElement>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
+  const chorusDropdownRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { selectedChorus, setChorus } = useChorus();
 
   const handleMouseEnter = (itemName: string) => {
     if (timeoutRef.current) {
@@ -36,6 +41,15 @@ export default function Header() {
       timeoutRef.current = null;
     }
     setActiveSubmenu(itemName);
+  };
+
+  const handleChorusDropdownToggle = () => {
+    setChorusDropdownOpen(!chorusDropdownOpen);
+  };
+
+  const handleChorusSelect = (chorus: 'harmony' | 'melody' | null) => {
+    setChorus(chorus);
+    setChorusDropdownOpen(false);
   };
 
   const handleMouseMove = (e: MouseEvent) => {
@@ -68,13 +82,46 @@ export default function Header() {
 
   useEffect(() => {
     document.addEventListener('mousemove', handleMouseMove);
+    
+    // Close the chorus dropdown when clicking outside
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (chorusDropdownRef.current && !chorusDropdownRef.current.contains(e.target as Node)) {
+        setChorusDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener('click', handleOutsideClick);
+    
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('click', handleOutsideClick);
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
   }, []);
+
+  // Determine which logo to display based on selected chorus
+  const getLogo = () => {
+    if (selectedChorus === 'harmony') {
+      return "/images/parkside-harmony-logo.png";
+    } else if (selectedChorus === 'melody') {
+      return "/images/parkside-melody-logo.png";
+    } else {
+      return "/images/parkside-logo.png";
+    }
+  };
+
+  // Get chorus display name
+  const getChorusName = () => {
+    if (selectedChorus === 'harmony') {
+      return chorusContent.harmony.fullName;
+    } else if (selectedChorus === 'melody') {
+      return chorusContent.melody.fullName;
+    } else {
+      return "Parkside";
+    }
+  };
 
   return (
     <header className="bg-white shadow-md">
@@ -88,13 +135,13 @@ export default function Header() {
             >
               <div className="relative h-10 w-10">
                 <Image
-                  src="/images/parkside-logo.png"
-                  alt="Parkside Logo"
+                  src={getLogo()}
+                  alt={`${getChorusName()} Logo`}
                   fill
                   className="object-contain"
                 />
               </div>
-              <span className="text-xl font-bold">Parkside</span>
+              <span className="text-xl font-bold">{getChorusName()}</span>
             </Link>
             <div className="hidden sm:block text-xs text-gray-500">
               <div>Hershey Chapter</div>
@@ -157,12 +204,89 @@ export default function Header() {
                 </AnimatePresence>
               </div>
             ))}
-            <Link
-              href="/splash"
-              className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
-            >
-              Choose Chorus
-            </Link>
+            
+            {/* Chorus Selector Dropdown */}
+            <div className="relative" ref={chorusDropdownRef}>
+              <button
+                className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors py-2 flex items-center"
+                onClick={handleChorusDropdownToggle}
+              >
+                {selectedChorus ? `Switch Chorus` : 'Choose Chorus'}
+                <svg
+                  className={`w-4 h-4 ml-1 transform transition-transform ${chorusDropdownOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+              <AnimatePresence>
+                {chorusDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 top-full mt-0 w-48 bg-white rounded-md shadow-lg py-2 z-50"
+                  >
+                    <div className="absolute h-2 w-full -top-2 bg-transparent" />
+                    
+                    <button
+                      onClick={() => handleChorusSelect(null)}
+                      className={`w-full text-left block px-4 py-2 hover:bg-gray-50 ${selectedChorus === null ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
+                    >
+                      <div className="flex items-center">
+                        <div className="relative h-6 w-6 mr-2">
+                          <Image
+                            src="/images/parkside-logo.png"
+                            alt="Parkside Logo"
+                            fill
+                            className="object-contain"
+                          />
+                        </div>
+                        Both Choruses
+                      </div>
+                    </button>
+                    
+                    <button
+                      onClick={() => handleChorusSelect('harmony')}
+                      className={`flex items-center ${selectedChorus === 'harmony' ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
+                    >
+                      <div className="relative h-6 w-6 mr-2">
+                        <Image
+                          src="/images/parkside-harmony-logo.png"
+                          alt="Harmony Logo"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      Parkside Harmony
+                    </button>
+                    
+                    <button
+                      onClick={() => handleChorusSelect('melody')}
+                      className={`flex items-center ${selectedChorus === 'melody' ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
+                    >
+                      <div className="relative h-6 w-6 mr-2">
+                        <Image
+                          src="/images/parkside-melody-logo.png"
+                          alt="Melody Logo"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      Parkside Melody
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -239,13 +363,55 @@ export default function Header() {
                   )}
                 </div>
               ))}
-              <Link
-                href="/splash"
-                className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Choose Chorus
-              </Link>
+              <div className="space-y-2">
+                <div className="font-medium text-indigo-600">Choose Chorus:</div>
+                <div className="ml-4 space-y-2">
+                  <button
+                    onClick={() => { handleChorusSelect(null); setMobileMenuOpen(false); }}
+                    className={`flex items-center ${selectedChorus === null ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
+                  >
+                    <div className="relative h-6 w-6 mr-2">
+                      <Image
+                        src="/images/parkside-logo.png"
+                        alt="Parkside Logo"
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    Both Choruses
+                  </button>
+                  
+                  <button
+                    onClick={() => { handleChorusSelect('harmony'); setMobileMenuOpen(false); }}
+                    className={`flex items-center ${selectedChorus === 'harmony' ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
+                  >
+                    <div className="relative h-6 w-6 mr-2">
+                      <Image
+                        src="/images/parkside-harmony-logo.png"
+                        alt="Harmony Logo"
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    Parkside Harmony
+                  </button>
+                  
+                  <button
+                    onClick={() => { handleChorusSelect('melody'); setMobileMenuOpen(false); }}
+                    className={`flex items-center ${selectedChorus === 'melody' ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
+                  >
+                    <div className="relative h-6 w-6 mr-2">
+                      <Image
+                        src="/images/parkside-melody-logo.png"
+                        alt="Melody Logo"
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                    Parkside Melody
+                  </button>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}

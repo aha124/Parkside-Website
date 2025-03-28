@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
-import HeroSection from "@/components/ui/HeroSection";
+import ChorusHero from "@/components/ui/ChorusHero";
 
 const PageTransition = dynamic(() => import("@/components/ui/PageTransition"), {
   ssr: true
@@ -17,11 +17,10 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <PageTransition>
-      <HeroSection
-        title="ABOUT PARKSIDE"
-        subtitle="Celebrating barbershop excellence in Hershey since 2015"
-        imagePath="/images/placeholder-hero.jpg"
-        imageAlt="Parkside Chorus in Performance"
+      <ChorusHero
+        page="about"
+        title="About Parkside"
+        description="Celebrating barbershop excellence in Hershey since 2015"
       />
 
       {/* Our Story Section */}

@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/lib/ThemeProvider";
 import { defaultMetadata } from "@/lib/metadata";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
+import { ChorusProvider } from "@/contexts/ChorusContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,9 +26,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ThemeProvider>
-          <ErrorBoundary>
-            {children}
-          </ErrorBoundary>
+          <ChorusProvider>
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
+          </ChorusProvider>
         </ThemeProvider>
       </body>
     </html>
