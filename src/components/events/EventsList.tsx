@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
+import { useChorus } from "@/contexts/ChorusContext";
 
 // Define the Event type
 export interface Event {
@@ -28,6 +29,7 @@ interface EventsListProps {
   showViewAllButton?: boolean;
   viewAllUrl?: string;
   showFilters?: boolean;
+  autoFilter?: boolean; // Whether to automatically filter by the selected chorus
 }
 
 export default function EventsList({
@@ -38,8 +40,10 @@ export default function EventsList({
   apiUrl = "/api/events",
   showViewAllButton = false,
   viewAllUrl = "/events",
-  showFilters = false
+  showFilters = false,
+  autoFilter = true // Default to true - filter events based on chorus context
 }: EventsListProps) {
+  const { selectedChorus } = useChorus();
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -105,6 +109,13 @@ export default function EventsList({
   // Apply filters to events
   const applyFilters = (allEvents: Event[], filter: string) => {
     if (filter === "All") {
+      // If auto-filtering is enabled and a chorus is selected, only show relevant events
+      if (autoFilter && selectedChorus && filter === "All") {
+        return allEvents.filter(event => 
+          event.chorus === selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1) || 
+          event.chorus === "Both"
+        );
+      }
       return allEvents;
     }
     
@@ -121,6 +132,14 @@ export default function EventsList({
       return true;
     });
   };
+
+  // Set initial filter based on selected chorus
+  useEffect(() => {
+    if (autoFilter && selectedChorus) {
+      const chorusName = selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1);
+      setActiveFilter(chorusName);
+    }
+  }, [selectedChorus, autoFilter]);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -178,19 +197,31 @@ export default function EventsList({
     };
 
     fetchEvents();
-  }, [dataSource, jsonUrl, apiUrl, maxEvents]);
+  }, [dataSource, jsonUrl, apiUrl, maxEvents, activeFilter]);
 
   // Update filtered events when filter changes
   useEffect(() => {
     setFilteredEvents(applyFilters(events, activeFilter).slice(0, maxEvents));
-  }, [activeFilter, events, maxEvents]);
+  }, [activeFilter, events, maxEvents, selectedChorus]);
+
+  // Get dynamic title based on selected chorus if auto-filtering
+  const getTitle = () => {
+    if (autoFilter && selectedChorus && title === "Upcoming Events") {
+      if (selectedChorus === 'harmony') {
+        return "Upcoming Harmony Events";
+      } else if (selectedChorus === 'melody') {
+        return "Upcoming Melody Events";
+      }
+    }
+    return title;
+  };
 
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
         <ScrollAnimation>
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">{title}</h2>
+            <h2 className="text-3xl font-bold text-gray-900">{getTitle()}</h2>
             {showViewAllButton && (
               <Link 
                 href={viewAllUrl}
