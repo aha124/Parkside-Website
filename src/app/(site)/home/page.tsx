@@ -26,6 +26,7 @@ export default function HomePage() {
         jsonUrl="/data/events.json" 
         showViewAllButton={true}
         viewAllUrl="/events"
+        autoFilter={true}
       />
 
       {/* News Section */}
