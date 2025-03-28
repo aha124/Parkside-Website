@@ -131,9 +131,9 @@ export default function Header() {
           <div className="flex items-center">
             <Link
               href="/splash"
-              className="flex items-center gap-2"
+              className="flex items-center gap-3"
             >
-              <div className="relative h-10 w-10">
+              <div className="relative h-14 w-14">
                 <Image
                   src={getLogo()}
                   alt={`${getChorusName()} Logo`}
@@ -143,7 +143,7 @@ export default function Header() {
               </div>
               <span className="text-xl font-bold">{getChorusName()}</span>
             </Link>
-            <div className="hidden sm:block text-xs text-gray-500">
+            <div className="hidden sm:block text-xs text-gray-500 ml-3">
               <div>Hershey Chapter</div>
               <div>Barbershop Harmony Society</div>
             </div>
@@ -256,32 +256,36 @@ export default function Header() {
                     
                     <button
                       onClick={() => handleChorusSelect('harmony')}
-                      className={`flex items-center ${selectedChorus === 'harmony' ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
+                      className={`w-full text-left block px-4 py-2 hover:bg-gray-50 ${selectedChorus === 'harmony' ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
                     >
-                      <div className="relative h-6 w-6 mr-2">
-                        <Image
-                          src="/images/parkside-harmony-logo.png"
-                          alt="Harmony Logo"
-                          fill
-                          className="object-contain"
-                        />
+                      <div className="flex items-center">
+                        <div className="relative h-6 w-6 mr-2">
+                          <Image
+                            src="/images/parkside-harmony-logo.png"
+                            alt="Harmony Logo"
+                            fill
+                            className="object-contain"
+                          />
+                        </div>
+                        Parkside Harmony
                       </div>
-                      Parkside Harmony
                     </button>
                     
                     <button
                       onClick={() => handleChorusSelect('melody')}
-                      className={`flex items-center ${selectedChorus === 'melody' ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
+                      className={`w-full text-left block px-4 py-2 hover:bg-gray-50 ${selectedChorus === 'melody' ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
                     >
-                      <div className="relative h-6 w-6 mr-2">
-                        <Image
-                          src="/images/parkside-melody-logo.png"
-                          alt="Melody Logo"
-                          fill
-                          className="object-contain"
-                        />
+                      <div className="flex items-center">
+                        <div className="relative h-6 w-6 mr-2">
+                          <Image
+                            src="/images/parkside-melody-logo.png"
+                            alt="Melody Logo"
+                            fill
+                            className="object-contain"
+                          />
+                        </div>
+                        Parkside Melody
                       </div>
-                      Parkside Melody
                     </button>
                   </motion.div>
                 )}
@@ -368,9 +372,9 @@ export default function Header() {
                 <div className="ml-4 space-y-2">
                   <button
                     onClick={() => { handleChorusSelect(null); setMobileMenuOpen(false); }}
-                    className={`flex items-center ${selectedChorus === null ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
+                    className={`flex items-center w-full py-2 ${selectedChorus === null ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
                   >
-                    <div className="relative h-6 w-6 mr-2">
+                    <div className="relative h-8 w-8 mr-2">
                       <Image
                         src="/images/parkside-logo.png"
                         alt="Parkside Logo"
@@ -383,9 +387,9 @@ export default function Header() {
                   
                   <button
                     onClick={() => { handleChorusSelect('harmony'); setMobileMenuOpen(false); }}
-                    className={`flex items-center ${selectedChorus === 'harmony' ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
+                    className={`flex items-center w-full py-2 ${selectedChorus === 'harmony' ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
                   >
-                    <div className="relative h-6 w-6 mr-2">
+                    <div className="relative h-8 w-8 mr-2">
                       <Image
                         src="/images/parkside-harmony-logo.png"
                         alt="Harmony Logo"
@@ -398,9 +402,9 @@ export default function Header() {
                   
                   <button
                     onClick={() => { handleChorusSelect('melody'); setMobileMenuOpen(false); }}
-                    className={`flex items-center ${selectedChorus === 'melody' ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
+                    className={`flex items-center w-full py-2 ${selectedChorus === 'melody' ? 'text-indigo-600 font-medium' : 'text-gray-600'}`}
                   >
-                    <div className="relative h-6 w-6 mr-2">
+                    <div className="relative h-8 w-8 mr-2">
                       <Image
                         src="/images/parkside-melody-logo.png"
                         alt="Melody Logo"

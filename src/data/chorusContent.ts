@@ -38,10 +38,10 @@ const chorusContent: Record<string, ChorusContent> = {
     bannerImages: {
       home: '/images/harmony-bg.jpg', // Tagged as "harmony"
       about: '/images/about-harmony.jpg', // New image for harmony about
-      events: '/images/harmony/hero/events-hero.jpg', // New image for harmony events (TBD)
-      media: '/images/harmony-performance.jpg', // Tagged as "harmony"
+      events: '/images/harmony/hero/events-hero.jpg', // Hero image for harmony events
+      media: '/images/harmony/hero/media-hero.jpg', // Hero image for harmony media
       join: '/images/join-hero.jpg', // Tagged as "both"
-      contact: '/images/harmony-contact.jpg', // New image for harmony contact
+      contact: '/images/harmony/hero/contact-hero.jpg', // Hero image for harmony contact
       leadership: '/images/leadership-hero.jpg' // Tagged as "harmony"
     },
     aboutContent: {
@@ -74,10 +74,10 @@ const chorusContent: Record<string, ChorusContent> = {
     bannerImages: {
       home: '/images/melody-bg.jpg', // Tagged as "melody"
       about: '/images/about-melody.jpg', // New image for melody about
-      events: '/images/melody/hero/events-hero.jpg', // New image for melody events (TBD)
-      media: '/images/melody-performance.jpg', // Tagged as "melody"
+      events: '/images/melody/hero/events-hero.jpg', // Hero image for melody events
+      media: '/images/melody/hero/media-hero.jpg', // Hero image for melody media
       join: '/images/join-hero.jpg', // Tagged as "both"
-      contact: '/images/melody-contact.jpg', // New image for melody contact
+      contact: '/images/melody/hero/contact-hero.jpg', // Hero image for melody contact
       leadership: '/images/leadership-hero.jpg' // Tagged as "harmony" but used for both currently
     },
     aboutContent: {
