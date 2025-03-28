@@ -54,6 +54,12 @@ export default function ChorusHero({ page, title, description, height = "300px",
           : `/images/placeholder-hero.jpg`;
     }
   };
+  
+  // Handle image loading error
+  const handleImageError = () => {
+    console.error(`Failed to load hero image for ${page} page with chorus ${selectedChorus}`);
+    // The component will use fallback styling if the image fails to load
+  };
 
   // Get the appropriate title based on the selected chorus
   const getTitle = () => {
@@ -85,6 +91,8 @@ export default function ChorusHero({ page, title, description, height = "300px",
             fill
             className="object-cover"
             priority
+            onError={handleImageError}
+            unoptimized
           />
         )}
         <div className="absolute inset-0 bg-black/60" />

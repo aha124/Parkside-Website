@@ -139,6 +139,7 @@ export default function Header() {
                   alt={`${getChorusName()} Logo`}
                   fill
                   className="object-contain"
+                  unoptimized
                 />
               </div>
               <span className="text-xl font-bold">{getChorusName()}</span>
@@ -248,6 +249,7 @@ export default function Header() {
                             alt="Parkside Logo"
                             fill
                             className="object-contain"
+                            unoptimized
                           />
                         </div>
                         Both Choruses
@@ -265,6 +267,7 @@ export default function Header() {
                             alt="Harmony Logo"
                             fill
                             className="object-contain"
+                            unoptimized
                           />
                         </div>
                         Parkside Harmony
@@ -282,6 +285,7 @@ export default function Header() {
                             alt="Melody Logo"
                             fill
                             className="object-contain"
+                            unoptimized
                           />
                         </div>
                         Parkside Melody
@@ -380,6 +384,7 @@ export default function Header() {
                         alt="Parkside Logo"
                         fill
                         className="object-contain"
+                        unoptimized
                       />
                     </div>
                     Both Choruses
@@ -395,6 +400,7 @@ export default function Header() {
                         alt="Harmony Logo"
                         fill
                         className="object-contain"
+                        unoptimized
                       />
                     </div>
                     Parkside Harmony
@@ -410,6 +416,7 @@ export default function Header() {
                         alt="Melody Logo"
                         fill
                         className="object-contain"
+                        unoptimized
                       />
                     </div>
                     Parkside Melody
