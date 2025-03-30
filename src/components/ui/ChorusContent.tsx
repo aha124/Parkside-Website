@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { useChorus } from "@/contexts/ChorusContext";
-import chorusContent from "@/data/chorusContent";
+// import chorusContent from "@/data/chorusContent"; // Removed as unused
 
 interface ChorusContentProps {
   harmony: ReactNode;

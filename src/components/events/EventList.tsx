@@ -16,7 +16,7 @@ interface EventListProps {
 
 export default function EventList({ events }: EventListProps) {
   const { selectedChorus } = useChorus();
-  const { buttonStyle, primaryTextClass } = useChorusStyles();
+  const { buttonStyle /* , primaryTextClass */ } = useChorusStyles();
   const [filteredEvents, setFilteredEvents] = useState<EventType[]>(events);
 
   useEffect(() => {

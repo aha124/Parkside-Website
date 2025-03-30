@@ -10,8 +10,10 @@
  *    node choirGeniusConverter.js path/to/exported.csv path/to/output.json
  */
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const fs = require('fs');
-const path = require('path');
+// const path = require('path'); // Removed as unused
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { v4: uuidv4 } = require('uuid'); // You may need to install this: npm install uuid
 
 // Default image paths for different chorus types

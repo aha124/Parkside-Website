@@ -89,7 +89,7 @@ export default function EventsList({
     if (!location) return "";
     
     // Remove "Location:" and clean up whitespace
-    let formatted = location.replace(/Location:\s*/g, "").trim();
+    const formatted = location.replace(/Location:\s*/g, "").trim();
     
     // Extract just the venue name and city
     const lines = formatted.split('\n').map(line => line.trim()).filter(Boolean);

@@ -13,7 +13,7 @@ interface VideoGalleryProps {
 
 export default function VideoGallery({ videos: allVideos }: VideoGalleryProps) {
   const { selectedChorus } = useChorus();
-  const { primaryColor, primaryTextClass } = useChorusStyles();
+  const { primaryColor /* , primaryTextClass */ } = useChorusStyles();
   const [videos, setVideos] = useState<VideoType[]>(allVideos);
 
   useEffect(() => {

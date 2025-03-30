@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
+// import Image from "next/image"; // Removed as unused
+// import Link from "next/link"; // Removed as unused
 import PageTransition from "@/components/ui/PageTransition";
 import ChorusHero from "@/components/ui/ChorusHero";
 import ContactContent from "@/components/contact/ContactContent";

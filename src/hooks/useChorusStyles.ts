@@ -25,7 +25,7 @@ export default function useChorusStyles(): ChorusStyles {
   let primaryColorLight = '#EEF2FF'; // indigo-50
   let primaryTextClass = 'text-indigo-600';
   let primaryBgClass = 'bg-indigo-600';
-  let secondaryBgClass = 'bg-gray-200';
+  const secondaryBgClass = 'bg-gray-200';
   
   if (selectedChorus === 'harmony') {
     primaryColor = chorusContent.harmony.primaryColor;

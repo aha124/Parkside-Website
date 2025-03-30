@@ -1,7 +1,8 @@
 import { HTMLAttributes, forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
-interface TypographyProps extends HTMLAttributes<HTMLElement> {}
+// interface TypographyProps extends HTMLAttributes<HTMLElement> {}
+type TypographyProps = HTMLAttributes<HTMLElement>;
 
 const H1 = forwardRef<HTMLHeadingElement, TypographyProps>(
   ({ className, children, ...props }, ref) => {

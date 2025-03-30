@@ -59,7 +59,7 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Parkside Harmony</h3>
                 <p className="text-gray-600 mb-4">
-                  Our competitive men's chorus that performs traditional and contemporary a cappella music in the barbershop style. Founded in 2010, Parkside Harmony has competed at the district and international levels.
+                  Our competitive men&apos;s chorus that performs traditional and contemporary a cappella music in the barbershop style. Founded in 2010, Parkside Harmony has competed at the district and international levels.
                 </p>
                 <Link 
                   href="/choruses/harmony"

@@ -6,7 +6,6 @@ import dynamic from "next/dynamic";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import ChorusHero from "@/components/ui/ChorusHero";
 import { useChorus } from "@/contexts/ChorusContext";
-import chorusContent from "@/data/chorusContent";
 
 // Since we're using client component with "use client", metadata must be in a separate file
 // See metadata.ts in the same directory

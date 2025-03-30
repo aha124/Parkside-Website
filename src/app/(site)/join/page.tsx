@@ -74,7 +74,7 @@ export default function JoinPage() {
                   Ready to Take the Next Step?
                 </h2>
                 <p className="text-lg text-gray-600 mb-8">
-                  If you'd like more information on our audition process for either group, contact us:
+                  If you&apos;d like more information on our audition process for either group, contact us:
                 </p>
                 <a
                   href="mailto:audition@parksideharmony.org"

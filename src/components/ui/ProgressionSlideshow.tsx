@@ -1,12 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, SyntheticEvent } from 'react';
 import Image from 'next/image';
 
 export default function ProgressionSlideshow() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [imageOrientation, setImageOrientation] = useState<'landscape' | 'portrait'>('landscape');
 
   const images = [
     '/images/progression_slideshow/486610174_1184361726869488_6607344270866660077_n.jpg',
@@ -30,10 +28,10 @@ export default function ProgressionSlideshow() {
     return () => clearInterval(timer);
   }, [images.length]);
 
-  const handleImageLoad = (event: any) => {
-    const img = event.target;
-    setImageOrientation(img.naturalWidth > img.naturalHeight ? 'landscape' : 'portrait');
-    setIsLoaded(true);
+  const handleImageLoad = (event: SyntheticEvent<HTMLImageElement, Event>) => {
+    // const img = event.target as HTMLImageElement; // Now implicitly typed
+    // setImageOrientation(img.naturalWidth > img.naturalHeight ? 'landscape' : 'portrait'); // Removed as state is unused
+    // setIsLoaded(true); // Removed as state is unused
   };
 
   const goToNext = () => {

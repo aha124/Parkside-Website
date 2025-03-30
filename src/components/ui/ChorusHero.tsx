@@ -15,14 +15,12 @@ interface ChorusHeroProps {
   page: 'home' | 'about' | 'events' | 'media' | 'join' | 'contact' | 'leadership';
   title: string;
   description?: string;
-  height?: string;
   videoId?: string; // Optional video ID for video backgrounds
   youtubeOpts?: YouTubeProps['opts']; // Add optional YouTube options prop
 }
 
-export default function ChorusHero({ page, title, description, height = "500px", videoId, youtubeOpts }: ChorusHeroProps) {
+export default function ChorusHero({ page, title, description, videoId, youtubeOpts }: ChorusHeroProps) {
   const { selectedChorus } = useChorus();
-  const { primaryColor } = useChorusStyles();
   const [scrollY, setScrollY] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
   const [videoLoaded, setVideoLoaded] = useState(false);

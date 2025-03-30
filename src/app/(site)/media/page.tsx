@@ -5,7 +5,7 @@ import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import ChorusHero from "@/components/ui/ChorusHero";
 import dynamic from "next/dynamic";
 import type { YouTubeProps } from "react-youtube";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useChorus } from "@/contexts/ChorusContext";
 
 // Dynamically import YouTube component to avoid SSR issues
@@ -217,11 +217,11 @@ const videos: VideoData[] = [
 ];
 
 type FilterType = "all" | "harmony" | "melody" | "both" | "competition";
-type FilterOption = {
+/* type FilterOption = { // Removed unused type
   label: string;
   value: FilterType;
   tooltip: string;
-};
+}; */
 
 export default function MediaPage() {
   const { selectedChorus } = useChorus();
@@ -580,7 +580,7 @@ export default function MediaPage() {
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">Parkside Harmony Performances</h3>
                       <p className="text-gray-600 mt-1">
-                        Showcasing our men's chorus with their award-winning performances and heartfelt barbershop arrangements.
+                        Showcasing our men&apos;s chorus with their award-winning performances and heartfelt barbershop arrangements.
                       </p>
                     </div>
                   </div>
@@ -594,7 +594,7 @@ export default function MediaPage() {
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">Parkside Melody Performances</h3>
                       <p className="text-gray-600 mt-1">
-                        Experience our women's chorus with their beautiful harmonies and engaging performances across various styles.
+                        Experience our women&apos;s chorus with their beautiful harmonies and engaging performances across various styles.
                       </p>
                     </div>
                   </div>

@@ -122,7 +122,7 @@ export default async function NewsArticlePage({ params }: { params: { slug: stri
               </p>
               
               <p className="text-gray-700 mb-6">
-                For now, we're displaying the summary as a preview of what this article would contain.
+                For now, we&apos;re displaying the summary as a preview of what this article would contain.
                 You can expand this component to include more detailed content as your needs evolve.
               </p>
               

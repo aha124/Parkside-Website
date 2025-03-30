@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/ThemeProvider";
-import { defaultMetadata } from "@/lib/metadata";
+// import { defaultMetadata } from "@/lib/metadata"; // Removed as unused
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { ChorusProvider } from "@/contexts/ChorusContext";
 import { StyleProvider } from "@/contexts/StyleContext";

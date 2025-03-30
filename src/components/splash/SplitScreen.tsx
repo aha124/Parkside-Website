@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
+// import Link from "next/link"; // Removed as unused
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useChorus } from "@/contexts/ChorusContext";
@@ -64,7 +64,7 @@ const SplitScreen = () => {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-5xl font-bold mb-4">Parkside Harmony</h2>
-          <p className="text-xl max-w-md mx-auto">Award-winning men's a cappella chorus performing in the barbershop tradition.</p>
+          <p className="text-xl max-w-md mx-auto">Award-winning men&apos;s a cappella chorus performing in the barbershop tradition.</p>
           <button 
             onClick={() => handleChorusSelection('harmony')}
             className="mt-6 px-6 py-2 bg-white text-gray-900 rounded-md font-medium hover:bg-gray-100 transition-colors"
