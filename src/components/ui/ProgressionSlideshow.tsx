@@ -28,12 +28,6 @@ export default function ProgressionSlideshow() {
     return () => clearInterval(timer);
   }, [images.length]);
 
-  const handleImageLoad = (event: SyntheticEvent<HTMLImageElement, Event>) => {
-    // const img = event.target as HTMLImageElement; // Now implicitly typed
-    // setImageOrientation(img.naturalWidth > img.naturalHeight ? 'landscape' : 'portrait'); // Removed as state is unused
-    // setIsLoaded(true); // Removed as state is unused
-  };
-
   const goToNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
   };
@@ -60,7 +54,6 @@ export default function ProgressionSlideshow() {
               alt={`Parkside community moment ${index + 1}`}
               fill
               className="object-contain bg-black/90"
-              onLoad={handleImageLoad}
               priority={index === 0}
             />
           </div>

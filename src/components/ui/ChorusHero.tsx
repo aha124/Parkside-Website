@@ -3,14 +3,15 @@
 import Image from "next/image";
 import { useChorus } from "@/contexts/ChorusContext";
 import chorusContent from "@/data/chorusContent";
-import { useChorusStyles } from "@/contexts/StyleContext";
 import dynamic from "next/dynamic";
 import type { YouTubeProps } from "react-youtube";
 import { useEffect, useState, useRef } from 'react';
+import React from 'react';
 
 // Dynamically import YouTube component to avoid SSR issues
 const YouTube = dynamic(() => import("react-youtube"), { ssr: false });
 
+// Add the interface definition back
 interface ChorusHeroProps {
   page: 'home' | 'about' | 'events' | 'media' | 'join' | 'contact' | 'leadership';
   title: string;
