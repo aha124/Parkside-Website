@@ -47,7 +47,14 @@ async function getNewsItem(slug: string): Promise<NewsItem | null> {
   }
 }
 
-export default async function NewsArticlePage({ params }: { params: { slug: string } }) {
+// Define the expected props type for the page component
+type Props = {
+  params: { slug: string };
+  searchParams?: { [key: string]: string | string[] | undefined }; // Optional searchParams
+};
+
+// Apply the explicit Props type to the component signature
+export default async function NewsArticlePage({ params }: Props) {
   const newsItem = await getNewsItem(params.slug);
   
   // If the news item doesn't exist, show a 404 page
