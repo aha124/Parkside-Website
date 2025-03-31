@@ -104,7 +104,7 @@ const boardMembersAtLarge = [
     name: "Tim Dawson",
     title: "Board Member at Large",
     bio: "Tim is relatively new to Barbershop, having joined Parkside Harmony during the pandemic via Zoom in 2021, but he has been singing since the early days as a pastor's kid. He has a degree in Music Education from Messiah University and an M.Ed in Higher Education from The Pennsylvania State University. He has been a member of the Harrisburg Singers, worship leader and church musician in the Harrisburg area for many years but has recently moved to Silver Spring, MD.\n\nBy day, he is a Strategic Business Advisor for Ellucian, providing software solutions for student success for colleges & universities. He has worked as an Enrollment Manager for both Messiah University and Harrisburg University of Science & Technology prior to joining Ellucian.\n\nIn addition to music and student success, he loves Walt Disney World and is a collector of memorabilia from the early days of the park which opened the year he was born. He is drawn to the way they tell stories and is pleased to be able to do that everyday at work and thru music with Parkside!",
-    photoUrl: "/images/timd.jpg"
+    photoUrl: "/images/timd.JPG"
   },
   {
     id: "board-member-4",
