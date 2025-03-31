@@ -34,7 +34,7 @@ const chorusContent: Record<string, ChorusContent> = {
     shortDescription: 'Award-winning men\'s a cappella chorus performing in the barbershop tradition.',
     longDescription: 'Parkside Harmony is an award-winning men\'s a cappella chorus based in Hershey, PA. Founded in 2009, we perform in the barbershop style and are dedicated to musical excellence and community engagement through our performances.',
     logoPath: '/images/parkside-harmony-logo.png', // Using the new harmony logo
-    primaryColor: '#1E40AF', // indigo-800
+    primaryColor: '#2563EB', // blue-600
     bannerImages: {
       home: '/images/harmony-bg.jpg', // Tagged as "harmony"
       about: '/images/harmony/about/hero.jpg', // Updated image for harmony about
@@ -70,7 +70,7 @@ const chorusContent: Record<string, ChorusContent> = {
     shortDescription: 'Exceptional treble chorus bringing vibrant a cappella performances to the Hershey area.',
     longDescription: 'Parkside Melody is a treble chorus dedicated to excellence in a cappella singing. Based in Hershey, PA, we bring together singers of all ages to create beautiful harmony and foster musical growth in the treble voice.',
     logoPath: '/images/parkside-melody-logo.png', // Using the new melody logo
-    primaryColor: '#BE185D', // pink-700
+    primaryColor: '#059669', // emerald-600
     bannerImages: {
       home: '/images/melody-bg.jpg', // Tagged as "melody"
       about: '/images/melody/about/hero.jpg', // Updated image for melody about

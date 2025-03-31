@@ -585,8 +585,8 @@ export default function MediaPage() {
                   </div>
                 ) : selectedChorus === "melody" || filter === "melody" ? (
                   <div className="flex items-start">
-                    <div className="mr-4 bg-pink-100 p-3 rounded-full">
-                      <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <div className="mr-4 bg-emerald-100 p-3 rounded-full">
+                      <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                       </svg>
                     </div>
@@ -661,8 +661,8 @@ export default function MediaPage() {
                               )}
                               <span className="px-3 py-1 rounded-full text-sm font-medium capitalize" 
                                 style={{
-                                  backgroundColor: video.chorus === 'harmony' ? '#4F46E5' : 
-                                                video.chorus === 'melody' ? '#EC4899' : '#6366F1',
+                                  backgroundColor: video.chorus === 'harmony' ? '#2563EB' : 
+                                                video.chorus === 'melody' ? '#059669' : '#6366F1',
                                   color: 'white'
                                 }}
                               >

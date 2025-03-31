@@ -263,7 +263,7 @@ export default function EventsList({
                 onClick={() => setActiveFilter("Harmony")}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeFilter === "Harmony" 
-                    ? "bg-blue-500 text-white" 
+                    ? "bg-blue-600 text-white" 
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
               >
@@ -273,7 +273,7 @@ export default function EventsList({
                 onClick={() => setActiveFilter("Melody")}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeFilter === "Melody" 
-                    ? "bg-pink-500 text-white" 
+                    ? "bg-emerald-600 text-white" 
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
               >
@@ -311,8 +311,8 @@ export default function EventsList({
                     />
                     {event.chorus && (
                       <div className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-medium ${
-                        event.chorus === "Harmony" ? "bg-blue-500 text-white" :
-                        event.chorus === "Melody" ? "bg-pink-500 text-white" :
+                        event.chorus === "Harmony" ? "bg-blue-600 text-white" :
+                        event.chorus === "Melody" ? "bg-emerald-600 text-white" :
                         "bg-purple-500 text-white"
                       }`}>
                         {event.chorus === "Both" ? "Harmony & Melody" : `Parkside ${event.chorus}`}

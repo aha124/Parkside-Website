@@ -29,16 +29,16 @@ export default function useChorusStyles(): ChorusStyles {
   
   if (selectedChorus === 'harmony') {
     primaryColor = chorusContent.harmony.primaryColor;
-    primaryColorHover = '#1E3A8A'; // indigo-900
-    primaryColorLight = '#EEF2FF'; // indigo-50
-    primaryTextClass = 'text-indigo-800';
-    primaryBgClass = 'bg-indigo-800';
+    primaryColorHover = '#1D4ED8'; // blue-700
+    primaryColorLight = '#EFF6FF'; // blue-50
+    primaryTextClass = 'text-blue-600';
+    primaryBgClass = 'bg-blue-600';
   } else if (selectedChorus === 'melody') {
     primaryColor = chorusContent.melody.primaryColor;
-    primaryColorHover = '#9D174D'; // pink-800
-    primaryColorLight = '#FDF2F8'; // pink-50
-    primaryTextClass = 'text-pink-700';
-    primaryBgClass = 'bg-pink-700';
+    primaryColorHover = '#047857'; // emerald-700
+    primaryColorLight = '#ECFDF5'; // emerald-50
+    primaryTextClass = 'text-emerald-600';
+    primaryBgClass = 'bg-emerald-600';
   }
   
   // Inline styles for buttons
