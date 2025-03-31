@@ -205,16 +205,4 @@ export async function OPTIONS() {
       }
     }
   );
-}
-
-// Cleanup function
-export async function cleanup() {
-  if (context) {
-    await context.close();
-    context = null;
-  }
-  if (browser) {
-    await browser.close();
-    browser = null;
-  }
 } 

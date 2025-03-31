@@ -84,7 +84,6 @@ export default function AboutPage() {
         page="about"
         title="About Parkside"
         description="Celebrating barbershop excellence in Hershey since 2015"
-        height="500px"
       />
 
       {/* Our Story Section */}

@@ -18,7 +18,6 @@ export default function ContactPage() {
         page="contact"
         title="Contact Us"
         description="Join our chorus, book a performance, or just say hello to the Parkside Barbershop Harmony Society."
-        height="70vh"
       />
 
       {/* Contact Content */}

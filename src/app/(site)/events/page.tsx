@@ -17,7 +17,6 @@ export default function EventsPage() {
         page="events"
         title="Events Calendar"
         description="Find upcoming performances, competitions, and community events featuring Parkside Harmony and Parkside Melody choruses."
-        height="70vh"
       />
       
       {/* Events List */}

@@ -427,7 +427,6 @@ export default function MediaPage() {
           title={selectedChorus ? `${selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1)} Media Gallery` : "Media Gallery"}
           description={`Featuring performances by Parkside${selectedChorus ? ' ' + selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1) : ''}`}
           videoId={heroVideo.id} // Pass video ID to use as background
-          height="70vh" // Set an initial height that matches our dynamic calculation
           youtubeOpts={heroOpts} // Pass the hero video options
         />
 

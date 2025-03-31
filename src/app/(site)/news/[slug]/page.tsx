@@ -6,7 +6,9 @@ import PageTransition from "@/components/ui/PageTransition";
 import { NewsItem } from "@/components/news/NewsList";
 
 // This is a dynamic route, so we need to generate metadata dynamically
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+// Use inline props type for generateMetadata, expecting a Promise
+export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await paramsPromise; // Await the promise
   const newsItem = await getNewsItem(params.slug);
   
   if (!newsItem) {
@@ -53,8 +55,10 @@ async function getNewsItem(slug: string): Promise<NewsItem | null> {
 //   searchParams?: { [key: string]: string | string[] | undefined }; // Optional searchParams
 // };
 
-// Revert to inline type definition in the component signature
-export default async function NewsArticlePage({ params }: { params: { slug: string } }) {
+// Add async back to the component signature
+// Expect params as a Promise
+export default async function NewsArticlePage({ params: paramsPromise }: { params: Promise<{ slug: string }> }) {
+  const params = await paramsPromise; // Await the promise
   const newsItem = await getNewsItem(params.slug);
   
   // If the news item doesn't exist, show a 404 page
