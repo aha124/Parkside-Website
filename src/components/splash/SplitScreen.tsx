@@ -236,7 +236,7 @@ const SplitScreen = () => {
           transition={{ duration: 0.5 }}
         >
           <h2 className={`${isMobile ? 'text-3xl' : 'text-5xl'} font-bold mb-2 md:mb-4`}>Parkside Melody</h2>
-          <p className={`${isMobile ? 'text-sm' : 'text-xl'} max-w-md mx-auto px-4`}>Exceptional treble chorus bringing vibrant a cappella performances to the Hershey area.</p>
+          <p className={`${isMobile ? 'text-sm' : 'text-xl'} max-w-md mx-auto px-4`}>Stunning clarity and cutting-edge harmonies from this award-winning a cappella treble chorus</p>
           
           {isMobile && activeSection === "melody" && (
             <button 

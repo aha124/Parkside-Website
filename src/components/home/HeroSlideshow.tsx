@@ -57,7 +57,7 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
       description: selectedChorus === 'harmony'
         ? "Award-winning men's a cappella chorus performing in the barbershop tradition."
         : selectedChorus === 'melody'
-          ? "Exceptional treble chorus bringing vibrant a cappella performances to the Hershey area."
+          ? "Stunning clarity and cutting-edge harmonies from this award-winning a cappella treble chorus"
           : "The Hershey Chapter of the Barbershop Harmony Society, featuring Parkside Harmony and Parkside Melody a cappella choruses.",
       imageUrl: `${slideshowPath}slide1-main.jpg`,
       fallbackImageUrl: selectedChorus === 'harmony' 
