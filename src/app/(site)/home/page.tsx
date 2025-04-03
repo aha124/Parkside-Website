@@ -83,7 +83,7 @@ export default function HomePage() {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">Parkside Melody</h3>
                 <p className="text-gray-600 mb-4">
-                  Our community-focused chorus that welcomes singers of all experience levels. Parkside Melody performs at local events and focuses on bringing barbershop harmony to the Hershey community.
+                  Stunning clarity and cutting-edge harmonies from this award-winning a cappella treble chorus
                 </p>
                 <Link 
                   href="/choruses/melody"

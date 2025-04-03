@@ -67,7 +67,7 @@ const chorusContent: Record<string, ChorusContent> = {
   melody: {
     id: 'melody',
     fullName: 'Parkside Melody',
-    shortDescription: 'Exceptional treble chorus bringing vibrant a cappella performances to the Hershey area.',
+    shortDescription: 'Stunning clarity and cutting-edge harmonies from this award-winning a cappella treble chorus',
     longDescription: 'Parkside Melody is a treble chorus dedicated to excellence in a cappella singing. Based in Hershey, PA, we bring together singers of all ages to create beautiful harmony and foster musical growth in the treble voice.',
     logoPath: '/images/parkside-melody-logo.png', // Using the new melody logo
     primaryColor: '#059669', // emerald-600

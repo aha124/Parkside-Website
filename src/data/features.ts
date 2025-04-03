@@ -9,7 +9,7 @@ export const features: FeatureType[] = [
   {
     id: "2",
     title: "Parkside Melody",
-    description: "Our treble chorus showcasing beautiful a cappella arrangements with a focus on barbershop and contemporary styles.",
+    description: "Stunning clarity and cutting-edge harmonies from this award-winning a cappella treble chorus",
   },
   {
     id: "3",
