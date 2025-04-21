@@ -6,10 +6,10 @@ import path from 'path';
 // In Vercel, the scripts directory will likely be at the root level after build
 const scriptPath = path.join(process.cwd(), 'scripts', 'fetch-news.js');
 
-export async function GET() {
+export async function GET(): Promise<Response> {
   console.log('CRON JOB STARTED: Fetching news...');
 
-  return new Promise((resolve) => {
+  return new Promise<Response>((resolve) => {
     const nodeProcess = spawn('node', [scriptPath], { stdio: 'pipe' });
 
     let output = '';
