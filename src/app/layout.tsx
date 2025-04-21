@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/lib/ThemeProvider";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 import { ChorusProvider } from "@/contexts/ChorusContext";
 import { StyleProvider } from "@/contexts/StyleContext";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,6 +36,7 @@ export default function RootLayout({
             </StyleProvider>
           </ChorusProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
