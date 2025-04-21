@@ -5,7 +5,7 @@ import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import ChorusHero from "@/components/ui/ChorusHero";
 import dynamic from "next/dynamic";
 import type { YouTubeProps } from "react-youtube";
-import { useState, useEffect, useCallback, useContext, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useChorus } from "@/contexts/ChorusContext";
 
 // Dynamically import YouTube component to avoid SSR issues
@@ -260,7 +260,7 @@ export default function MediaPage() {
     // Fallback if absolutely no relevant videos (shouldn't happen with current data)
     console.warn("No relevant videos found, falling back to first video overall.");
     return videos[0]; 
-  }, [contextFilteredVideos]);
+  }, [contextFilteredVideos, selectedChorus]);
 
   const [heroVideo, setHeroVideo] = useState<VideoData>(() => {
     console.log("Initializing hero video on page load");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -45,8 +45,8 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
   // Get the slideshow path
   const slideshowPath = getSlideshowPath();
   
-  // Define the slides
-  const slides: Slide[] = [
+  // Define the slides using useMemo
+  const slides = useMemo<Slide[]>(() => [
     {
       id: 1,
       title: selectedChorus === 'harmony' 
@@ -130,9 +130,9 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
       buttonText: "Contact Us",
       buttonUrl: "/contact"
     }
-  ];
+  ], [selectedChorus, slideshowPath]);
 
-  const [imageSources, setImageSources] = useState<string[]>(
+  const [imageSources, setImageSources] = useState<string[]>(() =>
     slides.map(slide => slide.imageUrl)
   );
 
@@ -150,10 +150,10 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Reset image sources when selectedChorus changes
+  // Initialize imageSources when slides array changes (due to selectedChorus change)
   useEffect(() => {
-    setImageSources(slides.map(slide => slide.imageUrl));
-  }, [selectedChorus, slides]);
+     setImageSources(slides.map(slide => slide.imageUrl));
+  }, [slides]); // Now depends on the memoized slides array
 
   // Auto-advance slides
   useEffect(() => {
@@ -164,7 +164,7 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
     }, interval);
     
     return () => clearTimeout(timer);
-  }, [currentSlide, interval, isAutoPlaying, slides.length]);
+  }, [currentSlide, interval, isAutoPlaying, slides]);
 
   // Pause auto-play on hover
   const handleMouseEnter = () => setIsAutoPlaying(false);

@@ -184,7 +184,7 @@ export default function EventsList({
             const dateB = new Date(b.date.split(' - ')[0]);
             if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) return 0; // Fallback for invalid dates
             return dateA.getTime() - dateB.getTime();
-          } catch (_e) {
+          } catch {
             return 0; // Fallback on parsing error
           }
         });
