@@ -8,7 +8,7 @@ import { useChorus } from "@/contexts/ChorusContext";
 import chorusContent from "@/data/chorusContent";
 
 const navItems = [
-  { name: "Home", href: "/home" },
+  { name: "Home", href: "/" },
   {
     name: "About",
     href: "/about",
@@ -130,7 +130,7 @@ export default function Header() {
           {/* Logo */}
           <div className="flex items-center">
             <Link
-              href="/splash"
+              href="/"
               className="flex items-center gap-3"
             >
               <div className="relative h-14 w-14">
