@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { VideoType } from "@/types";
 import { useChorus } from "@/contexts/ChorusContext";
 import chorusContent from "@/data/chorusContent";
@@ -71,10 +72,12 @@ export default function VideoGallery({ videos: allVideos }: VideoGalleryProps) {
             className="bg-white rounded-lg overflow-hidden shadow-md"
           >
             <div className="relative aspect-video cursor-pointer" onClick={() => window.open(video.url, '_blank')}>
-              <img 
+              <Image 
                 src={video.thumbnail} 
                 alt={video.title}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-16 h-16 bg-white bg-opacity-80 rounded-full flex items-center justify-center">

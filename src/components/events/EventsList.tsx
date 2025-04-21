@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
@@ -50,8 +50,8 @@ export default function EventsList({
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>(autoFilter && selectedChorus ? (selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1)) : "All");
 
-  // Static fallback events in case the fetch fails
-  const staticEvents: Event[] = [
+  // Static fallback events - use useMemo to prevent re-creation on every render
+  const staticEvents = useMemo<Event[]>(() => [
     {
       id: "1",
       title: "Spring Harmony Concert",
@@ -82,7 +82,7 @@ export default function EventsList({
       location: "Hershey Community Center",
       chorus: "Melody"
     }
-  ];
+  ], []);
 
   // Helper function to format location string
   const formatLocation = (location: string): string => {
@@ -184,7 +184,7 @@ export default function EventsList({
             const dateB = new Date(b.date.split(' - ')[0]);
             if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) return 0; // Fallback for invalid dates
             return dateA.getTime() - dateB.getTime();
-          } catch (e) {
+          } catch (_e) {
             return 0; // Fallback on parsing error
           }
         });
@@ -202,8 +202,7 @@ export default function EventsList({
     };
 
     fetchEvents();
-  // Removed activeFilter and applyFilters from here. 
-  // Added staticEvents dependency as it's defined outside.
+  // Now that staticEvents is memoized, it's safe in the dependency array
   }, [dataSource, jsonUrl, apiUrl, staticEvents]); 
 
   // Update filtered events when filter or events change

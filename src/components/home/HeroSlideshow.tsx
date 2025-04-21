@@ -153,7 +153,7 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
   // Reset image sources when selectedChorus changes
   useEffect(() => {
     setImageSources(slides.map(slide => slide.imageUrl));
-  }, [selectedChorus]);
+  }, [selectedChorus, slides]);
 
   // Auto-advance slides
   useEffect(() => {

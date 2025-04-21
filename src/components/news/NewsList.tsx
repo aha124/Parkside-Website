@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
@@ -32,8 +32,8 @@ export default function NewsList({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Static fallback news in case the fetch fails
-  const staticNews: NewsItem[] = [
+  // Static fallback news - memoize
+  const staticNews = useMemo<NewsItem[]>(() => [
     {
       id: "1",
       title: "Parkside Harmony Welcomes New Music Director",
@@ -58,72 +58,51 @@ export default function NewsList({
       imageUrl: "/images/news1.jpg", // Reusing news1.jpg as fallback
       url: "/news/fundraiser-success"
     }
-  ];
+  ], []);
 
-  // Helper function to determine if a URL is external
-  const isExternalUrl = (url: string) => {
+  // Helper function to determine if a URL is external - memoize
+  const isExternalUrl = useCallback((url: string) => {
     return url.startsWith('http') || url.startsWith('https');
-  };
+  }, []);
 
-  // Helper function to get a valid image URL
-  const getValidImageUrl = (url: string | undefined) => {
+  // Helper function to get a valid image URL - memoize
+  const getValidImageUrl = useCallback((url: string | undefined) => {
     if (!url) return "/images/news1.jpg";
-    
-    // If it's an external URL, use it directly
     if (isExternalUrl(url)) return url;
-    
-    // If it's a local URL starting with /images, use it
     if (url.startsWith('/images')) return url;
-    
-    // If it's a path from parksideharmony.org, use the full URL
     if (url.includes('parksideharmony.org')) return url;
-    
-    // Default fallback
     return "/images/news1.jpg";
-  };
+  }, [isExternalUrl]); // Dependency: isExternalUrl
 
-  // Helper function to get the correct URL for news items
-  const getNewsUrl = (url: string) => {
-    // If it's an external URL, use it directly
+  // Helper function to get the correct URL for news items - memoize
+  const getNewsUrl = useCallback((url: string) => {
     if (isExternalUrl(url)) return url;
-    
-    // If it's a node URL from Parkside Harmony (e.g., /node/6061)
     if (url.startsWith('/node/')) {
       return `https://parksideharmony.org${url}`;
     }
-    
-    // If it's a local URL, use it as is
     return url;
-  };
+  }, [isExternalUrl]); // Dependency: isExternalUrl
 
   useEffect(() => {
     const fetchNews = async () => {
       setLoading(true);
       try {
-        // Fetch news from JSON file
         const response = await fetch('/data/news.json');
         if (!response.ok) {
           throw new Error(`Failed to fetch news: ${response.status}`);
         }
-        
         const fetchedNews = await response.json();
         
-        // If we have news data, use it
         if (fetchedNews && fetchedNews.length > 0) {
-          // Map over the fetched news and ensure each item has valid URLs
           const processedNews = fetchedNews.map((item: NewsItem) => ({
             ...item,
-            imageUrl: getValidImageUrl(item.imageUrl),
-            // Ensure the URL is properly formatted
+            imageUrl: getValidImageUrl(item.imageUrl), // Now uses memoized version
             url: item.url || '/news'
           }));
-          
           setNewsItems(processedNews.slice(0, maxItems));
         } else {
-          // Otherwise use static news
           setNewsItems(staticNews.slice(0, maxItems));
         }
-        
         setError(null);
       } catch (err) {
         console.error("Error fetching news:", err);
@@ -135,7 +114,9 @@ export default function NewsList({
     };
 
     fetchNews();
-  }, [maxItems, staticNews]);
+  // Add getValidImageUrl as it's used in the fetch logic
+  // staticNews is memoized, maxItems is stable
+  }, [maxItems, staticNews, getValidImageUrl]);
 
   return (
     <section className="py-16">

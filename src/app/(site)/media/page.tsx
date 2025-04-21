@@ -5,7 +5,7 @@ import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import ChorusHero from "@/components/ui/ChorusHero";
 import dynamic from "next/dynamic";
 import type { YouTubeProps } from "react-youtube";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useContext, useMemo } from "react";
 import { useChorus } from "@/contexts/ChorusContext";
 
 // Dynamically import YouTube component to avoid SSR issues
@@ -227,83 +227,55 @@ export default function MediaPage() {
   const { selectedChorus } = useChorus();
   const [filter, setFilter] = useState<FilterType>("all");
   const [visibleCount, setVisibleCount] = useState(6);
+  const [reloadCounter, setReloadCounter] = useState(0);
 
-  // Set initial filter based on selected chorus
-  useEffect(() => {
+  // Filter videos based on selectedChorus context first (memoized)
+  const contextFilteredVideos = useMemo(() => {
     if (selectedChorus) {
-      setFilter(selectedChorus);
-    } else {
-      setFilter("all");
-    }
+      console.log(`Filtering videos for selected context: ${selectedChorus}`);
+      return videos.filter(v => v.chorus === selectedChorus || v.chorus === 'both');
+    } 
+    console.log("No chorus context selected, using all videos.");
+    return videos;
   }, [selectedChorus]);
 
-  // Add a key state to force re-render and new random selection
-  const [reloadCounter, setReloadCounter] = useState(0);
-  
-  // Get a featured video for the hero background based on chorus selection
-  const getFeaturedVideo = () => {
-    // Filter videos based on the selected chorus
-    let eligibleVideos = [];
+  // Memoize the function to get a featured video
+  const getFeaturedVideo = useCallback(() => {
+    // Filter videos based on the selected chorus context first
+    const relevantVideos = contextFilteredVideos;
     
-    if (selectedChorus === 'harmony') {
-      // Only harmony videos when harmony is selected
-      eligibleVideos = videos.filter(v => v.chorus === 'harmony');
-      console.log(`Found ${eligibleVideos.length} harmony videos`);
-    } else if (selectedChorus === 'melody') {
-      // Only melody videos when melody is selected
-      eligibleVideos = videos.filter(v => v.chorus === 'melody');
-      console.log(`Found ${eligibleVideos.length} melody videos`);
-    } else {
-      // When no chorus is selected, use all videos but prioritize "both" videos
-      const bothVideos = videos.filter(v => v.chorus === 'both');
-      if (bothVideos.length > 0) {
-        eligibleVideos = bothVideos;
-        console.log(`Found ${eligibleVideos.length} "both" chorus videos to choose from`);
-      } else {
-        eligibleVideos = videos;
-        console.log(`No "both" chorus videos found, using all ${eligibleVideos.length} videos`);
-      }
+    // Prefer videos explicitly marked as featured within the relevant set
+    const featured = relevantVideos.filter(v => v.featured);
+    if (featured.length > 0) {
+      console.log(`Selecting a featured video from ${featured.length} options (Context: ${selectedChorus || 'all'})`);
+      return featured[Math.floor(Math.random() * featured.length)];
     }
     
-    // Safety check - if no videos are available for some reason
-    if (eligibleVideos.length === 0) {
-      console.warn(`No videos found for selected chorus: ${selectedChorus}`);
-      return videos[0]; // Fallback to first video as a last resort
+    // If no featured videos in the context, select a random one from the relevant set
+    if (relevantVideos.length > 0) {
+      console.log(`No specific featured video found for context ${selectedChorus || 'all'}, selecting random from ${relevantVideos.length} relevant videos.`);
+      return relevantVideos[Math.floor(Math.random() * relevantVideos.length)];
     }
     
-    // Create a copy of eligible videos to shuffle
-    const shuffledVideos = [...eligibleVideos];
-    
-    // Fisher-Yates shuffle algorithm
-    for (let i = shuffledVideos.length - 1; i > 0; i--) {
-      // Generate a random index between 0 and i
-      // Use a combination of timestamp and Math.random() for better entropy
-      const timestamp = new Date().getTime();
-      const j = Math.floor((Math.random() * timestamp) % (i + 1));
-      
-      // Swap elements
-      [shuffledVideos[i], shuffledVideos[j]] = [shuffledVideos[j], shuffledVideos[i]];
-    }
-    
-    // Take the first video from the shuffled array
-    const selectedVideo = shuffledVideos[0];
-    console.log(`Selected video: "${selectedVideo.title}" (${selectedVideo.chorus}) from ${eligibleVideos.length} choices`);
-    
-    return selectedVideo;
-  };
+    // Fallback if absolutely no relevant videos (shouldn't happen with current data)
+    console.warn("No relevant videos found, falling back to first video overall.");
+    return videos[0]; 
+  }, [contextFilteredVideos]);
 
-  // Generate a random video each time the component mounts, not just when chorus changes
   const [heroVideo, setHeroVideo] = useState<VideoData>(() => {
     console.log("Initializing hero video on page load");
-    return getFeaturedVideo();
+    // Call the function directly for initial state - Note: context might not be ready here yet
+    // If initial context matters, might need an effect
+    return getFeaturedVideo(); 
   });
   
   // Update the hero video when the chorus changes or reload is triggered
   useEffect(() => {
-    const newHeroVideo = getFeaturedVideo();
+    const newHeroVideo = getFeaturedVideo(); // Now uses memoized function
     console.log(`Selected hero video: "${newHeroVideo.title}" (Chorus: ${newHeroVideo.chorus}) - Selected chorus: ${selectedChorus || 'none'}`);
     setHeroVideo(newHeroVideo);
-  }, [selectedChorus, reloadCounter]);
+  // Add getFeaturedVideo to dependencies. It's memoized, so this is safe.
+  }, [selectedChorus, reloadCounter, getFeaturedVideo]); 
   
   // Add a function that can be called to force reselection of a video (for manual testing)
   const reloadVideo = useCallback(() => {
@@ -368,42 +340,20 @@ export default function MediaPage() {
     },
   };
 
-  // Filter and sort videos
-  const filteredVideos = videos
+  // Filter and sort videos (uses contextFilteredVideos now)
+  const filteredVideos = useMemo(() => {
+    console.log(`Applying UI filter: ${filter} to context-filtered videos (count: ${contextFilteredVideos.length})`);
+    return contextFilteredVideos
     .filter(video => {
-      // Apply filter logic with improved handling of combinations
-      
-      // Handle special case of competition filter - this is independent of chorus
-      if (filter === "competition") {
-        // When filtering by competition, still respect the global chorus selection
-        if (selectedChorus) {
-          return !!video.competition && video.chorus === selectedChorus;
-        }
-        return !!video.competition;
-      }
-      
-      // Handle "both" filter - only show combined performances 
-      if (filter === "both") {
-        return video.chorus === "both";
-      }
-      
-      // For specific chorus filters (harmony/melody)
-      if (filter === "harmony" || filter === "melody") {
-        return video.chorus === filter;
-      }
-      
-      // For "all" filter, respect the global chorus selection
-      if (filter === "all") {
-        if (selectedChorus) {
-          return video.chorus === selectedChorus;
-        }
-        return true; // Show all videos when no chorus is selected
-      }
-      
-      // Fallback case
+      if (filter === "competition") return !!video.competition;
+      if (filter === "both") return video.chorus === "both";
+      if (filter === "harmony") return video.chorus === "harmony";
+      if (filter === "melody") return video.chorus === "melody";
+      // "all" filter is handled by contextFilteredVideos
       return true;
     })
     .sort((a, b) => b.year - a.year);
+  }, [filter, contextFilteredVideos]);
 
   const visibleVideos = filteredVideos.slice(0, visibleCount);
   const hasMore = visibleCount < filteredVideos.length;

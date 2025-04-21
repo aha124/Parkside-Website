@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Modal from '@/components/ui/Modal';
 
-type ChorusAffiliation = 'harmony' | 'melody' | 'both';
+// type ChorusAffiliation = 'harmony' | 'melody' | 'both'; // Removed as unused
 
 interface LeadershipProfileProps {
   name: string;

@@ -66,10 +66,10 @@ export default async function NewsArticlePage({ params: paramsPromise }: { param
     notFound();
   }
   
-  // Helper function to determine if a URL is external
-  const isExternalUrl = (url: string) => {
-    return url.startsWith('http') || url.startsWith('https');
-  };
+  // Helper function to determine if a URL is external - Removed as unused
+  // const isExternalUrl = (url: string) => {
+  //   return url.startsWith('http') || url.startsWith('https');
+  // };
 
   return (
     <PageTransition>
