@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { spawn } from 'child_process';
 import path from 'path';
 
 // Ensure the path to the script is correct relative to the built output
 const scriptPath = path.join(process.cwd(), 'scripts', 'fetchChoirGeniusEvents.js');
 
-export async function GET() {
+export async function GET(): Promise<Response> {
   console.log('CRON JOB STARTED: Fetching ChoirGenius events...');
 
   // Check for required environment variables
@@ -23,7 +23,7 @@ export async function GET() {
     );
   }
 
-  return new Promise((resolve) => {
+  return new Promise<Response>((resolve) => {
     // Pass environment variables to the child process
     const env = { ...process.env }; 
     const nodeProcess = spawn('node', [scriptPath], { stdio: 'pipe', env });
