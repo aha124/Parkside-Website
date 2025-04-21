@@ -10,30 +10,47 @@ This document describes the architecture of the Parkside website, built using th
 graph TD
     A[Client Browser] --> B(Next.js Frontend - React/TypeScript)
     B --> C{Next.js Server}
-    C --> D[API Routes (Potentially for data fetching)]
+    C --> D[API Routes]
     C --> E[Static Site Generation / Server-Side Rendering]
     E --> F[(Static Assets - /public)]
     E --> G[Page Components - src/app]
     G --> H[UI Components - src/components]
-    D --> I{Data Sources}
-    I --> J[/data/events.json]
-    I --> K[/scripts/fetch-news.js -> External Source?]
-
+    I{Data Sources} --> J[/public/data/events.json]
+    I --> K[/public/data/news.json]
+    L(External: parksideharmony.org/news) --> M(scripts/fetch-news.js)
+    N(External: ChoirGenius API) --> O(scripts/fetchChoirGeniusEvents.js)
+    P[Vercel Cron Jobs] --> D
+    D -- triggers --> M
+    D -- triggers --> O
+    M -- writes --> K
+    O -- writes --> J
+    
     subgraph NextApp [Next.js Application]
         B
         C
-        D
+        D(API Routes:
+          /api/cron/fetch-news
+          /api/cron/fetch-events
+        )
         E
         G
         H
     end
+
+    subgraph DataPersistence
+        J
+        K
+    end
 ```
 
 *   **Frontend:** Built with React, TypeScript, and Tailwind CSS, utilizing Next.js App Router.
-*   **Backend/Server:** Handled by Next.js (Server Components, API Routes if used).
+*   **Backend/Server:** Handled by Next.js (Server Components, API Routes).
 *   **Data:**
-    *   Events data seems to be sourced from a static JSON file (`/data/events.json`).
-    *   News data appears to be fetched via a script (`scripts/fetch-news.js`), potentially scraping or pulling from an external source.
+    *   Events data sourced from ChoirGenius via `scripts/fetchChoirGeniusEvents.js`, stored in `/public/data/events.json`.
+    *   News data scraped from `parksideharmony.org/news` via `scripts/fetch-news.js`, stored in `/public/data/news.json`.
+*   **Scheduled Tasks (Vercel Cron):**
+    *   Daily job triggers `/api/cron/fetch-news` to run `fetch-news.js`.
+    *   Daily job triggers `/api/cron/fetch-events` to run `fetchChoirGeniusEvents.js`.
 *   **Styling:** Tailwind CSS with `clsx` and `tailwind-merge`.
 *   **Animations:** Framer Motion (`framer-motion`) and custom scroll animations (`ScrollAnimation`).
 *   **UI Components:** Reusable components located in `src/components`.
@@ -54,7 +71,7 @@ graph TD
 
 ## 5. Open Questions / Areas for Detail
 
-*   Exact mechanism and source for the `fetch-news.js` script.
-*   Use of API routes (if any).
-*   Deployment strategy.
-*   State management approach (if complex state arises). 
+*   Use of API routes (Now: Used for Cron Triggers).
+*   Deployment strategy (Vercel detected, using Cron Jobs).
+*   State management approach (if complex state arises).
+*   Need for page revalidation after cron jobs run? 

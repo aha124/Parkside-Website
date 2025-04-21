@@ -13,14 +13,16 @@ This document tracks the development tasks, overall progress, and known issues f
 
 ## Task Backlog
 
-*(No specific tasks defined yet)*
+*   **Setup:** Configure `CHOIR_GENIUS_USERNAME` and `CHOIR_GENIUS_PASSWORD` environment variables in Vercel.
+*   **Monitoring:** Monitor Vercel logs after deployment to ensure cron jobs run successfully.
+*   **(Optional) Revalidation:** Investigate and potentially implement page revalidation (`revalidatePath` or `revalidateTag`) in cron API routes if static pages show stale data.
 
 ### Potential Future Tasks (Derived from PRD/Analysis)
 
 *   **Content:**
     *   Finalize content for Chorus pages.
-    *   Implement mechanism for updating Events (if not manual JSON edits).
-    *   Finalize and implement News fetching/display mechanism (`fetch-news.js`).
+    *   ~~Implement mechanism for updating Events (if not manual JSON edits).~~ (Done via Cron Job)
+    *   ~~Finalize and implement News fetching/display mechanism (`fetch-news.js`).~~ (Done via Cron Job)
     *   Create/Populate About Us page.
     *   Create/Populate Join/Support page.
     *   Gather and integrate media (images/videos) if required.
@@ -43,9 +45,15 @@ This document tracks the development tasks, overall progress, and known issues f
 
 *   Initial project setup and analysis.
 *   Creation of initial Memory Files.
+*   Implemented automatic daily fetching of News and Events via Vercel Cron Jobs:
+    *   Created `/api/cron/fetch-news` route.
+    *   Created `/api/cron/fetch-events` route.
+    *   Configured schedules in `vercel.json`.
 
 ## Known Issues / Open Questions
 
 *   See "Open Questions" sections in `product_requirement_docs.md`, `architecture.md`, and `technical.md`.
-*   Scalability of using `events.json` for events.
-*   Reliability and maintenance of `fetch-news.js` script. 
+*   ~~Scalability of using `events.json` for events.~~ (Mitigated by automatic updates)
+*   ~~Reliability and maintenance of `fetch-news.js` script.~~ (Now automated)
+*   Reliability of `fetchChoirGeniusEvents.js` script (depends on unofficial library and ChoirGenius availability).
+*   Need for page revalidation after cron jobs run (see Task Backlog). 

@@ -25,7 +25,8 @@
 
 *   **Build:** `npm run build`
 *   **Start Production Server:** `npm run start`
-*   **Deployment Platform:** (Not specified - Vercel is common for Next.js)
+*   **Deployment Platform:** Vercel
+*   **Scheduled Tasks:** Vercel Cron Jobs configured in `vercel.json` trigger API routes (`/api/cron/*`) daily to update news and events data.
 
 ## 4. Key Technical Decisions & Patterns (Initial Observation)
 
@@ -34,7 +35,8 @@
 *   **Tailwind CSS:** Utility-first CSS framework for rapid UI development.
 *   **Component-Based Architecture:** UI broken down into reusable components (`src/components`).
 *   **Static Data:** Some data (`events.json`) is stored directly in the repository.
-*   **Scripted Data Fetching:** News seems to be fetched via a separate Node.js script.
+*   **Scripted Data Fetching:** News and Events data are fetched/scraped via Node.js scripts (`scripts/fetch-news.js`, `scripts/fetchChoirGeniusEvents.js`) triggered by API routes invoked by Vercel Cron jobs.
+*   **API Routes:** Used as targets for Vercel Cron jobs to initiate data fetching scripts.
 
 ## 5. Scripts
 
@@ -42,7 +44,8 @@
 *   `build`: Creates an optimized production build.
 *   `start`: Runs the production server.
 *   `lint`: Lints the codebase using ESLint.
-*   `fetch-news`: Executes `scripts/fetch-news.js` (purpose likely to update news data).
+*   `fetch-news`: Executes `scripts/fetch-news.js` (scrapes news, saves to `/public/data/news.json`). Now triggered via `/api/cron/fetch-news`.
+*   `fetchChoirGeniusEvents`: Executes `scripts/fetchChoirGeniusEvents.js` (fetches events from ChoirGenius, saves to `/public/data/events.json`). Requires `CHOIR_GENIUS_USERNAME`, `CHOIR_GENIUS_PASSWORD` env vars. Now triggered via `/api/cron/fetch-events`.
 
 ## 6. Configuration Files
 
@@ -52,9 +55,11 @@
 *   `postcss.config.mjs`: PostCSS configuration.
 *   `eslint.config.mjs`: ESLint configuration.
 *   `components.json`: Potentially related to shadcn/ui or a similar component library setup.
+*   `vercel.json`: Configures Vercel deployment settings, including Cron Jobs.
 
 ## 7. Open Questions
 
-*   Details of the `fetch-news.js` implementation.
-*   Specific hosting/deployment environment and CI/CD setup.
-*   Is `components.json` used for shadcn/ui? If so, are there CLI commands associated with it? 
+*   Details of the `fetch-news.js` implementation (Mostly understood now).
+*   Specific hosting/deployment environment and CI/CD setup (Vercel, using Cron Jobs).
+*   Is `components.json` used for shadcn/ui? If so, are there CLI commands associated with it?
+*   Should pages using news/events data be revalidated after cron job execution? 
