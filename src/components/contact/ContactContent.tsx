@@ -239,10 +239,10 @@ export default function ContactContent() {
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">Experience the Joy of Harmony</h3>
                 <p className="text-lg text-gray-600 mb-6">
                   {selectedChorus === 'harmony' ? 
-                    "Whether you're an experienced barbershopper or just love to sing, there's a place for you in Parkside Harmony. Join us to experience the magic of men's a cappella!" :
+                    "Whether you&apos;re an experienced barbershopper or just love to sing, there&apos;s a place for you in Parkside Harmony. Join us to experience the magic of men&apos;s a cappella!" :
                   selectedChorus === 'melody' ? 
                     "Join Parkside Melody and become part of our vibrant treble voice community. All experience levels are welcome!" :
-                    "Whether you're an experienced singer or just love to sing in the shower, there's a place for you in our choruses. Join us for a rehearsal and discover the magic of barbershop harmony!"}
+                    "Whether you&apos;re an experienced singer or just love to sing in the shower, there&apos;s a place for you in our choruses. Join us for a rehearsal and discover the magic of barbershop harmony!"}
                 </p>
                 <Link
                   href="/join"

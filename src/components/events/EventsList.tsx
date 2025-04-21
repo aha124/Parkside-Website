@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
@@ -48,7 +48,7 @@ export default function EventsList({
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = useState<string>("All");
+  const [activeFilter, setActiveFilter] = useState<string>(autoFilter && selectedChorus ? (selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1)) : "All");
 
   // Static fallback events in case the fetch fails
   const staticEvents: Event[] = [
@@ -106,20 +106,28 @@ export default function EventsList({
     return formatted.split('\n').slice(0, 2).join(', ').replace(/\s+/g, ' ').trim();
   };
 
-  // Apply filters to events
-  const applyFilters = (allEvents: Event[], filter: string) => {
+  // Apply filters to events - memoize with useCallback
+  const applyFilters = useCallback((allEvents: Event[], filter: string) => {
+    let eventsToShow = allEvents;
+    
+    // First, filter by chorus context if autoFilter is on
+    // Note: This logic assumes selectedChorus is 'harmony', 'melody', or null (for both)
+    if (autoFilter && selectedChorus) {
+      const chorusName = selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1);
+      eventsToShow = allEvents.filter(event => 
+        event.chorus === chorusName || event.chorus === "Both"
+      );
+    } else if (autoFilter && selectedChorus === null) {
+        // If context is 'both', show all initially before applying UI filter
+        eventsToShow = allEvents;
+    }
+
+    // Then apply the active UI filter (All, Harmony, Melody, Both)
     if (filter === "All") {
-      // If auto-filtering is enabled and a chorus is selected, only show relevant events
-      if (autoFilter && selectedChorus !== null && filter === "All") {
-        return allEvents.filter(event => 
-          event.chorus === selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1) || 
-          event.chorus === "Both"
-        );
-      }
-      return allEvents;
+      return eventsToShow; 
     }
     
-    return allEvents.filter(event => {
+    return eventsToShow.filter(event => {
       if (filter === "Harmony") {
         return event.chorus === "Harmony" || event.chorus === "Both";
       }
@@ -127,106 +135,98 @@ export default function EventsList({
         return event.chorus === "Melody" || event.chorus === "Both";
       }
       if (filter === "Both") {
-        // When filtering for "Both" events, always show only joint events
         return event.chorus === "Both";
       }
-      return true;
+      return true; // Should not happen
     });
-  };
+  }, [autoFilter, selectedChorus]); // Dependencies for useCallback
 
-  // Set initial filter based on selected chorus
+  // Effect to update the activeFilter based on chorus context
   useEffect(() => {
     if (autoFilter) {
+      let newFilter = "All";
       if (selectedChorus) {
-        const chorusName = selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1);
-        setActiveFilter(chorusName);
-      } else {
-        // When selectedChorus is null (both choruses selected), reset to "All"
-        setActiveFilter("All");
+        newFilter = selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1);
+      }
+      if (newFilter !== activeFilter) {
+        setActiveFilter(newFilter);
       }
     }
-  }, [selectedChorus, autoFilter]);
+  }, [selectedChorus, autoFilter, activeFilter]);
 
+  // Fetch events
   useEffect(() => {
     const fetchEvents = async () => {
       setLoading(true);
+      setError(null); // Reset error on new fetch
       try {
         let fetchedEvents: Event[] = [];
         
         if (dataSource === "json") {
-          // Fetch from JSON file
           const response = await fetch(jsonUrl);
-          if (!response.ok) {
-            throw new Error(`Failed to fetch events: ${response.status}`);
-          }
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
           fetchedEvents = await response.json();
         } 
         else if (dataSource === "api") {
-          // Fetch from API endpoint
           const response = await fetch(apiUrl);
-          if (!response.ok) {
-            throw new Error(`Failed to fetch events: ${response.status}`);
-          }
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
           fetchedEvents = await response.json();
         } 
         else {
-          // Use static events
           fetchedEvents = staticEvents;
         }
         
-        // Sort events by date
+        // Sort events by date (assuming date format is parseable or consistent)
+        // Consider more robust date parsing if formats vary wildly
         fetchedEvents.sort((a, b) => {
-          // Handle various date formats
-          const dateA = new Date(a.date.replace(/(\w{3})\s+(\d+),?\s+(\d{4})/, "$1 $2 $3"));
-          const dateB = new Date(b.date.replace(/(\w{3})\s+(\d+),?\s+(\d{4})/, "$1 $2 $3"));
-          
-          // If dates can't be parsed, try a simple string comparison
-          if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
-            return a.date.localeCompare(b.date);
+          try {
+            const dateA = new Date(a.date.split(' - ')[0]); // Try parsing start date
+            const dateB = new Date(b.date.split(' - ')[0]);
+            if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) return 0; // Fallback for invalid dates
+            return dateA.getTime() - dateB.getTime();
+          } catch (e) {
+            return 0; // Fallback on parsing error
           }
-          
-          return dateA.getTime() - dateB.getTime();
         });
         
         setEvents(fetchedEvents);
-        // Apply initial filtering
-        setFilteredEvents(applyFilters(fetchedEvents, activeFilter).slice(0, maxEvents));
-        setError(null);
+        // We will apply filters in the next effect
+
       } catch (err) {
         console.error("Error fetching events:", err);
         setError("Failed to load events. Using fallback data.");
-        setEvents(staticEvents);
-        setFilteredEvents(staticEvents.slice(0, maxEvents));
+        setEvents(staticEvents); // Use static data on fetch error
       } finally {
         setLoading(false);
       }
     };
 
     fetchEvents();
-  }, [dataSource, jsonUrl, apiUrl, maxEvents]);
+  // Removed activeFilter and applyFilters from here. 
+  // Added staticEvents dependency as it's defined outside.
+  }, [dataSource, jsonUrl, apiUrl, staticEvents]); 
 
-  // Update filtered events when filter changes or when events are loaded
+  // Update filtered events when filter or events change
   useEffect(() => {
-    setFilteredEvents(applyFilters(events, activeFilter).slice(0, maxEvents));
-  }, [activeFilter, events, maxEvents, selectedChorus]);
+    const filtered = applyFilters(events, activeFilter);
+    setFilteredEvents(filtered.slice(0, maxEvents));
+  // Added applyFilters as a dependency because it's used here and defined outside (memoized).
+  }, [activeFilter, events, maxEvents, applyFilters]); 
 
-  // Get dynamic title based on selected chorus if auto-filtering
-  const getTitle = () => {
-    if (activeFilter === "Both") {
-      return "Upcoming Joint Events";
-    }
+  // Get dynamic title - memoized
+  const getTitle = useCallback(() => {
+    // Simplified logic slightly
+    if (activeFilter === "Both") return "Upcoming Joint Events";
+    if (activeFilter === "Harmony") return "Upcoming Harmony Events";
+    if (activeFilter === "Melody") return "Upcoming Melody Events";
     
-    if (autoFilter && title === "Upcoming Events") {
-      if (selectedChorus === 'harmony' && activeFilter === "All") {
-        return "Upcoming Harmony Events";
-      } else if (selectedChorus === 'melody' && activeFilter === "All") {
-        return "Upcoming Melody Events";
-      } else if (selectedChorus === null && activeFilter === "All") {
-        return "All Upcoming Events";
-      }
-    }
-    return title;
-  };
+    // Default or All
+    if (autoFilter && selectedChorus === 'harmony') return "Upcoming Harmony Events";
+    if (autoFilter && selectedChorus === 'melody') return "Upcoming Melody Events";
+    if (autoFilter && selectedChorus === null) return "All Upcoming Events";
+    
+    return title; // Fallback to original title prop
+  }, [activeFilter, autoFilter, selectedChorus, title]);
 
   return (
     <section className="py-16 bg-gray-50">

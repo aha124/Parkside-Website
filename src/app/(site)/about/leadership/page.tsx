@@ -174,9 +174,12 @@ export default function LeadershipPage() {
                 <h2 id="get-involved-title" className="text-3xl font-bold text-gray-900 mb-6">
                   Want to Get Involved?
                 </h2>
-                <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-                  We&apos;re always looking for passionate individuals to join our chorus and
-                  contribute to our mission of musical excellence.
+                <p className="text-lg text-gray-700 mb-8">
+                  Meet the dedicated individuals guiding Parkside Harmony and Parkside Melody. 
+                  Our leadership team is composed of experienced members committed to musical excellence, 
+                  chapter growth, and fostering a welcoming community for all singers. They work tirelessly 
+                  behind the scenes to ensure the smooth operation of our choruses and the success of our events. 
+                  Get to know the people leading Parkside&apos;s vibrant musical journey.
                 </p>
                 <a
                   href="/join"

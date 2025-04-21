@@ -98,28 +98,19 @@ export default async function NewsArticlePage({ params: paramsPromise }: { param
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="relative h-[400px]">
-              {isExternalUrl(newsItem.imageUrl) ? (
-                <img
-                  src={newsItem.imageUrl}
-                  alt={newsItem.title}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = "/images/news1.jpg";
-                  }}
-                />
-              ) : (
-                <Image
-                  src={newsItem.imageUrl}
-                  alt={newsItem.title}
-                  fill
-                  className="object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = "/images/news1.jpg";
-                  }}
-                />
-              )}
+              {/* Always use Next/Image for consistency and optimization */} 
+              <Image
+                src={newsItem.imageUrl} // Assuming getValidImageUrl logic isn't needed here or applied beforehand
+                alt={newsItem.title}
+                fill
+                className="object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "/images/news1.jpg"; // Fallback still needed
+                }}
+                // Consider adding priority prop if this is the LCP image
+                // priority 
+              />
             </div>
             
             <div className="p-8">

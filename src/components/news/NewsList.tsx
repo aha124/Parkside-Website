@@ -135,7 +135,7 @@ export default function NewsList({
     };
 
     fetchNews();
-  }, [maxItems]);
+  }, [maxItems, staticNews]);
 
   return (
     <section className="py-16">
@@ -173,32 +173,18 @@ export default function NewsList({
               <ScrollAnimation key={item.id} delay={0.1}>
                 <article className="flex flex-col h-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
                   <div className="relative h-48 overflow-hidden">
-                    {isExternalUrl(item.imageUrl) ? (
-                      // For external URLs, use img tag instead of Next.js Image
-                      <img
-                        src={item.imageUrl}
-                        alt={item.title}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                        onError={(e) => {
-                          // Fallback to a default image if the image fails to load
-                          const target = e.target as HTMLImageElement;
-                          target.src = "/images/news1.jpg";
-                        }}
-                      />
-                    ) : (
-                      // For local images, use Next.js Image component
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.title}
-                        fill
-                        className="object-cover transition-transform duration-500 hover:scale-105"
-                        onError={(e) => {
-                          // Fallback to a default image if the image fails to load
-                          const target = e.target as HTMLImageElement;
-                          target.src = "/images/news1.jpg";
-                        }}
-                      />
-                    )}
+                    {/* Always use Next/Image for consistency and optimization */}
+                    <Image
+                      src={item.imageUrl}
+                      alt={item.title}
+                      fill
+                      className="object-cover transition-transform duration-500 hover:scale-105"
+                      onError={(e) => {
+                        // Fallback to a default image if the image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/images/news1.jpg";
+                      }}
+                    />
                   </div>
                   <div className="p-6 flex-grow">
                     <div className="text-sm font-medium text-gray-500 mb-1">{item.date}</div>

@@ -12,7 +12,7 @@ interface LeadershipProfileProps {
   bio?: string;
   photoUrl?: string;
   size?: 'large' | 'medium' | 'small';
-  chorusAffiliation?: ChorusAffiliation;
+  // chorusAffiliation // Removed as unused
 }
 
 export default function LeadershipProfile({
@@ -23,6 +23,15 @@ export default function LeadershipProfile({
   size = 'medium',
 }: LeadershipProfileProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // const getAffiliationBadge = (affiliation: ChorusAffiliation) => {
+  //   switch (affiliation) {
+  //     case 'harmony': return <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">Harmony</span>;
+  //     case 'melody': return <span className="px-2 py-0.5 bg-pink-100 text-pink-800 text-xs font-medium rounded-full">Melody</span>;
+  //     case 'both': return <span className="px-2 py-0.5 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">Both</span>;
+  //     default: return null;
+  //   }
+  // }; // Removed as unused
 
   const sizeClasses = {
     large: 'w-72 h-72',
