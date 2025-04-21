@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import { useChorus } from "@/contexts/ChorusContext";
+import { startOfDay } from 'date-fns';
 
 // Define the Event type
 export interface Event {
@@ -108,26 +109,38 @@ export default function EventsList({
 
   // Apply filters to events - memoize with useCallback
   const applyFilters = useCallback((allEvents: Event[], filter: string) => {
-    let eventsToShow = allEvents;
-    
-    // First, filter by chorus context if autoFilter is on
-    // Note: This logic assumes selectedChorus is 'harmony', 'melody', or null (for both)
+    const startOfToday = startOfDay(new Date());
+
+    // --- 1. Filter out past events --- 
+    const futureEvents = allEvents.filter(event => {
+      try {
+        // Attempt to parse the start date (handles formats like "Month Day, Year" and "Month Day-Day, Year")
+        const eventStartDateStr = event.date.split('-')[0].trim(); 
+        const eventStartDate = new Date(eventStartDateStr);
+        // Check if date is valid and not in the past
+        return !isNaN(eventStartDate.getTime()) && eventStartDate >= startOfToday;
+      } catch {
+        return false; // Exclude if date parsing fails
+      }
+    });
+
+    // --- 2. Filter by chorus context if autoFilter is on --- 
+    let contextFilteredEvents = futureEvents; 
     if (autoFilter && selectedChorus) {
       const chorusName = selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1);
-      eventsToShow = allEvents.filter(event => 
+      contextFilteredEvents = futureEvents.filter(event => 
         event.chorus === chorusName || event.chorus === "Both"
       );
     } else if (autoFilter && selectedChorus === null) {
-        // If context is 'both', show all initially before applying UI filter
-        eventsToShow = allEvents;
+        contextFilteredEvents = futureEvents;
     }
 
-    // Then apply the active UI filter (All, Harmony, Melody, Both)
+    // --- 3. Apply the active UI filter (All, Harmony, Melody, Both) --- 
     if (filter === "All") {
-      return eventsToShow; 
+      return contextFilteredEvents; 
     }
     
-    return eventsToShow.filter(event => {
+    return contextFilteredEvents.filter(event => {
       if (filter === "Harmony") {
         return event.chorus === "Harmony" || event.chorus === "Both";
       }
@@ -176,21 +189,19 @@ export default function EventsList({
           fetchedEvents = staticEvents;
         }
         
-        // Sort events by date (assuming date format is parseable or consistent)
-        // Consider more robust date parsing if formats vary wildly
+        // Sort events by date (using potentially more robust parsing)
         fetchedEvents.sort((a, b) => {
           try {
-            const dateA = new Date(a.date.split(' - ')[0]); // Try parsing start date
-            const dateB = new Date(b.date.split(' - ')[0]);
-            if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) return 0; // Fallback for invalid dates
+            const dateA = new Date(a.date.split(' - ')[0].trim()); 
+            const dateB = new Date(b.date.split(' - ')[0].trim());
+            if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) return 0; 
             return dateA.getTime() - dateB.getTime();
           } catch {
-            return 0; // Fallback on parsing error
+            return 0; 
           }
         });
         
         setEvents(fetchedEvents);
-        // We will apply filters in the next effect
 
       } catch (err) {
         console.error("Error fetching events:", err);
@@ -207,9 +218,9 @@ export default function EventsList({
 
   // Update filtered events when filter or events change
   useEffect(() => {
+    // applyFilters now handles date filtering internally
     const filtered = applyFilters(events, activeFilter);
     setFilteredEvents(filtered.slice(0, maxEvents));
-  // Added applyFilters as a dependency because it's used here and defined outside (memoized).
   }, [activeFilter, events, maxEvents, applyFilters]); 
 
   // Get dynamic title - memoized
