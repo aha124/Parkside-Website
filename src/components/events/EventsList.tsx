@@ -141,14 +141,11 @@ export default function EventsList({
     }
   }, [selectedChorus, autoFilter]); // Removed activeFilter from dependency array
 
-  // Update filtered events when filter or events change
+  // Effect to update filteredEvents when filter or events change
   useEffect(() => {
-    // console.log(`[EventsList] useEffect running for activeFilter: ${activeFilter}`); // Removed log
-    // applyFilters now handles date filtering internally
     const filtered = applyFilters(events, activeFilter);
-    // console.log(`[EventsList] Setting filteredEvents state with ${filtered.length} items.`); // Removed log
     setFilteredEvents(filtered.slice(0, maxEvents));
-  }, [activeFilter, events, maxEvents, applyFilters]); // Changed: Removed dataSource etc. dependencies, applyFilters depends on autoFilter/selectedChorus
+  }, [activeFilter, events, maxEvents, applyFilters]); // Ensure activeFilter is listed here
 
   // Get dynamic title - memoized
   const getTitle = useCallback(() => {

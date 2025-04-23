@@ -3,12 +3,39 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageTransition from "@/components/ui/PageTransition";
-import { NewsItem } from "@/components/news/NewsList";
+import { News } from "@/components/news/NewsList";
+import { supabase } from "@/app/lib/supabaseClient.ts";
+import { format, parseISO } from 'date-fns';
 
-// This is a dynamic route, so we need to generate metadata dynamically
-// Use inline props type for generateMetadata, expecting a Promise
-export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const params = await paramsPromise; // Await the promise
+// Define Params type explicitly for clarity
+type PageParams = { slug: string };
+
+// Helper function to get a news item by ID (slug)
+// Assuming the slug parameter is the UUID of the news article
+async function getNewsItem(id: string): Promise<News | null> {
+  if (!id) return null;
+  try {
+    const { data, error } = await supabase
+      .from('news')
+      .select('id, created_at, published_date, title, content, image_url, author')
+      .eq('id', id) // Fetch by UUID
+      .single(); // Expect only one result
+
+    if (error) {
+      // Log the error but return null to trigger notFound()
+      console.error("Error fetching news item:", error.message);
+      return null;
+    }
+    return data as News | null;
+  } catch (error) {
+    // Catch any other potential errors during fetch
+    console.error("Unexpected error fetching news item:", error);
+    return null;
+  }
+}
+
+// generateMetadata function using the new getNewsItem
+export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
   const newsItem = await getNewsItem(params.slug);
   
   if (!newsItem) {
@@ -20,56 +47,28 @@ export async function generateMetadata({ params: paramsPromise }: { params: Prom
   
   return {
     title: `${newsItem.title} - Parkside News`,
-    description: newsItem.summary,
+    // Use first part of content for description, ensure content exists
+    description: newsItem.content ? newsItem.content.substring(0, 150) + '...' : "Read the latest news from Parkside.",
   };
 }
 
-// Helper function to get a news item by slug
-async function getNewsItem(slug: string): Promise<NewsItem | null> {
-  try {
-    // Fetch all news items
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/data/news.json`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch news: ${response.status}`);
-    }
-    
-    const newsItems: NewsItem[] = await response.json();
-    
-    // Find the news item with the matching slug
-    // The slug is the last part of the URL, e.g., "recent-performance" from "/news/recent-performance"
-    const newsItem = newsItems.find(item => {
-      const itemSlug = item.url.split('/').pop();
-      return itemSlug === slug;
-    });
-    
-    return newsItem || null;
-  } catch (error) {
-    console.error("Error fetching news item:", error);
-    return null;
-  }
-}
-
-// Remove the explicit Props type definition
-// type Props = {
-//   params: { slug: string };
-//   searchParams?: { [key: string]: string | string[] | undefined }; // Optional searchParams
-// };
-
-// Add async back to the component signature
-// Expect params as a Promise
-export default async function NewsArticlePage({ params: paramsPromise }: { params: Promise<{ slug: string }> }) {
-  const params = await paramsPromise; // Await the promise
+// News Article Page Component
+export default async function NewsArticlePage({ params }: { params: PageParams }) {
   const newsItem = await getNewsItem(params.slug);
   
-  // If the news item doesn't exist, show a 404 page
   if (!newsItem) {
-    notFound();
+    notFound(); // Trigger 404 page
   }
+
+  // Helper to format date (could be moved to utils)
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return null;
+    try {
+      return format(parseISO(dateString), "MMMM d, yyyy");
+    } catch { return null; }
+  };
   
-  // Helper function to determine if a URL is external - Removed as unused
-  // const isExternalUrl = (url: string) => {
-  //   return url.startsWith('http') || url.startsWith('https');
-  // };
+  const formattedDate = formatDate(newsItem.published_date);
 
   return (
     <PageTransition>
@@ -86,9 +85,12 @@ export default async function NewsArticlePage({ params: paramsPromise }: { param
             <h1 className="text-4xl md:text-5xl font-bold text-white mt-2">
               {newsItem.title}
             </h1>
-            <p className="text-xl text-white/80 mt-4">
-              {newsItem.date}
-            </p>
+            {formattedDate && (
+              <p className="text-xl text-white/80 mt-4">
+                Published on {formattedDate}
+                {newsItem.author && ` by ${newsItem.author}`}
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -97,36 +99,28 @@ export default async function NewsArticlePage({ params: paramsPromise }: { param
       <section className="py-12">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="relative h-[400px]">
-              {/* Always use Next/Image for consistency and optimization */} 
-              <Image
-                src={newsItem.imageUrl} // Assuming getValidImageUrl logic isn't needed here or applied beforehand
-                alt={newsItem.title}
-                fill
-                className="object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = "/images/news1.jpg"; // Fallback still needed
-                }}
-                // Consider adding priority prop if this is the LCP image
-                // priority 
-              />
-            </div>
+            {newsItem.image_url && ( // Check if image exists
+              <div className="relative h-[400px]">
+                <Image
+                  src={newsItem.image_url} 
+                  alt={newsItem.title}
+                  fill
+                  className="object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "/images/news1.jpg"; // Fallback still needed?
+                  }}
+                  priority // Prioritize loading header image
+                />
+              </div>
+            )}
             
-            <div className="p-8">
-              <p className="text-lg text-gray-700 mb-6">
-                {newsItem.summary}
-              </p>
-              
-              <p className="text-gray-700 mb-6">
-                This is a placeholder for the full article content. In a real implementation, 
-                you would fetch the complete article content from your CMS or database.
-              </p>
-              
-              <p className="text-gray-700 mb-6">
-                For now, we&apos;re displaying the summary as a preview of what this article would contain.
-                You can expand this component to include more detailed content as your needs evolve.
-              </p>
+            <div className="p-8 prose prose-lg max-w-none"> {/* Use Tailwind prose for styling */}
+              {/* Render the full content */}
+              {/* Consider using Markdown renderer if content is Markdown */}
+              <div className="whitespace-pre-wrap">
+                {newsItem.content}
+              </div>
               
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <Link 
