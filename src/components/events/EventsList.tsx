@@ -53,12 +53,10 @@ export default function EventsList({
   // Removed: dataSource, jsonUrl, apiUrl from props destructuring
 }: EventsListProps) {
   const { selectedChorus } = useChorus();
-  const [events, setEvents] = useState<Event[]>(initialEvents || []); // Changed: Initialize with prop
+  const [events] = useState<Event[]>(initialEvents || []);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState<boolean>(false); // Changed: No initial loading needed
-  const [error, setError] = useState<string | null>(null); // Keep error state for potential future use? Or remove? Let's keep for now.
   const [activeFilter, setActiveFilter] = useState<string>(autoFilter && selectedChorus ? (selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1)) : "All");
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null); // Added state for modal
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   // Helper function to format location string
   const formatLocation = (location: string): string => {
@@ -195,7 +193,6 @@ export default function EventsList({
                 </Link>
               )}
             </div>
-            {error && <p className="text-amber-600 mb-4">Note: {error}</p>}
           </ScrollAnimation>
           
           {showFilters && (
@@ -257,11 +254,7 @@ export default function EventsList({
             </ScrollAnimation>
           )}
           
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-            </div>
-          ) : filteredEvents.length > 0 ? (
+          {filteredEvents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredEvents.map((event, index) => (
                 <ScrollAnimation key={event.id} delay={0.1 * index}>
