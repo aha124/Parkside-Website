@@ -53,7 +53,7 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
 }
 
 // News Article Page Component
-export default async function NewsArticlePage({ params }: { params: PageParams }) {
+export default async function NewsArticlePage({ params }: { params: { slug: string } }) {
   const newsItem = await getNewsItem(params.slug);
   
   if (!newsItem) {
