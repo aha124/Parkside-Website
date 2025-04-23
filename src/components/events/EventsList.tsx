@@ -145,8 +145,7 @@ export default function EventsList({
   useEffect(() => {
     const filtered = applyFilters(events, activeFilter);
     setFilteredEvents(filtered.slice(0, maxEvents));
-    // Removed applyFilters from deps as it's stable due to useCallback([])
-  }, [activeFilter, events, maxEvents]); // Removed applyFilters
+  }, [activeFilter, events, maxEvents, applyFilters]); // Add activeFilter and applyFilters back
 
   // Get dynamic title - memoized
   const getTitle = useCallback(() => {

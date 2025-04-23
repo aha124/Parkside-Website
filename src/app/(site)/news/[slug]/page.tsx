@@ -34,8 +34,9 @@ async function getNewsItem(id: string): Promise<News | null> {
   }
 }
 
-// generateMetadata function using the new getNewsItem
-export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
+// generateMetadata function expecting params as a Promise
+export async function generateMetadata({ params: paramsPromise }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const params = await paramsPromise; // Await the promise
   const newsItem = await getNewsItem(params.slug);
   
   if (!newsItem) {
@@ -52,8 +53,9 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
   };
 }
 
-// News Article Page Component
-export default async function NewsArticlePage({ params }: { params: { slug: string } }) {
+// News Article Page Component expecting params as a Promise
+export default async function NewsArticlePage({ params: paramsPromise }: { params: Promise<{ slug: string }> }) {
+  const params = await paramsPromise; // Await the promise
   const newsItem = await getNewsItem(params.slug);
   
   if (!newsItem) {
