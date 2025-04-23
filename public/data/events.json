@@ -1,42 +1,18 @@
 [
   {
-    "id": "cb2c5e5d-e6dc-4e54-9f31-379f144a8f6c",
-    "title": "Parkside Harmony Rehearsal",
-    "date": "Apr 21, 2025",
-    "startTime": "7:00pm",
-    "endTime": "10:00pm",
-    "description": "We are excited to be back at it this week, guests are always welcome - for more information... more",
-    "location": "Location: \n  \n          Christ Presbyterian Church\n              \n        421 Deerfield Road\n              \n              17011\n              Camp Hill\n                        United States\n                                          \n      \n      See map: Google Maps    \n  \n  \n                US",
-    "imageUrl": "https://parksideharmony.org/sites/parksideharmony.org/files/styles/event_view/public/img_event/_PH2_47.jpg?itok=ma0SHnaq",
-    "chorus": "Harmony",
-    "url": "https://parksideharmony.org/PHApril2125"
-  },
-  {
-    "id": "7f2f8149-50cd-42d9-a6b0-2b3b75de1963",
-    "title": "Parkside Melody Rehearsal",
-    "date": "Apr 21, 2025",
-    "startTime": "7:00pm",
-    "endTime": "10:00pm",
-    "description": "We are excited to be back at it this week, guests are always welcome - for more information including rehearsal agenda and music, email us at: parksidemelody@parksideharmony.org... See you there! ",
-    "location": "Location: \n  \n          Christ Presbyterian Church\n              \n        421 Deerfield Road\n              \n              17011\n              Camp Hill\n                        United States\n                                          \n      \n      See map: Google Maps    \n  \n  \n                US",
-    "imageUrl": "https://parksideharmony.org/sites/parksideharmony.org/files/styles/node_pic/public/img_event/_PM1_47.jpg?itok=PBO2ChUz",
-    "chorus": "Melody",
-    "url": "https://parksideharmony.org/PMApril2125"
-  },
-  {
-    "id": "55ddf5ba-8ec7-44d7-9e68-ce51a4aa24b6",
+    "id": "7b6b939c-47c4-4123-8095-f35087e5ac70",
     "title": "Parkside Harmony Rehearsal",
     "date": "May 5, 2025",
     "startTime": "7:00pm",
     "endTime": "10:00pm",
-    "description": "We are excited to be back at it this week, guests are always welcome - for more information including rehearsal agenda and music, email us at: parksideharmony@parksideharmony.org... See you there! ",
+    "description": "We are excited to be back at it this week, guests are always welcome - for more information... more",
     "location": "Location: \n  \n          Christ Presbyterian Church\n              \n        421 Deerfield Road\n              \n              17011\n              Camp Hill\n                        United States\n                                          \n      \n      See map: Google Maps    \n  \n  \n                US",
-    "imageUrl": "https://parksideharmony.org/sites/parksideharmony.org/files/styles/node_pic/public/img_event/_PH1_34.jpg?itok=AxvZYaC5",
+    "imageUrl": "https://parksideharmony.org/sites/parksideharmony.org/files/styles/event_view/public/img_event/_PH1_34.jpg?itok=T9C0CkNC",
     "chorus": "Harmony",
     "url": "https://parksideharmony.org/PHMay525"
   },
   {
-    "id": "a3f0a27d-837a-43f7-bae1-025ef44f6076",
+    "id": "c93d757f-6432-409f-8c19-b86bebb2aa27",
     "title": "Parkside Melody Rehearsal",
     "date": "May 5, 2025",
     "startTime": "7:00pm",
@@ -48,7 +24,7 @@
     "url": "https://parksideharmony.org/PMMay525"
   },
   {
-    "id": "8c210f94-9f19-4aa4-a453-85c62312be66",
+    "id": "49fffce7-2f49-42d3-9a09-e0dd4c85f992",
     "title": "Parkside Harmony Rehearsal",
     "date": "May 18, 2025",
     "startTime": "5:00pm",
@@ -60,7 +36,7 @@
     "url": "https://parksideharmony.org/PHMay1825"
   },
   {
-    "id": "59b12022-890b-478d-9c62-46411c39f545",
+    "id": "93875bff-187f-4e9d-876a-96ce7364e3c6",
     "title": "Parkside Melody Rehearsal",
     "date": "May 19, 2025",
     "startTime": "7:00pm",
@@ -72,7 +48,7 @@
     "url": "https://parksideharmony.org/PMMay1925"
   },
   {
-    "id": "e16454dc-9801-4348-9fa8-ce61ee6c47b7",
+    "id": "3aa9aa9d-121a-480b-bd5b-6caf087df7a9",
     "title": "Parkside Harmony Rehearsal",
     "date": "Jun 2, 2025",
     "startTime": "7:00pm",
@@ -84,7 +60,7 @@
     "url": "https://parksideharmony.org/PHJune225"
   },
   {
-    "id": "572ec832-2b1b-45de-851e-8e4f39197cdf",
+    "id": "1afbcd4e-a190-4842-9eb3-8a64aff3ee37",
     "title": "Parkside Harmony Rehearsal",
     "date": "Jun 16, 2025",
     "startTime": "7:00pm",
@@ -96,7 +72,7 @@
     "url": "https://parksideharmony.org/PHJune1625"
   },
   {
-    "id": "3c76f8d1-a5f3-4b66-8e89-e02d04a1daec",
+    "id": "0955c69b-469f-49f4-ba1a-ee5e7805a283",
     "title": "Parkside Melody Rehearsal",
     "date": "Jun 16, 2025",
     "startTime": "7:00pm",
@@ -108,7 +84,7 @@
     "url": "https://parksideharmony.org/PMJune1625"
   },
   {
-    "id": "aa413dfd-e5d6-4036-8b75-be4734fae89c",
+    "id": "e6e4ea49-6899-42fd-9a7f-ed6eaade11d1",
     "title": "Parkside Presents: A Decade of Harmony",
     "date": "Jun 21, 2025",
     "startTime": "3:00pm",
@@ -120,7 +96,7 @@
     "url": "https://parksideharmony.org/ADecadeofHarmony"
   },
   {
-    "id": "d0afbdc8-0cbf-440c-ae8a-eb3baf2d8946",
+    "id": "f13b446b-f59a-4829-858c-14a4428db2ac",
     "title": "Parkside Melody Rehearsal",
     "date": "Jul 21, 2025",
     "startTime": "7:00pm",
@@ -132,7 +108,7 @@
     "url": "https://parksideharmony.org/node/6096"
   },
   {
-    "id": "e11023ec-73a0-4211-9cda-7d226a96801c",
+    "id": "bca41c0e-f225-4ac7-a4ec-fb6c023bc11c",
     "title": "Parkside Melody Rehearsal",
     "date": "Aug 25, 2025",
     "startTime": "7:00pm",
@@ -144,7 +120,7 @@
     "url": "https://parksideharmony.org/node/6097"
   },
   {
-    "id": "98928086-cb8f-4c84-84d3-338e7c8c9041",
+    "id": "c97540b6-7019-4dc2-a477-bc9d1c4f91b8",
     "title": "Parkside Melody Rehearsal",
     "date": "Sep 8, 2025",
     "startTime": "7:00pm",
@@ -156,7 +132,7 @@
     "url": "https://parksideharmony.org/node/6098"
   },
   {
-    "id": "49acfa35-8d11-4b34-a471-f34874468b5a",
+    "id": "acff56d1-4714-4a8e-af61-d7e5028dab28",
     "title": "Parkside Melody Rehearsal",
     "date": "Sep 22, 2025",
     "startTime": "7:00pm",
@@ -168,7 +144,7 @@
     "url": "https://parksideharmony.org/node/6110"
   },
   {
-    "id": "7469f8fd-208e-42c4-84d7-afa15ec95bc7",
+    "id": "8a91018f-158f-46f0-9249-2fdeaa24de80",
     "title": "Parkside Melody Rehearsal",
     "date": "Sep 28, 2025",
     "startTime": "5:00pm",
@@ -180,7 +156,7 @@
     "url": "https://parksideharmony.org/node/6107"
   },
   {
-    "id": "24c67e5e-4d10-4570-9bf1-a6185754e6e3",
+    "id": "ec83cb92-f7f6-463c-af1a-af003377a581",
     "title": "Parkside Melody Rehearsal",
     "date": "Oct 12, 2025",
     "startTime": "5:00pm",
@@ -192,7 +168,7 @@
     "url": "https://parksideharmony.org/node/6108"
   },
   {
-    "id": "e683a526-3814-4b0d-adc4-7b668d53f9e1",
+    "id": "3b51a57b-885d-475f-8801-ae1920fe3d7c",
     "title": "Parkside Melody Rehearsal",
     "date": "Oct 20, 2025",
     "startTime": "7:00pm",
@@ -204,7 +180,7 @@
     "url": "https://parksideharmony.org/node/6101"
   },
   {
-    "id": "4c350b41-6503-462a-910f-e4d6cfe7142e",
+    "id": "0869aeff-2e2f-46d4-9b24-63e4fdb72b27",
     "title": "Parkside Melody Rehearsal",
     "date": "Nov 3, 2025",
     "startTime": "7:00pm",
@@ -216,7 +192,7 @@
     "url": "https://parksideharmony.org/node/6102"
   },
   {
-    "id": "17ebf940-cd52-4481-8a50-7b4e55471007",
+    "id": "80ab6a30-9a1e-43cc-bf32-b1763c0366a1",
     "title": "Parkside Melody Rehearsal",
     "date": "Nov 17, 2025",
     "startTime": "7:00pm",
@@ -228,7 +204,7 @@
     "url": "https://parksideharmony.org/node/6103"
   },
   {
-    "id": "99ac88ef-a287-41a3-a008-920cbd9101ae",
+    "id": "22a8cc53-7ea8-43e2-81e8-1c2ca6ee7183",
     "title": "Parkside Melody Rehearsal",
     "date": "Dec 1, 2025",
     "startTime": "7:00pm",
@@ -240,7 +216,7 @@
     "url": "https://parksideharmony.org/node/6104"
   },
   {
-    "id": "832c5c6e-b989-4188-9b1c-68ae1d1eb3ca",
+    "id": "afe05c7d-39ed-46f8-b5f4-35b87d83680a",
     "title": "Parkside Melody Rehearsal",
     "date": "Dec 15, 2025",
     "startTime": "7:00pm",
