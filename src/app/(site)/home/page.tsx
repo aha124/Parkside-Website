@@ -8,6 +8,7 @@ import NewsList from "@/components/news/NewsList";
 import HeroSlideshow from "@/components/home/HeroSlideshow";
 import { supabase } from "@/app/lib/supabaseClient.ts";
 import { Event } from "@/components/events/EventsList";
+import { News } from "@/components/news/NewsList";
 
 export const metadata: Metadata = {
   title: "Parkside - Hershey Chapter of the Barbershop Harmony Society",
@@ -22,21 +23,35 @@ export default async function HomePage() {
     // Fetch the 3 nearest future events
     const today = new Date().toISOString(); // Get today's date
 
-    const { data, error } = await supabase
+    const { data: eventData, error: eventErr } = await supabase
       .from('events')
       .select('id, created_at, title, event_date, description, image_url, location, chorus') 
       .gte('event_date', today) // Added: Filter for future/today events
       .order('event_date', { ascending: true })
       .limit(3); 
 
-    if (error) {
-      throw error;
-    }
-    fetchedEvents = (data as Event[]) || [];
+    if (eventErr) throw eventErr;
+    fetchedEvents = (eventData as Event[]) || [];
     // console.log('[HomePage] Fetched Events:', JSON.stringify(fetchedEvents, null, 2)); // Can remove debug log
   } catch (error) {
     console.error("Error fetching events for homepage:", error);
     eventsError = "Could not load recent events."; 
+  }
+
+  let fetchedNews: News[] = [];
+  let newsError: string | null = null;
+
+  try {
+    const { data: newsData, error: newsErr } = await supabase
+      .from('news')
+      .select('id, created_at, published_date, title, content, image_url, author')
+      .order('published_date', { ascending: false })
+      .limit(3);
+    if (newsErr) throw newsErr;
+    fetchedNews = (newsData as News[]) || [];
+  } catch (error) {
+    console.error("Error fetching news for homepage:", error);
+    newsError = "Could not load recent news.";
   }
 
   return (
@@ -44,24 +59,33 @@ export default async function HomePage() {
       {/* Hero Section with Slideshow */}
       <HeroSlideshow interval={6000} />
 
-      {/* Events Section */}
-      <EventsList 
-        title="Upcoming Events" 
-        maxEvents={3}
-        initialEvents={fetchedEvents}
-        showViewAllButton={true}
-        viewAllUrl="/events"
-        autoFilter={true}
-        showFilters={true}
-      />
+      {/* Events Section - Display error or list */}
+      {eventsError ? (
+        <div className="container mx-auto px-4 py-8 text-center text-red-600"><p>{eventsError}</p></div> 
+      ) : (
+        <EventsList 
+          title="Upcoming Events" 
+          maxEvents={3}
+          initialEvents={fetchedEvents}
+          showViewAllButton={true}
+          viewAllUrl="/events"
+          autoFilter={true}
+          showFilters={true}
+        />
+      )}
 
-      {/* News Section */}
-      <NewsList 
-        title="Chorus News" 
-        maxItems={3} 
-        showViewAllButton={true}
-        viewAllUrl="/news"
-      />
+      {/* News Section - Display error or list */}
+      {newsError ? (
+        <div className="container mx-auto px-4 py-8 text-center text-red-600"><p>{newsError}</p></div>
+      ) : (
+        <NewsList 
+          title="Chorus News" 
+          maxItems={3} 
+          initialNews={fetchedNews}
+          showViewAllButton={true}
+          viewAllUrl="/news"
+        />
+      )}
 
       {/* Choruses Section */}
       <section className="py-16 bg-gray-50 relative overflow-hidden">

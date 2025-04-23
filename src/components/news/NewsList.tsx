@@ -4,19 +4,33 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
+import { parseISO, format } from 'date-fns';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
-// Define the News type
-export interface NewsItem {
-  id: string;
-  title: string;
-  date: string;
-  summary: string;
-  imageUrl: string;
-  url: string;
+// Define the News type matching Supabase schema
+export interface News {
+  id: string; // uuid
+  created_at?: string; // timestamptz
+  updated_at?: string; // timestamptz
+  published_date: string; // timestamptz
+  title: string; // text
+  content: string; // text
+  author?: string | null; // text (nullable)
+  image_url?: string | null; // text (nullable)
 }
 
 interface NewsListProps {
   title?: string;
+  initialNews: News[]; // Changed: Accept initialNews prop
   maxItems?: number;
   showViewAllButton?: boolean;
   viewAllUrl?: string;
@@ -24,179 +38,139 @@ interface NewsListProps {
 
 export default function NewsList({
   title = "Chorus News",
-  maxItems = 3,
+  initialNews, // Changed: Use initialNews
+  maxItems = Infinity, // Default to showing all passed items unless specified
   showViewAllButton = false,
   viewAllUrl = "/news"
 }: NewsListProps) {
-  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  // Removed internal state for loading, error, and fetched newsItems
+  // We now directly use the initialNews prop, applying maxItems limit if needed
+  const newsItemsToDisplay = useMemo(() => initialNews?.slice(0, maxItems) || [], [initialNews, maxItems]);
+  const [selectedNews, setSelectedNews] = useState<News | null>(null);
 
-  // Static fallback news - memoize
-  const staticNews = useMemo<NewsItem[]>(() => [
-    {
-      id: "1",
-      title: "Parkside Harmony Welcomes New Music Director",
-      date: "February 28, 2025",
-      summary: "We're excited to announce our new Music Director who brings 20 years of barbershop experience to our chorus.",
-      imageUrl: "/images/news1.jpg",
-      url: "/news/new-director"
-    },
-    {
-      id: "2",
-      title: "Parkside Wins Excellence in Harmony Award",
-      date: "February 15, 2025",
-      summary: "Our chorus has been recognized for outstanding musical performance at the regional barbershop competition.",
-      imageUrl: "/images/news2.jpg",
-      url: "/news/excellence-award"
-    },
-    {
-      id: "3",
-      title: "Annual Fundraiser Exceeds Goals",
-      date: "January 30, 2025",
-      summary: "Thanks to our generous supporters, we've exceeded our fundraising goals for the year, allowing us to expand our community programs.",
-      imageUrl: "/images/news1.jpg", // Reusing news1.jpg as fallback
-      url: "/news/fundraiser-success"
+  // Removed staticNews definition
+  // Removed isExternalUrl, getValidImageUrl, getNewsUrl helpers
+  // Removed useEffect hook for fetching data
+
+  // Helper to format date
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return "Date Unknown";
+    try {
+      return format(parseISO(dateString), "MMMM d, yyyy");
+    } catch (e) {
+      console.error("Error parsing news date:", e);
+      return "Date Invalid";
     }
-  ], []);
+  };
 
-  // Helper function to determine if a URL is external - memoize
-  const isExternalUrl = useCallback((url: string) => {
-    return url.startsWith('http') || url.startsWith('https');
-  }, []);
+  // Function to open dialog
+  const handleNewsClick = (newsItem: News) => {
+    setSelectedNews(newsItem);
+  };
 
-  // Helper function to get a valid image URL - memoize
-  const getValidImageUrl = useCallback((url: string | undefined) => {
-    if (!url) return "/images/news1.jpg";
-    if (isExternalUrl(url)) return url;
-    if (url.startsWith('/images')) return url;
-    if (url.includes('parksideharmony.org')) return url;
-    return "/images/news1.jpg";
-  }, [isExternalUrl]); // Dependency: isExternalUrl
-
-  // Helper function to get the correct URL for news items - memoize
-  const getNewsUrl = useCallback((url: string) => {
-    if (isExternalUrl(url)) return url;
-    if (url.startsWith('/node/')) {
-      return `https://parksideharmony.org${url}`;
+  // Function to handle dialog open/close state changes
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      setSelectedNews(null);
     }
-    return url;
-  }, [isExternalUrl]); // Dependency: isExternalUrl
-
-  useEffect(() => {
-    const fetchNews = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch('/data/news.json');
-        if (!response.ok) {
-          throw new Error(`Failed to fetch news: ${response.status}`);
-        }
-        const fetchedNews = await response.json();
-        
-        if (fetchedNews && fetchedNews.length > 0) {
-          const processedNews = fetchedNews.map((item: NewsItem) => ({
-            ...item,
-            imageUrl: getValidImageUrl(item.imageUrl), // Now uses memoized version
-            url: item.url || '/news'
-          }));
-          setNewsItems(processedNews.slice(0, maxItems));
-        } else {
-          setNewsItems(staticNews.slice(0, maxItems));
-        }
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching news:", err);
-        setError("Failed to load news. Using fallback data.");
-        setNewsItems(staticNews.slice(0, maxItems));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNews();
-  // Add getValidImageUrl as it's used in the fetch logic
-  // staticNews is memoized, maxItems is stable
-  }, [maxItems, staticNews, getValidImageUrl]);
+  };
 
   return (
-    <section className="py-16">
-      <div className="container mx-auto px-4">
-        <ScrollAnimation>
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">{title}</h2>
-            {showViewAllButton && (
-              <Link 
-                href={viewAllUrl}
-                className="text-indigo-600 font-medium hover:text-indigo-500 inline-flex items-center group"
-              >
-                View All News <svg className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
-              </Link>
+    <Dialog open={selectedNews !== null} onOpenChange={handleOpenChange}>
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <ScrollAnimation>
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900">{title}</h2>
+              {showViewAllButton && (
+                <Link 
+                  href={viewAllUrl}
+                  className="text-indigo-600 font-medium hover:text-indigo-500 inline-flex items-center group"
+                >
+                  View All News <svg className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
+                </Link>
+              )}
+            </div>
+            {/* Removed error display logic as fetching is done server-side */}
+          </ScrollAnimation>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Removed loading skeleton as data is pre-fetched */}
+            {newsItemsToDisplay.length > 0 ? (
+              newsItemsToDisplay.map((item) => (
+                <ScrollAnimation key={item.id} delay={0.1}>
+                  <DialogTrigger asChild onClick={() => handleNewsClick(item)}>
+                    <article className="flex flex-col h-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 cursor-pointer">
+                      {item.image_url && ( // Check if image exists
+                        <div className="relative h-48 overflow-hidden">
+                          <Image
+                            src={item.image_url} // Use image_url
+                            alt={item.title}
+                            fill
+                            className="object-cover transition-transform duration-500 hover:scale-105"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = "/images/news1.jpg"; // Keep fallback
+                            }}
+                          />
+                        </div>
+                      )}
+                      <div className="p-6 flex-grow">
+                        <div className="text-sm font-medium text-gray-500 mb-1">
+                          {formatDate(item.published_date)} {/* Use published_date and format */}
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
+                        <p className="text-gray-600 mb-4 line-clamp-4">{item.content}</p> {/* Use content, adjust line-clamp */}
+                      </div>
+                    </article>
+                  </DialogTrigger>
+                </ScrollAnimation>
+              ))
+            ) : (
+               <div className="col-span-full bg-white p-8 rounded-lg shadow-md text-center">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">No news found</h3>
+                  <p className="text-gray-600">
+                    There are currently no news articles available.
+                  </p>
+               </div>
             )}
           </div>
-          {error && <p className="text-amber-600 mb-4">Note: {error}</p>}
-        </ScrollAnimation>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {loading ? (
-            // Loading skeleton
-            Array.from({ length: maxItems }).map((_, index) => (
-              <div key={index} className="animate-pulse">
-                <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
-                <div className="bg-gray-200 h-4 w-1/4 mb-2"></div>
-                <div className="bg-gray-200 h-6 mb-2"></div>
-                <div className="bg-gray-200 h-4 w-3/4 mb-2"></div>
-                <div className="bg-gray-200 h-4 w-1/2 mb-4"></div>
-                <div className="bg-gray-200 h-4 w-1/4"></div>
-              </div>
-            ))
-          ) : (
-            newsItems.map((item) => (
-              <ScrollAnimation key={item.id} delay={0.1}>
-                <article className="flex flex-col h-full bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                  <div className="relative h-48 overflow-hidden">
-                    {/* Always use Next/Image for consistency and optimization */}
-                    <Image
-                      src={item.imageUrl}
-                      alt={item.title}
-                      fill
-                      className="object-cover transition-transform duration-500 hover:scale-105"
-                      onError={(e) => {
-                        // Fallback to a default image if the image fails to load
-                        const target = e.target as HTMLImageElement;
-                        target.src = "/images/news1.jpg";
-                      }}
-                    />
-                  </div>
-                  <div className="p-6 flex-grow">
-                    <div className="text-sm font-medium text-gray-500 mb-1">{item.date}</div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
-                    <p className="text-gray-600 mb-4">{item.summary}</p>
-                  </div>
-                  <div className="px-6 pb-6">
-                    {isExternalUrl(item.url) || item.url.startsWith('/node/') ? (
-                      <a 
-                        href={getNewsUrl(item.url)}
-                        className="text-indigo-600 font-medium hover:text-indigo-500 inline-flex items-center group"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Read More <svg className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
-                      </a>
-                    ) : (
-                      <Link 
-                        href={item.url}
-                        className="text-indigo-600 font-medium hover:text-indigo-500 inline-flex items-center group"
-                      >
-                        Read More <svg className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
-                      </Link>
-                    )}
-                  </div>
-                </article>
-              </ScrollAnimation>
-            ))
-          )}
         </div>
-      </div>
-    </section>
+      </section>
+
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>{selectedNews?.title}</DialogTitle>
+          {selectedNews?.published_date && (
+            <DialogDescription className="pt-1">
+              Published: {formatDate(selectedNews.published_date)}
+              {selectedNews.author && ` by ${selectedNews.author}`}
+            </DialogDescription>
+          )}
+        </DialogHeader>
+        <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto pr-4">
+          {selectedNews?.image_url && (
+            <div className="relative h-64 w-full mb-4 rounded overflow-hidden">
+              <Image
+                src={selectedNews.image_url}
+                alt={selectedNews.title}
+                fill
+                className="object-contain" 
+              />
+            </div>
+          )}
+          <div 
+            className="text-sm text-gray-700 whitespace-pre-wrap prose prose-sm max-w-none"
+          >
+            {selectedNews?.content}
+          </div>
+        </div>
+        <DialogClose asChild>
+            <Button type="button" variant="secondary" className="mt-4">
+              Close
+            </Button>
+        </DialogClose>
+      </DialogContent>
+    </Dialog>
   );
 } 
