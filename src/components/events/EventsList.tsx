@@ -128,18 +128,22 @@ export default function EventsList({
 
   }, []); // Removed dependencies on autoFilter/selectedChorus
 
-  // Effect to update the activeFilter based on chorus context
+  // Effect to sync activeFilter with context
   useEffect(() => {
     if (autoFilter) {
       let newFilter = "All";
       if (selectedChorus) {
         newFilter = selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1);
       }
-      if (newFilter !== activeFilter) {
-        setActiveFilter(newFilter);
-      }
+      // Use functional update to avoid needing activeFilter in deps
+      setActiveFilter(currentActiveFilter => {
+        if (newFilter !== currentActiveFilter) {
+          return newFilter; // Set to the context-derived filter
+        }
+        return currentActiveFilter; // Keep the current filter
+      });
     }
-  }, [selectedChorus, autoFilter]); // Removed activeFilter from dependency array
+  }, [selectedChorus, autoFilter]); // Dependency array is now correct
 
   // Effect to update filteredEvents when filter or events change
   useEffect(() => {

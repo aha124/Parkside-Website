@@ -7,8 +7,8 @@ import { News } from "@/components/news/NewsList";
 import { supabase } from "@/app/lib/supabaseClient.ts";
 import { format, parseISO } from 'date-fns';
 
-// Define Params type explicitly for clarity
-type PageParams = { slug: string };
+// Removed unused type alias
+// type PageParams = { slug: string };
 
 // Helper function to get a news item by ID (slug)
 // Assuming the slug parameter is the UUID of the news article
