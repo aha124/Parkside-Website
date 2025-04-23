@@ -6,13 +6,39 @@ import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import EventsList from "@/components/events/EventsList";
 import NewsList from "@/components/news/NewsList";
 import HeroSlideshow from "@/components/home/HeroSlideshow";
+import { supabase } from "@/app/lib/supabaseClient.ts";
+import { Event } from "@/components/events/EventsList";
 
 export const metadata: Metadata = {
   title: "Parkside - Hershey Chapter of the Barbershop Harmony Society",
   description: "Welcome to Parkside - home of Parkside Harmony and Parkside Melody a cappella choruses.",
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  let fetchedEvents: Event[] = [];
+  let eventsError: string | null = null;
+
+  try {
+    // Fetch the 3 nearest future events
+    const today = new Date().toISOString(); // Get today's date
+
+    const { data, error } = await supabase
+      .from('events')
+      .select('id, created_at, title, event_date, description, image_url, location, chorus') 
+      .gte('event_date', today) // Added: Filter for future/today events
+      .order('event_date', { ascending: true })
+      .limit(3); 
+
+    if (error) {
+      throw error;
+    }
+    fetchedEvents = (data as Event[]) || [];
+    // console.log('[HomePage] Fetched Events:', JSON.stringify(fetchedEvents, null, 2)); // Can remove debug log
+  } catch (error) {
+    console.error("Error fetching events for homepage:", error);
+    eventsError = "Could not load recent events."; 
+  }
+
   return (
     <PageTransition>
       {/* Hero Section with Slideshow */}
@@ -21,9 +47,8 @@ export default function HomePage() {
       {/* Events Section */}
       <EventsList 
         title="Upcoming Events" 
-        maxEvents={3} 
-        dataSource="json" 
-        jsonUrl="/data/events.json" 
+        maxEvents={3}
+        initialEvents={fetchedEvents}
         showViewAllButton={true}
         viewAllUrl="/events"
         autoFilter={true}

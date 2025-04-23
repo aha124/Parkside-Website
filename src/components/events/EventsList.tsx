@@ -5,85 +5,49 @@ import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import { useChorus } from "@/contexts/ChorusContext";
-import { startOfDay } from 'date-fns';
+import { startOfDay, parseISO } from 'date-fns';
 
-// Define the Event type
+// Define the Event type to match Supabase schema
 export interface Event {
-  id: string;
-  title: string;
-  date: string;
-  startTime?: string;
-  endTime?: string;
-  description: string;
-  imageUrl: string;
-  url?: string;
-  location?: string;
-  chorus?: string; // e.g., "Harmony", "Melody", or "Both"
+  id: string; // uuid
+  created_at?: string; // timestamptz
+  updated_at?: string; // timestamptz
+  title: string; // text
+  event_date: string; // timestamptz (will be string like '2024-07-28T10:00:00+00:00')
+  description: string; // text
+  image_url?: string | null; // text (nullable)
+  location?: string | null; // text (nullable)
+  chorus?: 'Harmony' | 'Melody' | 'Both' | null; // text (nullable) - Assuming these are the only values
+  // Removed: startTime, endTime, url
 }
 
 interface EventsListProps {
   title?: string;
+  initialEvents: Event[]; // Changed: Accept events directly
   maxEvents?: number;
-  dataSource?: "static" | "json" | "api";
-  jsonUrl?: string;
-  apiUrl?: string;
   showViewAllButton?: boolean;
   viewAllUrl?: string;
   showFilters?: boolean;
-  autoFilter?: boolean; // Whether to automatically filter by the selected chorus
+  autoFilter?: boolean;
+  // Removed: dataSource, jsonUrl, apiUrl
 }
 
 export default function EventsList({
   title = "Upcoming Events",
+  initialEvents, // Changed: Use initialEvents
   maxEvents = 3,
-  dataSource = "static",
-  jsonUrl = "/data/events.json",
-  apiUrl = "/api/events",
   showViewAllButton = false,
   viewAllUrl = "/events",
   showFilters = false,
-  autoFilter = true // Default to true - filter events based on chorus context
+  autoFilter = true
+  // Removed: dataSource, jsonUrl, apiUrl from props destructuring
 }: EventsListProps) {
   const { selectedChorus } = useChorus();
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<Event[]>(initialEvents || []); // Changed: Initialize with prop
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false); // Changed: No initial loading needed
+  const [error, setError] = useState<string | null>(null); // Keep error state for potential future use? Or remove? Let's keep for now.
   const [activeFilter, setActiveFilter] = useState<string>(autoFilter && selectedChorus ? (selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1)) : "All");
-
-  // Static fallback events - use useMemo to prevent re-creation on every render
-  const staticEvents = useMemo<Event[]>(() => [
-    {
-      id: "1",
-      title: "Spring Harmony Concert",
-      date: "March 15, 2025",
-      description: "Join us for our annual Spring Concert featuring both Parkside Harmony and Parkside Melody choruses.",
-      imageUrl: "/images/event1.jpg",
-      url: "/events/spring-concert",
-      location: "Hershey Theatre",
-      chorus: "Both"
-    },
-    {
-      id: "2",
-      title: "Mid-Atlantic District Competition",
-      date: "April 5-7, 2025",
-      description: "Cheer on Parkside Harmony as they compete in the Mid-Atlantic District Barbershop Competition.",
-      imageUrl: "/images/event2.jpg",
-      url: "/events/district-competition",
-      location: "Baltimore Convention Center",
-      chorus: "Harmony"
-    },
-    {
-      id: "3",
-      title: "Community Outreach Performance",
-      date: "March 28, 2025",
-      description: "Parkside Melody will be performing at the Hershey Community Center to support local charities.",
-      imageUrl: "/images/event3.jpg",
-      url: "/events/community-performance",
-      location: "Hershey Community Center",
-      chorus: "Melody"
-    }
-  ], []);
 
   // Helper function to format location string
   const formatLocation = (location: string): string => {
@@ -108,51 +72,52 @@ export default function EventsList({
   };
 
   // Apply filters to events - memoize with useCallback
-  const applyFilters = useCallback((allEvents: Event[], filter: string) => {
+  const applyFilters = useCallback((allEvents: Event[], uiFilter: string) => {
     const startOfToday = startOfDay(new Date());
+    // console.log(`[EventsList] applyFilters called. UI Filter: ${uiFilter}`); // Removed log
+    // console.log('[EventsList] Filtering Events. Start of Today:', startOfToday);
+    // console.log('[EventsList] All Events Input:', allEvents);
 
-    // --- 1. Filter out past events --- 
+    // --- 1. Filter out past events ---
     const futureEvents = allEvents.filter(event => {
       try {
-        // Attempt to parse the start date (handles formats like "Month Day, Year" and "Month Day-Day, Year")
-        const eventStartDateStr = event.date.split('-')[0].trim(); 
-        const eventStartDate = new Date(eventStartDateStr);
+        // Use event_date and parseISO for timestamptz
+        const eventStartDate = parseISO(event.event_date);
+        const isFuture = !isNaN(eventStartDate.getTime()) && eventStartDate >= startOfToday;
+        // console.log(`[EventsList] Event: ${event.title}, Date: ${event.event_date}, Parsed: ${eventStartDate}, Is Future: ${isFuture}`); // Removed log
         // Check if date is valid and not in the past
-        return !isNaN(eventStartDate.getTime()) && eventStartDate >= startOfToday;
-      } catch {
+        return isFuture;
+      } catch (e) {
+        console.error(`Error parsing event date ${event.event_date}:`, e);
         return false; // Exclude if date parsing fails
       }
     });
+    // console.log('[EventsList] Future Events:', futureEvents); // Removed log
+    // console.log('[EventsList] Future Events after date filter:', futureEvents);
 
-    // --- 2. Filter by chorus context if autoFilter is on --- 
-    let contextFilteredEvents = futureEvents; 
-    if (autoFilter && selectedChorus) {
-      const chorusName = selectedChorus.charAt(0).toUpperCase() + selectedChorus.slice(1);
-      contextFilteredEvents = futureEvents.filter(event => 
-        event.chorus === chorusName || event.chorus === "Both"
-      );
-    } else if (autoFilter && selectedChorus === null) {
-        contextFilteredEvents = futureEvents;
+    // --- 2. Apply the active UI filter (All, Harmony, Melody, Both) ---
+    if (uiFilter === "All") {
+      // console.log('[EventsList] Returning all future events.'); // Removed log
+      return futureEvents;
     }
 
-    // --- 3. Apply the active UI filter (All, Harmony, Melody, Both) --- 
-    if (filter === "All") {
-      return contextFilteredEvents; 
-    }
-    
-    return contextFilteredEvents.filter(event => {
-      if (filter === "Harmony") {
-        return event.chorus === "Harmony" || event.chorus === "Both";
+    const finalFiltered = futureEvents.filter(event => {
+      const eventChorus = event.chorus; // Might be null, 'Harmony', 'Melody', 'Both'
+      if (uiFilter === "Harmony") {
+        return eventChorus === "Harmony" || eventChorus === "Both";
       }
-      if (filter === "Melody") {
-        return event.chorus === "Melody" || event.chorus === "Both";
+      if (uiFilter === "Melody") {
+        return eventChorus === "Melody" || eventChorus === "Both";
       }
-      if (filter === "Both") {
-        return event.chorus === "Both";
+      if (uiFilter === "Both") {
+        return eventChorus === "Both";
       }
-      return true; // Should not happen
+      return false; // Should not happen if filter is valid
     });
-  }, [autoFilter, selectedChorus]); // Dependencies for useCallback
+    // console.log('[EventsList] Final Filtered Events:', finalFiltered); // Removed log
+    return finalFiltered;
+
+  }, []); // Removed dependencies on autoFilter/selectedChorus
 
   // Effect to update the activeFilter based on chorus context
   useEffect(() => {
@@ -165,63 +130,16 @@ export default function EventsList({
         setActiveFilter(newFilter);
       }
     }
-  }, [selectedChorus, autoFilter, activeFilter]);
-
-  // Fetch events
-  useEffect(() => {
-    const fetchEvents = async () => {
-      setLoading(true);
-      setError(null); // Reset error on new fetch
-      try {
-        let fetchedEvents: Event[] = [];
-        
-        if (dataSource === "json") {
-          const response = await fetch(jsonUrl);
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          fetchedEvents = await response.json();
-        } 
-        else if (dataSource === "api") {
-          const response = await fetch(apiUrl);
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          fetchedEvents = await response.json();
-        } 
-        else {
-          fetchedEvents = staticEvents;
-        }
-        
-        // Sort events by date (using potentially more robust parsing)
-        fetchedEvents.sort((a, b) => {
-          try {
-            const dateA = new Date(a.date.split(' - ')[0].trim()); 
-            const dateB = new Date(b.date.split(' - ')[0].trim());
-            if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) return 0; 
-            return dateA.getTime() - dateB.getTime();
-          } catch {
-            return 0; 
-          }
-        });
-        
-        setEvents(fetchedEvents);
-
-      } catch (err) {
-        console.error("Error fetching events:", err);
-        setError("Failed to load events. Using fallback data.");
-        setEvents(staticEvents); // Use static data on fetch error
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvents();
-  // Now that staticEvents is memoized, it's safe in the dependency array
-  }, [dataSource, jsonUrl, apiUrl, staticEvents]); 
+  }, [selectedChorus, autoFilter]); // Removed activeFilter from dependency array
 
   // Update filtered events when filter or events change
   useEffect(() => {
+    // console.log(`[EventsList] useEffect running for activeFilter: ${activeFilter}`); // Removed log
     // applyFilters now handles date filtering internally
     const filtered = applyFilters(events, activeFilter);
+    // console.log(`[EventsList] Setting filteredEvents state with ${filtered.length} items.`); // Removed log
     setFilteredEvents(filtered.slice(0, maxEvents));
-  }, [activeFilter, events, maxEvents, applyFilters]); 
+  }, [activeFilter, events, maxEvents, applyFilters]); // Changed: Removed dataSource etc. dependencies, applyFilters depends on autoFilter/selectedChorus
 
   // Get dynamic title - memoized
   const getTitle = useCallback(() => {
@@ -260,7 +178,10 @@ export default function EventsList({
           <ScrollAnimation>
             <div className="flex flex-wrap gap-2 mb-8">
               <button
-                onClick={() => setActiveFilter("All")}
+                onClick={() => {
+                  // console.log('[EventsList] Setting activeFilter to: All'); // Removed log
+                  setActiveFilter("All");
+                }}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeFilter === "All" 
                     ? "bg-gray-900 text-white" 
@@ -270,7 +191,10 @@ export default function EventsList({
                 All Events
               </button>
               <button
-                onClick={() => setActiveFilter("Harmony")}
+                onClick={() => {
+                  // console.log('[EventsList] Setting activeFilter to: Harmony'); // Removed log
+                  setActiveFilter("Harmony");
+                }}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeFilter === "Harmony" 
                     ? "bg-blue-600 text-white" 
@@ -280,7 +204,10 @@ export default function EventsList({
                 Parkside Harmony
               </button>
               <button
-                onClick={() => setActiveFilter("Melody")}
+                onClick={() => {
+                  // console.log('[EventsList] Setting activeFilter to: Melody'); // Removed log
+                  setActiveFilter("Melody");
+                }}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeFilter === "Melody" 
                     ? "bg-emerald-600 text-white" 
@@ -290,7 +217,10 @@ export default function EventsList({
                 Parkside Melody
               </button>
               <button
-                onClick={() => setActiveFilter("Both")}
+                onClick={() => {
+                  // console.log('[EventsList] Setting activeFilter to: Both'); // Removed log
+                  setActiveFilter("Both");
+                }}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeFilter === "Both" 
                     ? "bg-purple-500 text-white" 
@@ -312,28 +242,31 @@ export default function EventsList({
             {filteredEvents.map((event, index) => (
               <ScrollAnimation key={event.id} delay={0.1 * index}>
                 <div className="bg-white rounded-lg shadow-md overflow-hidden h-full flex flex-col transform transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                  <div className="relative h-48 overflow-hidden">
-                    <Image
-                      src={event.imageUrl}
-                      alt={event.title}
-                      fill
-                      className="object-cover transition-transform duration-500 hover:scale-105"
-                    />
-                    {event.chorus && (
-                      <div className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-medium ${
-                        event.chorus === "Harmony" ? "bg-blue-600 text-white" :
-                        event.chorus === "Melody" ? "bg-emerald-600 text-white" :
-                        "bg-purple-500 text-white"
-                      }`}>
-                        {event.chorus === "Both" ? "Harmony & Melody" : `Parkside ${event.chorus}`}
-                      </div>
-                    )}
-                  </div>
+                  {event.image_url && ( // Check if image_url exists
+                    <div className="relative h-48 overflow-hidden">
+                      <Image
+                        src={event.image_url} // Changed: use image_url
+                        alt={event.title}
+                        fill
+                        className="object-cover transition-transform duration-500 hover:scale-105"
+                      />
+                      {event.chorus && (
+                        <div className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-medium ${
+                          event.chorus === "Harmony" ? "bg-blue-600 text-white" :
+                          event.chorus === "Melody" ? "bg-emerald-600 text-white" :
+                          event.chorus === "Both" ? "bg-purple-500 text-white" : // Added case for Both explicitly
+                          "bg-gray-500 text-white" // Fallback style if needed
+                        }`}>
+                          {event.chorus === "Both" ? "Harmony & Melody" : `Parkside ${event.chorus}`}
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div className="p-6 flex-grow">
                     <div className="text-sm font-medium text-indigo-600 mb-1">
-                      {event.date}
-                      {event.startTime && ` • ${event.startTime}`}
-                      {event.endTime && ` - ${event.endTime}`}
+                      {/* Format event_date - assumes parseISO works */}
+                      {event.event_date ? new Date(event.event_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) : 'Date TBD'}
+                      {/* Removed startTime / endTime */}
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h3>
                     {event.location && (
@@ -341,20 +274,9 @@ export default function EventsList({
                         <span className="inline-block mr-1">📍</span> {formatLocation(event.location)}
                       </div>
                     )}
-                    <p className="text-gray-600 mb-4">{event.description}</p>
+                    <p className="text-gray-600 mb-4 line-clamp-3">{event.description}</p> {/* Adjusted line-clamp */}
                   </div>
-                  {event.url && (
-                    <div className="px-6 pb-6">
-                      <Link 
-                        href={event.url}
-                        className="text-indigo-600 font-medium hover:text-indigo-500 inline-flex items-center group"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Learn More <svg className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"></path></svg>
-                      </Link>
-                    </div>
-                  )}
+                  {/* Removed the 'Learn More' link section that used event.url */}
                 </div>
               </ScrollAnimation>
             ))}

@@ -3,13 +3,33 @@ import PageTransition from "@/components/ui/PageTransition";
 import EventsList from "@/components/events/EventsList";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import ChorusHero from "@/components/ui/ChorusHero";
+import { supabase } from "@/app/lib/supabaseClient.ts";
+import { Event } from "@/components/events/EventsList";
 
 export const metadata: Metadata = {
   title: "Events - Parkside Barbershop Harmony",
   description: "Upcoming performances and events for Parkside Harmony and Parkside Melody choruses.",
 };
 
-export default function EventsPage() {
+export default async function EventsPage() {
+  let fetchedEvents: Event[] = [];
+  let fetchError: string | null = null;
+
+  try {
+    const { data, error } = await supabase
+      .from('events')
+      .select('id, created_at, title, event_date, description, image_url, location, chorus')
+      .order('event_date', { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+    fetchedEvents = (data as Event[]) || [];
+  } catch (error) {
+    console.error("Error fetching events from Supabase:", error);
+    fetchError = "Could not load events at this time. Please try again later.";
+  }
+
   return (
     <PageTransition>
       {/* Page Header */}
@@ -20,13 +40,18 @@ export default function EventsPage() {
       />
       
       {/* Events List */}
-      <EventsList 
-        title="All Upcoming Events" 
-        maxEvents={100} 
-        dataSource="json" 
-        jsonUrl="/data/events.json" 
-        showFilters={true}
-      />
+      {fetchError ? (
+        <div className="container mx-auto px-4 py-16 text-center text-red-600">
+          <p>{fetchError}</p>
+        </div>
+      ) : (
+        <EventsList 
+          title="All Upcoming Events" 
+          maxEvents={100} 
+          initialEvents={fetchedEvents}
+          showFilters={true}
+        />
+      )}
       
       {/* Calendar Integration Info */}
       <section className="py-16">
