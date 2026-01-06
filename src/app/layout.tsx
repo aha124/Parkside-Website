@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/ThemeProvider";
-import { defaultMetadata } from "@/lib/metadata";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"] });

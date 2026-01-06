@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ExternalLink, Github, Database, Image, Key } from "lucide-react";
 
 export default function AdminSettingsPage() {
@@ -121,7 +120,7 @@ BLOB_READ_WRITE_TOKEN=your-blob-token`}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-blue-100 rounded-lg">
-              <Image className="w-5 h-5 text-blue-600" />
+              <Image className="w-5 h-5 text-blue-600" aria-hidden="true" />
             </div>
             <h3 className="font-semibold text-gray-900">Vercel Blob</h3>
           </div>

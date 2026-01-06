@@ -1,18 +1,19 @@
 /**
  * Utility to convert ChoirGenius CSV exports to the Events JSON format
- * 
+ *
  * This script can be run with Node.js to convert a CSV export from ChoirGenius
  * to the JSON format used by the EventsList component.
- * 
+ *
  * Usage:
  * 1. Export events from ChoirGenius as CSV
  * 2. Run this script with Node.js:
  *    node choirGeniusConverter.js path/to/exported.csv path/to/output.json
  */
 
+/* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require('fs');
-const path = require('path');
 const { v4: uuidv4 } = require('uuid'); // You may need to install this: npm install uuid
+/* eslint-enable @typescript-eslint/no-require-imports */
 
 // Default image paths for different chorus types
 const DEFAULT_IMAGES = {

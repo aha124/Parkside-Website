@@ -5,8 +5,6 @@ import Image from 'next/image';
 
 export default function ProgressionSlideshow() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [imageOrientation, setImageOrientation] = useState<'landscape' | 'portrait'>('landscape');
 
   const images = [
     '/images/progression_slideshow/486610174_1184361726869488_6607344270866660077_n.jpg',
@@ -29,12 +27,6 @@ export default function ProgressionSlideshow() {
 
     return () => clearInterval(timer);
   }, [images.length]);
-
-  const handleImageLoad = (event: any) => {
-    const img = event.target;
-    setImageOrientation(img.naturalWidth > img.naturalHeight ? 'landscape' : 'portrait');
-    setIsLoaded(true);
-  };
 
   const goToNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
@@ -62,7 +54,6 @@ export default function ProgressionSlideshow() {
               alt={`Parkside community moment ${index + 1}`}
               fill
               className="object-contain bg-black/90"
-              onLoad={handleImageLoad}
               priority={index === 0}
             />
           </div>

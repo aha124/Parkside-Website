@@ -175,7 +175,7 @@ export default function LeadershipPage() {
                   Want to Get Involved?
                 </h2>
                 <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-                  We're always looking for passionate individuals to join our chorus and
+                  We&apos;re always looking for passionate individuals to join our chorus and
                   contribute to our mission of musical excellence.
                 </p>
                 <a

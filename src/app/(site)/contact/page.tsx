@@ -90,7 +90,7 @@ export default function ContactPage() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     >
                       <option value="">Please select a subject</option>
-                      <option value="join">I'm interested in joining</option>
+                      <option value="join">I&apos;m interested in joining</option>
                       <option value="performance">Book a performance</option>
                       <option value="lessons">Vocal coaching/lessons</option>
                       <option value="general">General inquiry</option>
@@ -253,7 +253,7 @@ export default function ContactPage() {
               <div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">Experience the Joy of Harmony</h3>
                 <p className="text-lg text-gray-600 mb-6">
-                  Whether you're an experienced singer or just love to sing in the shower, there's a place for you in our chorus. Join us for a rehearsal and discover the magic of barbershop harmony!
+                  Whether you&apos;re an experienced singer or just love to sing in the shower, there&apos;s a place for you in our chorus. Join us for a rehearsal and discover the magic of barbershop harmony!
                 </p>
                 <a
                   href="/join"
