@@ -1,0 +1,324 @@
+import { kv } from "@vercel/kv";
+import { v4 as uuidv4 } from "uuid";
+import type { NewsItem, EventItem, VideoItem, SiteImage, AdminUser } from "@/types/admin";
+
+// KV Keys
+const KEYS = {
+  NEWS: "admin:news",
+  EVENT_OVERRIDES: "admin:event-overrides",
+  VIDEOS: "admin:videos",
+  IMAGES: "admin:images",
+  ADMIN_USERS: "admin:users",
+} as const;
+
+// ============ NEWS MANAGEMENT ============
+
+export async function getNews(): Promise<NewsItem[]> {
+  try {
+    const news = await kv.get<NewsItem[]>(KEYS.NEWS);
+    return news || [];
+  } catch (error) {
+    console.error("Error fetching news:", error);
+    return [];
+  }
+}
+
+export async function createNews(data: Omit<NewsItem, "id" | "createdAt" | "updatedAt">): Promise<NewsItem> {
+  const news = await getNews();
+  const newItem: NewsItem = {
+    ...data,
+    id: uuidv4(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  await kv.set(KEYS.NEWS, [newItem, ...news]);
+  return newItem;
+}
+
+export async function updateNews(id: string, data: Partial<NewsItem>): Promise<NewsItem | null> {
+  const news = await getNews();
+  const index = news.findIndex(item => item.id === id);
+  if (index === -1) return null;
+
+  news[index] = {
+    ...news[index],
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+  await kv.set(KEYS.NEWS, news);
+  return news[index];
+}
+
+export async function deleteNews(id: string): Promise<boolean> {
+  const news = await getNews();
+  const filtered = news.filter(item => item.id !== id);
+  if (filtered.length === news.length) return false;
+  await kv.set(KEYS.NEWS, filtered);
+  return true;
+}
+
+// ============ EVENT OVERRIDES MANAGEMENT ============
+
+export async function getEventOverrides(): Promise<EventItem[]> {
+  try {
+    const overrides = await kv.get<EventItem[]>(KEYS.EVENT_OVERRIDES);
+    return overrides || [];
+  } catch (error) {
+    console.error("Error fetching event overrides:", error);
+    return [];
+  }
+}
+
+export async function createEventOverride(data: Omit<EventItem, "id" | "createdAt" | "updatedAt" | "isManualOverride">): Promise<EventItem> {
+  const overrides = await getEventOverrides();
+  const newItem: EventItem = {
+    ...data,
+    id: uuidv4(),
+    isManualOverride: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  await kv.set(KEYS.EVENT_OVERRIDES, [...overrides, newItem]);
+  return newItem;
+}
+
+export async function updateEventOverride(id: string, data: Partial<EventItem>): Promise<EventItem | null> {
+  const overrides = await getEventOverrides();
+  const index = overrides.findIndex(item => item.id === id);
+  if (index === -1) return null;
+
+  overrides[index] = {
+    ...overrides[index],
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+  await kv.set(KEYS.EVENT_OVERRIDES, overrides);
+  return overrides[index];
+}
+
+export async function deleteEventOverride(id: string): Promise<boolean> {
+  const overrides = await getEventOverrides();
+  const filtered = overrides.filter(item => item.id !== id);
+  if (filtered.length === overrides.length) return false;
+  await kv.set(KEYS.EVENT_OVERRIDES, filtered);
+  return true;
+}
+
+// Hide a scraped event by its original ID
+export async function hideScrapedEvent(originalId: string, createdBy?: string): Promise<EventItem> {
+  const overrides = await getEventOverrides();
+  const hideOverride: EventItem = {
+    id: uuidv4(),
+    originalId,
+    isHidden: true,
+    isManualOverride: true,
+    title: "",
+    date: "",
+    startTime: "",
+    endTime: "",
+    description: "",
+    location: "",
+    imageUrl: "",
+    chorus: "Both",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    createdBy,
+  };
+  await kv.set(KEYS.EVENT_OVERRIDES, [...overrides, hideOverride]);
+  return hideOverride;
+}
+
+// ============ VIDEO MANAGEMENT ============
+
+export async function getVideos(): Promise<VideoItem[]> {
+  try {
+    const videos = await kv.get<VideoItem[]>(KEYS.VIDEOS);
+    return videos || [];
+  } catch (error) {
+    console.error("Error fetching videos:", error);
+    return [];
+  }
+}
+
+export async function createVideo(data: Omit<VideoItem, "id" | "createdAt" | "updatedAt">): Promise<VideoItem> {
+  const videos = await getVideos();
+  const newItem: VideoItem = {
+    ...data,
+    id: uuidv4(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  await kv.set(KEYS.VIDEOS, [newItem, ...videos]);
+  return newItem;
+}
+
+export async function updateVideo(id: string, data: Partial<VideoItem>): Promise<VideoItem | null> {
+  const videos = await getVideos();
+  const index = videos.findIndex(item => item.id === id);
+  if (index === -1) return null;
+
+  videos[index] = {
+    ...videos[index],
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+  await kv.set(KEYS.VIDEOS, videos);
+  return videos[index];
+}
+
+export async function deleteVideo(id: string): Promise<boolean> {
+  const videos = await getVideos();
+  const filtered = videos.filter(item => item.id !== id);
+  if (filtered.length === videos.length) return false;
+  await kv.set(KEYS.VIDEOS, filtered);
+  return true;
+}
+
+// ============ IMAGE MANAGEMENT ============
+
+export async function getImages(): Promise<SiteImage[]> {
+  try {
+    const images = await kv.get<SiteImage[]>(KEYS.IMAGES);
+    return images || [];
+  } catch (error) {
+    console.error("Error fetching images:", error);
+    return [];
+  }
+}
+
+export async function createImage(data: Omit<SiteImage, "id" | "createdAt" | "updatedAt">): Promise<SiteImage> {
+  const images = await getImages();
+  const newItem: SiteImage = {
+    ...data,
+    id: uuidv4(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  await kv.set(KEYS.IMAGES, [...images, newItem]);
+  return newItem;
+}
+
+export async function updateImage(id: string, data: Partial<SiteImage>): Promise<SiteImage | null> {
+  const images = await getImages();
+  const index = images.findIndex(item => item.id === id);
+  if (index === -1) return null;
+
+  images[index] = {
+    ...images[index],
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+  await kv.set(KEYS.IMAGES, images);
+  return images[index];
+}
+
+export async function deleteImage(id: string): Promise<boolean> {
+  const images = await getImages();
+  const filtered = images.filter(item => item.id !== id);
+  if (filtered.length === images.length) return false;
+  await kv.set(KEYS.IMAGES, filtered);
+  return true;
+}
+
+// ============ ADMIN USER MANAGEMENT ============
+
+export async function getAdminUsers(): Promise<AdminUser[]> {
+  try {
+    const users = await kv.get<AdminUser[]>(KEYS.ADMIN_USERS);
+    return users || [];
+  } catch (error) {
+    console.error("Error fetching admin users:", error);
+    return [];
+  }
+}
+
+export async function addAdminUser(email: string, addedBy?: string, role: "admin" | "superadmin" = "admin"): Promise<AdminUser> {
+  const users = await getAdminUsers();
+  const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (existing) return existing;
+
+  const newUser: AdminUser = {
+    email: email.toLowerCase(),
+    role,
+    addedAt: new Date().toISOString(),
+    addedBy,
+  };
+  await kv.set(KEYS.ADMIN_USERS, [...users, newUser]);
+
+  // Also update the admin emails list for auth
+  const { addAdminEmail } = await import("./auth");
+  await addAdminEmail(email);
+
+  return newUser;
+}
+
+export async function removeAdminUser(email: string): Promise<boolean> {
+  const users = await getAdminUsers();
+  const filtered = users.filter(u => u.email.toLowerCase() !== email.toLowerCase());
+  if (filtered.length === users.length) return false;
+  await kv.set(KEYS.ADMIN_USERS, filtered);
+
+  // Also remove from admin emails list for auth
+  const { removeAdminEmail } = await import("./auth");
+  await removeAdminEmail(email);
+
+  return true;
+}
+
+export async function updateAdminUser(email: string, data: Partial<AdminUser>): Promise<AdminUser | null> {
+  const users = await getAdminUsers();
+  const index = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+  if (index === -1) return null;
+
+  users[index] = {
+    ...users[index],
+    ...data,
+  };
+  await kv.set(KEYS.ADMIN_USERS, users);
+  return users[index];
+}
+
+// ============ YOUTUBE METADATA ============
+
+export async function fetchYouTubeMetadata(videoIdOrUrl: string): Promise<{
+  id: string;
+  title: string;
+  thumbnailUrl: string;
+} | null> {
+  // Extract video ID from URL if necessary
+  let videoId = videoIdOrUrl;
+
+  // Handle various YouTube URL formats
+  const urlPatterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /^([a-zA-Z0-9_-]{11})$/,
+  ];
+
+  for (const pattern of urlPatterns) {
+    const match = videoIdOrUrl.match(pattern);
+    if (match) {
+      videoId = match[1];
+      break;
+    }
+  }
+
+  try {
+    // Use YouTube oEmbed API (no API key required)
+    const response = await fetch(
+      `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
+    );
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+
+    return {
+      id: videoId,
+      title: data.title,
+      thumbnailUrl: data.thumbnail_url,
+    };
+  } catch (error) {
+    console.error("Error fetching YouTube metadata:", error);
+    return null;
+  }
+}

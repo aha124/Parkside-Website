@@ -5,13 +5,14 @@ import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import HeroSection from "@/components/ui/HeroSection";
 import dynamic from "next/dynamic";
 import type { YouTubeProps } from "react-youtube";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 // Dynamically import YouTube component to avoid SSR issues
 const YouTube = dynamic(() => import("react-youtube"), { ssr: false });
 
 interface VideoData {
   id: string;
+  youtubeId?: string; // Admin videos use youtubeId
   title: string;
   description: string;
   year: number;
@@ -20,7 +21,8 @@ interface VideoData {
   placement?: string;
 }
 
-const videos: VideoData[] = [
+// Fallback hardcoded videos (used if no admin videos exist)
+const fallbackVideos: VideoData[] = [
   // Harmony Videos - Most Recent First
   {
     id: "tmrUqGZbTm0",
@@ -213,14 +215,42 @@ const videos: VideoData[] = [
 type FilterType = "all" | "harmony" | "melody" | "both" | "competition";
 
 export default function MediaPage() {
+  const [videos, setVideos] = useState<VideoData[]>(fallbackVideos);
   const [filter, setFilter] = useState<FilterType>("all");
   const [visibleCount, setVisibleCount] = useState(6);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch admin-managed videos
+  useEffect(() => {
+    async function fetchVideos() {
+      try {
+        const response = await fetch("/api/videos");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data && data.data.length > 0) {
+            // Map admin videos to the expected format
+            const adminVideos = data.data.map((v: { id: string; youtubeId: string; title: string; description: string; year: number; chorus: "harmony" | "melody" | "both"; competition?: string; placement?: string }) => ({
+              ...v,
+              id: v.youtubeId, // Use youtubeId as the display id
+            }));
+            setVideos(adminVideos);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching videos:", error);
+        // Keep fallback videos on error
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchVideos();
+  }, []);
 
   // Randomly select a featured video for the hero background
   const heroVideo = useMemo(() => {
     const randomIndex = Math.floor(Math.random() * videos.length);
     return videos[randomIndex];
-  }, []); // Empty dependency array means this only runs once when component mounts
+  }, [videos]);
 
   const opts: YouTubeProps['opts'] = {
     height: '100%',
@@ -258,10 +288,10 @@ export default function MediaPage() {
       <div className="bg-white">
         <HeroSection
           title="Media Gallery"
-          subtitle={`Featuring: ${heroVideo.title}`}
+          subtitle={heroVideo ? `Featuring: ${heroVideo.title}` : "Performance Videos"}
           imagePath="/images/media-hero.jpg"
           imageAlt="Parkside Performance"
-          videoId={heroVideo.id}
+          videoId={heroVideo?.id}
         />
 
         {/* Filter Section */}
@@ -299,56 +329,62 @@ export default function MediaPage() {
                 <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
                   Featured Performances
                 </h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {visibleVideos.map((video) => (
-                    <div 
-                      key={video.id}
-                      className="bg-white rounded-xl shadow-lg overflow-hidden transition-transform hover:scale-105 duration-300"
-                    >
-                      <div className="aspect-video relative">
-                        <YouTube
-                          videoId={video.id}
-                          opts={opts}
-                          className="absolute inset-0"
-                          iframeClassName="w-full h-full"
-                        />
-                      </div>
-                      <div className="p-6">
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                          {video.title}
-                        </h3>
-                        <p className="text-gray-600 mb-4">
-                          {video.description}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-500">
-                            {video.year}
-                          </span>
-                          <div className="flex gap-2">
-                            {video.placement && (
-                              <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                {video.placement}
-                              </span>
-                            )}
-                            <span className="px-3 py-1 rounded-full text-sm font-medium capitalize" 
-                              style={{
-                                backgroundColor: video.chorus === 'harmony' ? '#4F46E5' : 
-                                              video.chorus === 'melody' ? '#EC4899' : '#6366F1',
-                                color: 'white'
-                              }}
-                            >
-                              {video.chorus === 'both' ? 'Combined' : video.chorus}
+
+                {loading ? (
+                  <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {visibleVideos.map((video) => (
+                      <div
+                        key={video.id}
+                        className="bg-white rounded-xl shadow-lg overflow-hidden transition-transform hover:scale-105 duration-300"
+                      >
+                        <div className="aspect-video relative">
+                          <YouTube
+                            videoId={video.id}
+                            opts={opts}
+                            className="absolute inset-0"
+                            iframeClassName="w-full h-full"
+                          />
+                        </div>
+                        <div className="p-6">
+                          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                            {video.title}
+                          </h3>
+                          <p className="text-gray-600 mb-4">
+                            {video.description}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-500">
+                              {video.year}
                             </span>
+                            <div className="flex gap-2">
+                              {video.placement && (
+                                <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                  {video.placement}
+                                </span>
+                              )}
+                              <span className="px-3 py-1 rounded-full text-sm font-medium capitalize"
+                                style={{
+                                  backgroundColor: video.chorus === 'harmony' ? '#4F46E5' :
+                                                video.chorus === 'melody' ? '#EC4899' : '#6366F1',
+                                  color: 'white'
+                                }}
+                              >
+                                {video.chorus === 'both' ? 'Combined' : video.chorus}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Show More Button */}
-                {hasMore && (
+                {hasMore && !loading && (
                   <div className="mt-12 text-center">
                     <button
                       onClick={handleShowMore}
@@ -381,4 +417,4 @@ export default function MediaPage() {
       </div>
     </PageTransition>
   );
-} 
+}
