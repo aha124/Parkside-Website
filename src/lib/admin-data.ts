@@ -327,27 +327,77 @@ export async function fetchYouTubeMetadata(videoIdOrUrl: string): Promise<{
 // ============ SITE SETTINGS MANAGEMENT ============
 
 const DEFAULT_SITE_SETTINGS: SiteSettings = {
-  harmony: {
-    logoUrl: "/images/parkside-logo.png",
-    bannerUrl: "/images/harmony-performance.jpg",
-    heroImageUrl: "/images/harmony-bg.jpg",
+  logos: {
+    harmony: "/images/parkside-logo.png",
+    melody: "/images/parkside-logo.png",
+    voices: "/images/parkside-logo.png",
   },
-  melody: {
-    logoUrl: "/images/parkside-logo.png",
-    bannerUrl: "/images/melody-performance.jpg",
-    heroImageUrl: "/images/melody-bg.jpg",
-  },
-  voices: {
-    logoUrl: "/images/parkside-logo.png",
-    bannerUrl: "/images/slideshow/slide1-main.jpg",
-    heroImageUrl: "/images/placeholder-hero.jpg",
+  pageBanners: {
+    home: {
+      harmony: "/images/harmony-bg.jpg",
+      melody: "/images/melody-bg.jpg",
+      voices: "/images/slideshow/slide1-main.jpg",
+    },
+    about: {
+      harmony: "/images/harmony-performance.jpg",
+      melody: "/images/melody-performance.jpg",
+      voices: "/images/placeholder-hero.jpg",
+    },
+    join: {
+      harmony: "/images/harmony-bg.jpg",
+      melody: "/images/melody-bg.jpg",
+      voices: "/images/join-hero.jpg",
+    },
+    media: {
+      harmony: "/images/harmony-performance.jpg",
+      melody: "/images/melody-performance.jpg",
+      voices: "/images/placeholder-hero.jpg",
+    },
+    donate: {
+      harmony: "/images/harmony-bg.jpg",
+      melody: "/images/melody-bg.jpg",
+      voices: "/images/slideshow/slide2-donate.jpg",
+    },
+    events: {
+      harmony: "/images/harmony-performance.jpg",
+      melody: "/images/melody-performance.jpg",
+      voices: "/images/slideshow/slide3-events.jpg",
+    },
+    gear: {
+      harmony: "/images/harmony-bg.jpg",
+      melody: "/images/melody-bg.jpg",
+      voices: "/images/slideshow/slide4-shop.jpg",
+    },
+    contact: {
+      harmony: "/images/harmony-performance.jpg",
+      melody: "/images/melody-performance.jpg",
+      voices: "/images/slideshow/slide5-contact.jpg",
+    },
   },
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   try {
     const settings = await kv.get<SiteSettings>(KEYS.SITE_SETTINGS);
-    return settings || DEFAULT_SITE_SETTINGS;
+    // Merge with defaults to ensure all fields exist
+    if (settings) {
+      return {
+        logos: { ...DEFAULT_SITE_SETTINGS.logos, ...settings.logos },
+        pageBanners: {
+          home: { ...DEFAULT_SITE_SETTINGS.pageBanners.home, ...settings.pageBanners?.home },
+          about: { ...DEFAULT_SITE_SETTINGS.pageBanners.about, ...settings.pageBanners?.about },
+          join: { ...DEFAULT_SITE_SETTINGS.pageBanners.join, ...settings.pageBanners?.join },
+          media: { ...DEFAULT_SITE_SETTINGS.pageBanners.media, ...settings.pageBanners?.media },
+          donate: { ...DEFAULT_SITE_SETTINGS.pageBanners.donate, ...settings.pageBanners?.donate },
+          events: { ...DEFAULT_SITE_SETTINGS.pageBanners.events, ...settings.pageBanners?.events },
+          gear: { ...DEFAULT_SITE_SETTINGS.pageBanners.gear, ...settings.pageBanners?.gear },
+          contact: { ...DEFAULT_SITE_SETTINGS.pageBanners.contact, ...settings.pageBanners?.contact },
+        },
+        updatedAt: settings.updatedAt,
+        updatedBy: settings.updatedBy,
+      };
+    }
+    return DEFAULT_SITE_SETTINGS;
   } catch (error) {
     console.error("Error fetching site settings:", error);
     return DEFAULT_SITE_SETTINGS;
@@ -360,11 +410,17 @@ export async function updateSiteSettings(
 ): Promise<SiteSettings> {
   const current = await getSiteSettings();
   const updated: SiteSettings = {
-    ...current,
-    ...data,
-    harmony: { ...current.harmony, ...data.harmony },
-    melody: { ...current.melody, ...data.melody },
-    voices: { ...current.voices, ...data.voices },
+    logos: { ...current.logos, ...data.logos },
+    pageBanners: {
+      home: { ...current.pageBanners.home, ...data.pageBanners?.home },
+      about: { ...current.pageBanners.about, ...data.pageBanners?.about },
+      join: { ...current.pageBanners.join, ...data.pageBanners?.join },
+      media: { ...current.pageBanners.media, ...data.pageBanners?.media },
+      donate: { ...current.pageBanners.donate, ...data.pageBanners?.donate },
+      events: { ...current.pageBanners.events, ...data.pageBanners?.events },
+      gear: { ...current.pageBanners.gear, ...data.pageBanners?.gear },
+      contact: { ...current.pageBanners.contact, ...data.pageBanners?.contact },
+    },
     updatedAt: new Date().toISOString(),
     updatedBy,
   };

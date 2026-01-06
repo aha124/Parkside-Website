@@ -4,11 +4,10 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { useChorus } from "@/lib/chorus-context";
+import { useChorus, ChorusType } from "@/lib/chorus-context";
 
-// Logo and name configuration for each chorus
-// Note: Using same logo for now until custom logos are uploaded via admin
-const chorusConfig = {
+// Default logo and name configuration for each chorus
+const defaultChorusConfig = {
   harmony: {
     logo: "/images/parkside-logo.png",
     name: "Parkside Harmony",
@@ -47,11 +46,39 @@ const navItems = [
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
+  const [logos, setLogos] = useState<Record<ChorusType, string>>(
+    { harmony: defaultChorusConfig.harmony.logo, melody: defaultChorusConfig.melody.logo, voices: defaultChorusConfig.voices.logo }
+  );
   const menuItemRef = useRef<HTMLDivElement>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { chorus, chorusLabel } = useChorus();
-  const currentConfig = chorusConfig[chorus];
+  const { chorus } = useChorus();
+
+  // Fetch logos from site settings
+  useEffect(() => {
+    async function fetchLogos() {
+      try {
+        const response = await fetch("/api/admin/site-settings");
+        const data = await response.json();
+        if (data.success && data.data?.logos) {
+          setLogos({
+            harmony: data.data.logos.harmony || defaultChorusConfig.harmony.logo,
+            melody: data.data.logos.melody || defaultChorusConfig.melody.logo,
+            voices: data.data.logos.voices || defaultChorusConfig.voices.logo,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching logos:", error);
+      }
+    }
+    fetchLogos();
+  }, []);
+
+  const currentConfig = {
+    logo: logos[chorus],
+    name: defaultChorusConfig[chorus].name,
+    tagline: defaultChorusConfig[chorus].tagline,
+  };
 
   const handleMouseEnter = (itemName: string) => {
     if (timeoutRef.current) {
