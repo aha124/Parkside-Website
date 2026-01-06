@@ -329,18 +329,18 @@ export async function fetchYouTubeMetadata(videoIdOrUrl: string): Promise<{
 const DEFAULT_SITE_SETTINGS: SiteSettings = {
   harmony: {
     logoUrl: "/images/parkside-logo.png",
-    bannerUrl: "/images/harmony-banner.jpg",
-    heroImageUrl: "/images/harmony-hero.jpg",
+    bannerUrl: "/images/harmony-performance.jpg",
+    heroImageUrl: "/images/harmony-bg.jpg",
   },
   melody: {
     logoUrl: "/images/parkside-logo.png",
-    bannerUrl: "/images/melody-banner.jpg",
-    heroImageUrl: "/images/melody-hero.jpg",
+    bannerUrl: "/images/melody-performance.jpg",
+    heroImageUrl: "/images/melody-bg.jpg",
   },
   voices: {
     logoUrl: "/images/parkside-logo.png",
-    bannerUrl: "/images/parkside-banner.jpg",
-    heroImageUrl: "/images/parkside-hero.jpg",
+    bannerUrl: "/images/slideshow/slide1-main.jpg",
+    heroImageUrl: "/images/placeholder-hero.jpg",
   },
 };
 
@@ -370,4 +370,68 @@ export async function updateSiteSettings(
   };
   await kv.set(KEYS.SITE_SETTINGS, updated);
   return updated;
+}
+
+// ============ SEED EXISTING IMAGES ============
+
+// Predefined list of existing images in the repo
+const EXISTING_IMAGES: Array<{
+  name: string;
+  url: string;
+  category: SiteImage["category"];
+  chorus: SiteImage["chorus"];
+  alt: string;
+}> = [
+  // Harmony images
+  { name: "Harmony Background", url: "/images/harmony-bg.jpg", category: "hero", chorus: "harmony", alt: "Parkside Harmony background" },
+  { name: "Harmony Performance", url: "/images/harmony-performance.jpg", category: "banner", chorus: "harmony", alt: "Parkside Harmony performance" },
+  // Melody images
+  { name: "Melody Background", url: "/images/melody-bg.jpg", category: "hero", chorus: "melody", alt: "Parkside Melody background" },
+  { name: "Melody Performance", url: "/images/melody-performance.jpg", category: "banner", chorus: "melody", alt: "Parkside Melody performance" },
+  // Voices/Combined images
+  { name: "Main Hero", url: "/images/placeholder-hero.jpg", category: "hero", chorus: "voices", alt: "Parkside Voices hero" },
+  { name: "Join Page Hero", url: "/images/join-hero.jpg", category: "hero", chorus: "voices", alt: "Join Parkside" },
+  { name: "Progression Hero", url: "/images/progression_hero.jpg", category: "progression", chorus: "voices", alt: "Parkside progression" },
+  // Slideshow images
+  { name: "Slideshow - Main", url: "/images/slideshow/slide1-main.jpg", category: "slideshow", chorus: "voices", alt: "Main slideshow" },
+  { name: "Slideshow - Donate", url: "/images/slideshow/slide2-donate.jpg", category: "slideshow", chorus: "voices", alt: "Donate slideshow" },
+  { name: "Slideshow - Events", url: "/images/slideshow/slide3-events.jpg", category: "slideshow", chorus: "voices", alt: "Events slideshow" },
+  { name: "Slideshow - Shop", url: "/images/slideshow/slide4-shop.jpg", category: "slideshow", chorus: "voices", alt: "Shop slideshow" },
+  { name: "Slideshow - Contact", url: "/images/slideshow/slide5-contact.jpg", category: "slideshow", chorus: "voices", alt: "Contact slideshow" },
+  // Gallery images
+  { name: "Gallery 1", url: "/images/placeholder-gallery-1.jpg", category: "other", chorus: "voices", alt: "Gallery image 1" },
+  { name: "Gallery 2", url: "/images/placeholder-gallery-2.jpg", category: "other", chorus: "voices", alt: "Gallery image 2" },
+  { name: "Gallery 3", url: "/images/placeholder-gallery-3.jpg", category: "other", chorus: "voices", alt: "Gallery image 3" },
+  { name: "Gallery 4", url: "/images/placeholder-gallery-4.jpg", category: "other", chorus: "voices", alt: "Gallery image 4" },
+  // Logos
+  { name: "Parkside Logo", url: "/images/parkside-logo.png", category: "other", chorus: "voices", alt: "Parkside logo" },
+  { name: "BHS Logo", url: "/images/bhs-logo.png", category: "other", chorus: "voices", alt: "BHS logo" },
+  { name: "MAD Logo", url: "/images/MAD_logo.gif", category: "other", chorus: "voices", alt: "MAD District logo" },
+];
+
+export async function seedExistingImages(createdBy?: string): Promise<{ added: number; skipped: number }> {
+  const existingImages = await getImages();
+  const existingUrls = new Set(existingImages.map(img => img.url));
+
+  let added = 0;
+  let skipped = 0;
+
+  for (const img of EXISTING_IMAGES) {
+    if (existingUrls.has(img.url)) {
+      skipped++;
+      continue;
+    }
+
+    await createImage({
+      name: img.name,
+      url: img.url,
+      category: img.category,
+      chorus: img.chorus,
+      alt: img.alt,
+      createdBy,
+    });
+    added++;
+  }
+
+  return { added, skipped };
 }
