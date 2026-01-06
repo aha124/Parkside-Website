@@ -7,14 +7,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useChorus } from "@/lib/chorus-context";
 
 // Logo and name configuration for each chorus
+// Note: Using same logo for now until custom logos are uploaded via admin
 const chorusConfig = {
   harmony: {
-    logo: "/images/harmony-logo.png",
+    logo: "/images/parkside-logo.png",
     name: "Parkside Harmony",
     tagline: "Bass Clef Chorus",
   },
   melody: {
-    logo: "/images/melody-logo.png",
+    logo: "/images/parkside-logo.png",
     name: "Parkside Melody",
     tagline: "Treble Clef Chorus",
   },

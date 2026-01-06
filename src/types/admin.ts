@@ -96,3 +96,18 @@ export interface YouTubeOEmbed {
   thumbnail_url: string;
   html: string;
 }
+
+// Site branding settings per chorus
+export interface ChorusBranding {
+  logoUrl?: string;
+  bannerUrl?: string;
+  heroImageUrl?: string;
+}
+
+export interface SiteSettings {
+  harmony: ChorusBranding;
+  melody: ChorusBranding;
+  voices: ChorusBranding;
+  updatedAt?: string;
+  updatedBy?: string;
+}

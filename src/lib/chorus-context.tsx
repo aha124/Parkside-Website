@@ -92,9 +92,12 @@ export function shouldShowForChorus(
   // If user selected "voices", show everything
   if (selectedChorus === "voices") return true;
 
-  // If content is tagged "voices", show it for all chorus selections
-  if (contentChorus === "voices") return true;
+  // Normalize contentChorus to lowercase for comparison
+  const normalizedChorus = contentChorus.toLowerCase();
 
-  // Otherwise, only show if it matches the selected chorus
-  return contentChorus === selectedChorus;
+  // If content is tagged "voices" or "both", show it for all chorus selections
+  if (normalizedChorus === "voices" || normalizedChorus === "both") return true;
+
+  // Otherwise, only show if it matches the selected chorus (case-insensitive)
+  return normalizedChorus === selectedChorus;
 }
