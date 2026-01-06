@@ -229,7 +229,7 @@ export default function EventsList({
                 onClick={() => setActiveFilter("harmony")}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeFilter === "harmony"
-                    ? "bg-blue-500 text-white"
+                    ? "bg-indigo-500 text-white"
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
               >
@@ -239,7 +239,7 @@ export default function EventsList({
                 onClick={() => setActiveFilter("melody")}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeFilter === "melody"
-                    ? "bg-pink-500 text-white"
+                    ? "bg-amber-500 text-white"
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
               >
@@ -277,8 +277,8 @@ export default function EventsList({
                     />
                     {event.chorus && (
                       <div className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-medium ${
-                        event.chorus.toLowerCase() === "harmony" ? "bg-blue-500 text-white" :
-                        event.chorus.toLowerCase() === "melody" ? "bg-pink-500 text-white" :
+                        event.chorus.toLowerCase() === "harmony" ? "bg-indigo-500 text-white" :
+                        event.chorus.toLowerCase() === "melody" ? "bg-amber-500 text-white" :
                         "bg-purple-500 text-white"
                       }`}>
                         {event.chorus.toLowerCase() === "voices" ? "Harmony & Melody" : `Parkside ${event.chorus.charAt(0).toUpperCase() + event.chorus.slice(1)}`}

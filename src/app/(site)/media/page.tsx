@@ -374,8 +374,8 @@ export default function MediaPage() {
                               )}
                               <span className="px-3 py-1 rounded-full text-sm font-medium capitalize"
                                 style={{
-                                  backgroundColor: video.chorus === 'harmony' ? '#3B82F6' :
-                                                video.chorus === 'melody' ? '#EC4899' : '#8B5CF6',
+                                  backgroundColor: video.chorus === 'harmony' ? '#6366F1' :
+                                                video.chorus === 'melody' ? '#F59E0B' : '#8B5CF6',
                                   color: 'white'
                                 }}
                               >

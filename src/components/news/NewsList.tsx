@@ -216,8 +216,8 @@ export default function NewsList({
                     )}
                     {item.chorus && (
                       <div className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-medium ${
-                        item.chorus.toLowerCase() === "harmony" ? "bg-blue-500 text-white" :
-                        item.chorus.toLowerCase() === "melody" ? "bg-pink-500 text-white" :
+                        item.chorus.toLowerCase() === "harmony" ? "bg-indigo-500 text-white" :
+                        item.chorus.toLowerCase() === "melody" ? "bg-amber-500 text-white" :
                         "bg-purple-500 text-white"
                       }`}>
                         {item.chorus.toLowerCase() === "voices" ? "Harmony & Melody" : `Parkside ${item.chorus.charAt(0).toUpperCase() + item.chorus.slice(1)}`}
