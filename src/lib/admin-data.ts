@@ -1,6 +1,6 @@
 import { kv } from "@vercel/kv";
 import { v4 as uuidv4 } from "uuid";
-import type { NewsItem, EventItem, VideoItem, SiteImage, AdminUser } from "@/types/admin";
+import type { NewsItem, EventItem, VideoItem, SiteImage, AdminUser, SiteSettings } from "@/types/admin";
 
 // KV Keys
 const KEYS = {
@@ -9,6 +9,7 @@ const KEYS = {
   VIDEOS: "admin:videos",
   IMAGES: "admin:images",
   ADMIN_USERS: "admin:users",
+  SITE_SETTINGS: "admin:site-settings",
 } as const;
 
 // ============ NEWS MANAGEMENT ============
@@ -321,4 +322,52 @@ export async function fetchYouTubeMetadata(videoIdOrUrl: string): Promise<{
     console.error("Error fetching YouTube metadata:", error);
     return null;
   }
+}
+
+// ============ SITE SETTINGS MANAGEMENT ============
+
+const DEFAULT_SITE_SETTINGS: SiteSettings = {
+  harmony: {
+    logoUrl: "/images/parkside-logo.png",
+    bannerUrl: "/images/harmony-banner.jpg",
+    heroImageUrl: "/images/harmony-hero.jpg",
+  },
+  melody: {
+    logoUrl: "/images/parkside-logo.png",
+    bannerUrl: "/images/melody-banner.jpg",
+    heroImageUrl: "/images/melody-hero.jpg",
+  },
+  voices: {
+    logoUrl: "/images/parkside-logo.png",
+    bannerUrl: "/images/parkside-banner.jpg",
+    heroImageUrl: "/images/parkside-hero.jpg",
+  },
+};
+
+export async function getSiteSettings(): Promise<SiteSettings> {
+  try {
+    const settings = await kv.get<SiteSettings>(KEYS.SITE_SETTINGS);
+    return settings || DEFAULT_SITE_SETTINGS;
+  } catch (error) {
+    console.error("Error fetching site settings:", error);
+    return DEFAULT_SITE_SETTINGS;
+  }
+}
+
+export async function updateSiteSettings(
+  data: Partial<SiteSettings>,
+  updatedBy?: string
+): Promise<SiteSettings> {
+  const current = await getSiteSettings();
+  const updated: SiteSettings = {
+    ...current,
+    ...data,
+    harmony: { ...current.harmony, ...data.harmony },
+    melody: { ...current.melody, ...data.melody },
+    voices: { ...current.voices, ...data.voices },
+    updatedAt: new Date().toISOString(),
+    updatedBy,
+  };
+  await kv.set(KEYS.SITE_SETTINGS, updated);
+  return updated;
 }

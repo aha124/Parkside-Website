@@ -11,6 +11,7 @@ import {
   Users,
   Settings,
   Home,
+  Palette,
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/admin/events", label: "Events", icon: Calendar },
   { href: "/admin/videos", label: "Videos", icon: Video },
   { href: "/admin/images", label: "Images", icon: Image },
+  { href: "/admin/branding", label: "Site Branding", icon: Palette },
   { href: "/admin/users", label: "Admin Users", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
