@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
+import { useChorus, shouldShowForChorus } from "@/lib/chorus-context";
 
 // Define the Event type
 export interface Event {
@@ -16,7 +17,7 @@ export interface Event {
   imageUrl: string;
   url?: string;
   location?: string;
-  chorus?: string; // e.g., "Harmony", "Melody", or "Both"
+  chorus?: string; // e.g., "harmony", "melody", or "voices"
 }
 
 interface EventsListProps {
@@ -45,6 +46,7 @@ export default function EventsList({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>("All");
+  const { chorus: selectedChorus } = useChorus();
 
   // Static fallback events in case the fetch fails
   const staticEvents: Event[] = [
@@ -56,7 +58,7 @@ export default function EventsList({
       imageUrl: "/images/event1.jpg",
       url: "/events/spring-concert",
       location: "Hershey Theatre",
-      chorus: "Both"
+      chorus: "voices"
     },
     {
       id: "2",
@@ -66,7 +68,7 @@ export default function EventsList({
       imageUrl: "/images/event2.jpg",
       url: "/events/district-competition",
       location: "Baltimore Convention Center",
-      chorus: "Harmony"
+      chorus: "harmony"
     },
     {
       id: "3",
@@ -76,7 +78,7 @@ export default function EventsList({
       imageUrl: "/images/event3.jpg",
       url: "/events/community-performance",
       location: "Hershey Community Center",
-      chorus: "Melody"
+      chorus: "melody"
     }
   ];
 
@@ -102,24 +104,31 @@ export default function EventsList({
     return formatted.split('\n').slice(0, 2).join(', ').replace(/\s+/g, ' ').trim();
   };
 
-  // Apply filters to events
+  // Apply filters to events - first filter by selected chorus from context, then by UI filter
   const applyFilters = (allEvents: Event[], filter: string) => {
-    if (filter === "All") {
-      return allEvents;
+    // First, filter by the selected chorus from context
+    let filtered = allEvents.filter(event =>
+      shouldShowForChorus(event.chorus, selectedChorus)
+    );
+
+    // Then apply UI filter if not "All"
+    if (filter !== "All") {
+      filtered = filtered.filter(event => {
+        const eventChorus = event.chorus?.toLowerCase();
+        if (filter === "harmony") {
+          return eventChorus === "harmony" || eventChorus === "voices";
+        }
+        if (filter === "melody") {
+          return eventChorus === "melody" || eventChorus === "voices";
+        }
+        if (filter === "voices") {
+          return eventChorus === "voices";
+        }
+        return true;
+      });
     }
-    
-    return allEvents.filter(event => {
-      if (filter === "Harmony") {
-        return event.chorus === "Harmony" || event.chorus === "Both";
-      }
-      if (filter === "Melody") {
-        return event.chorus === "Melody" || event.chorus === "Both";
-      }
-      if (filter === "Both") {
-        return event.chorus === "Both";
-      }
-      return true;
-    });
+
+    return filtered;
   };
 
   useEffect(() => {
@@ -180,10 +189,10 @@ export default function EventsList({
     fetchEvents();
   }, [dataSource, jsonUrl, apiUrl, maxEvents]);
 
-  // Update filtered events when filter changes
+  // Update filtered events when filter or selectedChorus changes
   useEffect(() => {
     setFilteredEvents(applyFilters(events, activeFilter).slice(0, maxEvents));
-  }, [activeFilter, events, maxEvents]);
+  }, [activeFilter, events, maxEvents, selectedChorus]);
 
   return (
     <section className="py-16 bg-gray-50">
@@ -209,38 +218,38 @@ export default function EventsList({
               <button
                 onClick={() => setActiveFilter("All")}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeFilter === "All" 
-                    ? "bg-gray-900 text-white" 
+                  activeFilter === "All"
+                    ? "bg-gray-900 text-white"
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
               >
                 All Events
               </button>
               <button
-                onClick={() => setActiveFilter("Harmony")}
+                onClick={() => setActiveFilter("harmony")}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeFilter === "Harmony" 
-                    ? "bg-blue-500 text-white" 
+                  activeFilter === "harmony"
+                    ? "bg-indigo-500 text-white"
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
               >
                 Parkside Harmony
               </button>
               <button
-                onClick={() => setActiveFilter("Melody")}
+                onClick={() => setActiveFilter("melody")}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeFilter === "Melody" 
-                    ? "bg-pink-500 text-white" 
+                  activeFilter === "melody"
+                    ? "bg-amber-500 text-white"
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
               >
                 Parkside Melody
               </button>
               <button
-                onClick={() => setActiveFilter("Both")}
+                onClick={() => setActiveFilter("voices")}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeFilter === "Both" 
-                    ? "bg-purple-500 text-white" 
+                  activeFilter === "voices"
+                    ? "bg-purple-500 text-white"
                     : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                 }`}
               >
@@ -268,11 +277,11 @@ export default function EventsList({
                     />
                     {event.chorus && (
                       <div className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-medium ${
-                        event.chorus === "Harmony" ? "bg-blue-500 text-white" :
-                        event.chorus === "Melody" ? "bg-pink-500 text-white" :
+                        event.chorus.toLowerCase() === "harmony" ? "bg-indigo-500 text-white" :
+                        event.chorus.toLowerCase() === "melody" ? "bg-amber-500 text-white" :
                         "bg-purple-500 text-white"
                       }`}>
-                        {event.chorus === "Both" ? "Harmony & Melody" : `Parkside ${event.chorus}`}
+                        {event.chorus.toLowerCase() === "voices" ? "Harmony & Melody" : `Parkside ${event.chorus.charAt(0).toUpperCase() + event.chorus.slice(1)}`}
                       </div>
                     )}
                   </div>

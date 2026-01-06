@@ -4,6 +4,26 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { useChorus } from "@/lib/chorus-context";
+
+// Logo and name configuration for each chorus
+const chorusConfig = {
+  harmony: {
+    logo: "/images/harmony-logo.png",
+    name: "Parkside Harmony",
+    tagline: "Bass Clef Chorus",
+  },
+  melody: {
+    logo: "/images/melody-logo.png",
+    name: "Parkside Melody",
+    tagline: "Treble Clef Chorus",
+  },
+  voices: {
+    logo: "/images/parkside-logo.png",
+    name: "Parkside Voices",
+    tagline: "Hershey Chapter - BHS",
+  },
+};
 
 const navItems = [
   { name: "Home", href: "/home" },
@@ -29,6 +49,8 @@ export default function Header() {
   const menuItemRef = useRef<HTMLDivElement>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { chorus, chorusLabel } = useChorus();
+  const currentConfig = chorusConfig[chorus];
 
   const handleMouseEnter = (itemName: string) => {
     if (timeoutRef.current) {
@@ -88,17 +110,16 @@ export default function Header() {
             >
               <div className="relative h-10 w-10">
                 <Image
-                  src="/images/parkside-logo.png"
-                  alt="Parkside Logo"
+                  src={currentConfig.logo}
+                  alt={`${currentConfig.name} Logo`}
                   fill
                   className="object-contain"
                 />
               </div>
-              <span className="text-xl font-bold">Parkside</span>
+              <span className="text-xl font-bold">{currentConfig.name}</span>
             </Link>
-            <div className="hidden sm:block text-xs text-gray-500">
-              <div>Hershey Chapter</div>
-              <div>Barbershop Harmony Society</div>
+            <div className="hidden sm:block text-xs text-gray-500 ml-2">
+              <div>{currentConfig.tagline}</div>
             </div>
           </div>
 

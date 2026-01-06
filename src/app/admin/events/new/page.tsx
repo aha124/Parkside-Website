@@ -18,7 +18,7 @@ export default function NewEventPage() {
     description: "",
     location: "",
     imageUrl: "",
-    chorus: "Both" as "Harmony" | "Melody" | "Both",
+    chorus: "voices" as "harmony" | "melody" | "voices",
     url: "",
   });
 
@@ -167,14 +167,14 @@ export default function NewEventPage() {
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  chorus: e.target.value as "Harmony" | "Melody" | "Both",
+                  chorus: e.target.value as "harmony" | "melody" | "voices",
                 })
               }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             >
-              <option value="Harmony">Parkside Harmony</option>
-              <option value="Melody">Parkside Melody</option>
-              <option value="Both">Both</option>
+              <option value="harmony">Parkside Harmony</option>
+              <option value="melody">Parkside Melody</option>
+              <option value="voices">Parkside Voices (Both)</option>
             </select>
           </div>
 

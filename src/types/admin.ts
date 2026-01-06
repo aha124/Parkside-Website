@@ -1,5 +1,8 @@
 // Admin content types
 
+// Chorus type used across all content
+export type ChorusTag = "harmony" | "melody" | "voices";
+
 export interface NewsItem {
   id: string;
   title: string;
@@ -8,6 +11,7 @@ export interface NewsItem {
   content?: string;
   imageUrl: string;
   url?: string;
+  chorus: ChorusTag;
   createdAt: string;
   updatedAt: string;
   createdBy?: string;
@@ -22,7 +26,7 @@ export interface EventItem {
   description: string;
   location: string;
   imageUrl: string;
-  chorus: "Harmony" | "Melody" | "Both";
+  chorus: ChorusTag;
   url?: string;
   // Admin override fields
   isManualOverride?: boolean;
@@ -39,7 +43,7 @@ export interface VideoItem {
   title: string;
   description: string;
   year: number;
-  chorus: "harmony" | "melody" | "both";
+  chorus: ChorusTag;
   competition?: string;
   placement?: string;
   thumbnailUrl?: string;
@@ -53,6 +57,7 @@ export interface SiteImage {
   name: string;
   url: string;
   category: "slideshow" | "hero" | "banner" | "progression" | "other";
+  chorus: ChorusTag;
   alt?: string;
   order?: number;
   createdAt: string;

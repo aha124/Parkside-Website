@@ -4,6 +4,8 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Upload, Loader2, X, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
+import ChorusSelector from "@/components/admin/ChorusSelector";
+import { ChorusTag } from "@/types/admin";
 
 export default function UploadImagePage() {
   const router = useRouter();
@@ -17,6 +19,7 @@ export default function UploadImagePage() {
     name: "",
     category: "other" as "slideshow" | "hero" | "banner" | "progression" | "other",
     alt: "",
+    chorus: "voices" as ChorusTag,
   });
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,6 +72,7 @@ export default function UploadImagePage() {
       uploadData.append("name", formData.name);
       uploadData.append("category", formData.category);
       uploadData.append("alt", formData.alt);
+      uploadData.append("chorus", formData.chorus);
 
       const response = await fetch("/api/admin/images/upload", {
         method: "POST",
@@ -230,6 +234,11 @@ export default function UploadImagePage() {
               placeholder="Describe the image for screen readers"
             />
           </div>
+
+          <ChorusSelector
+            value={formData.chorus}
+            onChange={(chorus) => setFormData({ ...formData, chorus })}
+          />
         </div>
 
         <div className="flex items-center justify-end gap-4">

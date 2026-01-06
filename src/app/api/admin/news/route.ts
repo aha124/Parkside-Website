@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { title, date, summary, content, imageUrl } = body;
+    const { title, date, summary, content, imageUrl, chorus } = body;
 
     if (!title || !date || !summary) {
       return NextResponse.json(
@@ -35,6 +35,7 @@ export async function POST(request: Request) {
       summary,
       content: content || "",
       imageUrl: imageUrl || "",
+      chorus: chorus || "voices",
       createdBy: session.user.email || undefined,
     });
 

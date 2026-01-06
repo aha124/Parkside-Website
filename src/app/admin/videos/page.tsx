@@ -81,11 +81,11 @@ export default async function AdminVideosPage() {
                       video.chorus === "harmony"
                         ? "bg-indigo-100 text-indigo-700"
                         : video.chorus === "melody"
-                        ? "bg-pink-100 text-pink-700"
+                        ? "bg-amber-100 text-amber-700"
                         : "bg-purple-100 text-purple-700"
                     }`}
                   >
-                    {video.chorus === "both"
+                    {video.chorus === "voices"
                       ? "Combined"
                       : video.chorus.charAt(0).toUpperCase() +
                         video.chorus.slice(1)}
