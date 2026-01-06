@@ -4,11 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Loader2 } from "lucide-react";
 
-interface AddUserFormProps {
-  currentUserEmail: string;
-}
-
-export default function AddUserForm({ currentUserEmail }: AddUserFormProps) {
+export default function AddUserForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

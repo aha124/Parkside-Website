@@ -21,7 +21,6 @@ export default function LeadershipProfile({
   bio,
   photoUrl,
   size = 'medium',
-  chorusAffiliation
 }: LeadershipProfileProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -33,11 +32,6 @@ export default function LeadershipProfile({
 
   // Split bio into paragraphs
   const bioParagraphs = bio?.split('\n\n') || [];
-
-  const getAffiliationBadge = () => {
-    // Keeping the function but returning null to hide badges
-    return null;
-  };
 
   return (
     <>

@@ -20,7 +20,7 @@ export default function Footer() {
               <span className="text-xl font-bold">Parkside</span>
             </div>
             <p className="text-gray-400 mb-4">
-              Parkside Harmony & Parkside Melody are a cappella 'barbershop' choruses right here in Hershey, PA! We are extremely proud and fortunate to join an already thriving arts community here in the 'Sweetest Place on Earth' - and welcome passionate singers from all over the mid-atlantic region who strive for musical excellence.
+              Parkside Harmony &amp; Parkside Melody are a cappella &quot;barbershop&quot; choruses right here in Hershey, PA! We are extremely proud and fortunate to join an already thriving arts community here in the &quot;Sweetest Place on Earth&quot; - and welcome passionate singers from all over the mid-atlantic region who strive for musical excellence.
             </p>
             <div className="flex flex-wrap gap-4">
               {/* Harmony Facebook */}

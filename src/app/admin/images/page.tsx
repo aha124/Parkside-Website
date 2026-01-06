@@ -1,6 +1,6 @@
 import { getImages } from "@/lib/admin-data";
 import Link from "next/link";
-import { Plus, Edit, Copy, Trash2 } from "lucide-react";
+import { Plus, Edit } from "lucide-react";
 import DeleteButton from "@/components/admin/DeleteButton";
 import CopyUrlButton from "@/components/admin/CopyUrlButton";
 

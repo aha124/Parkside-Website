@@ -1,6 +1,6 @@
 import { getVideos } from "@/lib/admin-data";
 import Link from "next/link";
-import { Plus, Edit, Trash2, ExternalLink } from "lucide-react";
+import { Plus, Edit, ExternalLink } from "lucide-react";
 import DeleteButton from "@/components/admin/DeleteButton";
 
 export default async function AdminVideosPage() {

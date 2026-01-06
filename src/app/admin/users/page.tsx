@@ -22,7 +22,7 @@ export default async function AdminUsersPage() {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
           Add Admin User
         </h2>
-        <AddUserForm currentUserEmail={session?.user?.email || ""} />
+        <AddUserForm />
       </div>
 
       {/* Users List */}
