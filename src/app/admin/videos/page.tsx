@@ -85,7 +85,7 @@ export default async function AdminVideosPage() {
                         : "bg-purple-100 text-purple-700"
                     }`}
                   >
-                    {video.chorus === "both"
+                    {video.chorus === "voices"
                       ? "Combined"
                       : video.chorus.charAt(0).toUpperCase() +
                         video.chorus.slice(1)}

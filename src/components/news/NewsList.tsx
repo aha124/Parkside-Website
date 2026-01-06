@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
+import { useChorus, shouldShowForChorus } from "@/lib/chorus-context";
 
 // Define the News type
 export interface NewsItem {
@@ -13,6 +14,7 @@ export interface NewsItem {
   summary: string;
   imageUrl: string;
   url: string;
+  chorus?: string; // e.g., "harmony", "melody", or "voices"
 }
 
 interface NewsListProps {
@@ -28,9 +30,11 @@ export default function NewsList({
   showViewAllButton = false,
   viewAllUrl = "/news"
 }: NewsListProps) {
+  const [allNews, setAllNews] = useState<NewsItem[]>([]);
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { chorus: selectedChorus } = useChorus();
 
   // Static fallback news in case the fetch fails
   const staticNews: NewsItem[] = [
@@ -40,7 +44,8 @@ export default function NewsList({
       date: "February 28, 2025",
       summary: "We're excited to announce our new Music Director who brings 20 years of barbershop experience to our chorus.",
       imageUrl: "/images/news1.jpg",
-      url: "/news/new-director"
+      url: "/news/new-director",
+      chorus: "harmony"
     },
     {
       id: "2",
@@ -48,15 +53,17 @@ export default function NewsList({
       date: "February 15, 2025",
       summary: "Our chorus has been recognized for outstanding musical performance at the regional barbershop competition.",
       imageUrl: "/images/news2.jpg",
-      url: "/news/excellence-award"
+      url: "/news/excellence-award",
+      chorus: "voices"
     },
     {
       id: "3",
       title: "Annual Fundraiser Exceeds Goals",
       date: "January 30, 2025",
       summary: "Thanks to our generous supporters, we've exceeded our fundraising goals for the year, allowing us to expand our community programs.",
-      imageUrl: "/images/news1.jpg", // Reusing news1.jpg as fallback
-      url: "/news/fundraiser-success"
+      imageUrl: "/images/news1.jpg",
+      url: "/news/fundraiser-success",
+      chorus: "voices"
     }
   ];
 
@@ -105,9 +112,9 @@ export default function NewsList({
         if (!response.ok) {
           throw new Error(`Failed to fetch news: ${response.status}`);
         }
-        
+
         const fetchedNews = await response.json();
-        
+
         // If we have news data, use it
         if (fetchedNews && fetchedNews.length > 0) {
           // Map over the fetched news and ensure each item has valid URLs
@@ -117,25 +124,33 @@ export default function NewsList({
             // Ensure the URL is properly formatted
             url: item.url || '/news'
           }));
-          
-          setNewsItems(processedNews.slice(0, maxItems));
+
+          setAllNews(processedNews);
         } else {
           // Otherwise use static news
-          setNewsItems(staticNews.slice(0, maxItems));
+          setAllNews(staticNews);
         }
-        
+
         setError(null);
       } catch (err) {
         console.error("Error fetching news:", err);
         setError("Failed to load news. Using fallback data.");
-        setNewsItems(staticNews.slice(0, maxItems));
+        setAllNews(staticNews);
       } finally {
         setLoading(false);
       }
     };
 
     fetchNews();
-  }, [maxItems]);
+  }, []);
+
+  // Filter news by selected chorus
+  useEffect(() => {
+    const filtered = allNews
+      .filter(item => shouldShowForChorus(item.chorus, selectedChorus))
+      .slice(0, maxItems);
+    setNewsItems(filtered);
+  }, [allNews, selectedChorus, maxItems]);
 
   return (
     <section className="py-16">
@@ -198,6 +213,15 @@ export default function NewsList({
                           target.src = "/images/news1.jpg";
                         }}
                       />
+                    )}
+                    {item.chorus && (
+                      <div className={`absolute top-2 right-2 px-3 py-1 rounded-full text-xs font-medium ${
+                        item.chorus.toLowerCase() === "harmony" ? "bg-blue-500 text-white" :
+                        item.chorus.toLowerCase() === "melody" ? "bg-pink-500 text-white" :
+                        "bg-purple-500 text-white"
+                      }`}>
+                        {item.chorus.toLowerCase() === "voices" ? "Harmony & Melody" : `Parkside ${item.chorus.charAt(0).toUpperCase() + item.chorus.slice(1)}`}
+                      </div>
                     )}
                   </div>
                   <div className="p-6 flex-grow">

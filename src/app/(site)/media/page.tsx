@@ -6,6 +6,7 @@ import HeroSection from "@/components/ui/HeroSection";
 import dynamic from "next/dynamic";
 import type { YouTubeProps } from "react-youtube";
 import { useState, useMemo, useEffect } from "react";
+import { useChorus, shouldShowForChorus } from "@/lib/chorus-context";
 
 // Dynamically import YouTube component to avoid SSR issues
 const YouTube = dynamic(() => import("react-youtube"), { ssr: false });
@@ -16,7 +17,7 @@ interface VideoData {
   title: string;
   description: string;
   year: number;
-  chorus: "harmony" | "melody" | "both";
+  chorus: "harmony" | "melody" | "voices";
   competition?: string;
   placement?: string;
 }
@@ -208,17 +209,18 @@ const fallbackVideos: VideoData[] = [
     title: "Parkside Virtual Performance - The Way We Were",
     description: "Special virtual collaboration between Parkside Harmony and Parkside Melody during the pandemic",
     year: 2020,
-    chorus: "both"
+    chorus: "voices"
   }
 ];
 
-type FilterType = "all" | "harmony" | "melody" | "both" | "competition";
+type FilterType = "all" | "harmony" | "melody" | "voices" | "competition";
 
 export default function MediaPage() {
   const [videos, setVideos] = useState<VideoData[]>(fallbackVideos);
   const [filter, setFilter] = useState<FilterType>("all");
   const [visibleCount, setVisibleCount] = useState(6);
   const [loading, setLoading] = useState(true);
+  const { chorus: selectedChorus } = useChorus();
 
   // Fetch admin-managed videos
   useEffect(() => {
@@ -229,9 +231,11 @@ export default function MediaPage() {
           const data = await response.json();
           if (data.success && data.data && data.data.length > 0) {
             // Map admin videos to the expected format
-            const adminVideos = data.data.map((v: { id: string; youtubeId: string; title: string; description: string; year: number; chorus: "harmony" | "melody" | "both"; competition?: string; placement?: string }) => ({
+            const adminVideos = data.data.map((v: { id: string; youtubeId: string; title: string; description: string; year: number; chorus: "harmony" | "melody" | "voices" | "both"; competition?: string; placement?: string }) => ({
               ...v,
               id: v.youtubeId, // Use youtubeId as the display id
+              // Normalize "both" to "voices" for consistency
+              chorus: v.chorus === "both" ? "voices" : v.chorus,
             }));
             setVideos(adminVideos);
           }
@@ -261,12 +265,14 @@ export default function MediaPage() {
     },
   };
 
-  // Filter and sort videos
+  // Filter and sort videos - first by global chorus context, then by UI filter
   const filteredVideos = videos
+    .filter(video => shouldShowForChorus(video.chorus, selectedChorus))
     .filter(video => {
       if (filter === "all") return true;
       if (filter === "competition") return !!video.competition;
-      return video.chorus === filter;
+      if (filter === "voices") return video.chorus === "voices";
+      return video.chorus === filter || video.chorus === "voices";
     })
     .sort((a, b) => b.year - a.year);
 
@@ -302,7 +308,7 @@ export default function MediaPage() {
                 { label: "All Performances", value: "all" },
                 { label: "Parkside Harmony", value: "harmony" },
                 { label: "Parkside Melody", value: "melody" },
-                { label: "Combined", value: "both" },
+                { label: "Combined", value: "voices" },
                 { label: "Competition Sets", value: "competition" },
               ].map((option) => (
                 <button
@@ -368,12 +374,12 @@ export default function MediaPage() {
                               )}
                               <span className="px-3 py-1 rounded-full text-sm font-medium capitalize"
                                 style={{
-                                  backgroundColor: video.chorus === 'harmony' ? '#4F46E5' :
-                                                video.chorus === 'melody' ? '#EC4899' : '#6366F1',
+                                  backgroundColor: video.chorus === 'harmony' ? '#3B82F6' :
+                                                video.chorus === 'melody' ? '#EC4899' : '#8B5CF6',
                                   color: 'white'
                                 }}
                               >
-                                {video.chorus === 'both' ? 'Combined' : video.chorus}
+                                {video.chorus === 'voices' ? 'Combined' : video.chorus}
                               </span>
                             </div>
                           </div>
