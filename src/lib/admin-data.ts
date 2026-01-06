@@ -119,7 +119,7 @@ export async function hideScrapedEvent(originalId: string, createdBy?: string): 
     description: "",
     location: "",
     imageUrl: "",
-    chorus: "Both",
+    chorus: "voices",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     createdBy,

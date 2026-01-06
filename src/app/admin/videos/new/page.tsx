@@ -17,7 +17,7 @@ export default function NewVideoPage() {
     title: "",
     description: "",
     year: new Date().getFullYear(),
-    chorus: "harmony" as "harmony" | "melody" | "both",
+    chorus: "voices" as "harmony" | "melody" | "voices",
     competition: "",
     placement: "",
     thumbnailUrl: "",
@@ -246,14 +246,14 @@ export default function NewVideoPage() {
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    chorus: e.target.value as "harmony" | "melody" | "both",
+                    chorus: e.target.value as "harmony" | "melody" | "voices",
                   })
                 }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               >
                 <option value="harmony">Parkside Harmony</option>
                 <option value="melody">Parkside Melody</option>
-                <option value="both">Both / Combined</option>
+                <option value="voices">Parkside Voices (Both)</option>
               </select>
             </div>
 

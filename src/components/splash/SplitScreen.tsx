@@ -2,11 +2,19 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useChorus, ChorusType } from "@/lib/chorus-context";
 
 const SplitScreen = () => {
   const [hoveredSide, setHoveredSide] = useState<"left" | "right" | "center" | null>(null);
+  const { setChorus } = useChorus();
+  const router = useRouter();
+
+  const handleChorusSelect = (chorus: ChorusType) => {
+    setChorus(chorus);
+    router.push("/home");
+  };
 
   return (
     <div className="h-screen w-screen flex relative overflow-hidden">
@@ -55,12 +63,13 @@ const SplitScreen = () => {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-5xl font-bold mb-4">Parkside Harmony</h2>
-          <p className="text-xl max-w-md mx-auto">Award-winning men&apos;s a cappella chorus performing in the barbershop tradition.</p>
-          <Link href="/choruses/harmony">
-            <button className="mt-6 px-6 py-2 bg-white text-gray-900 rounded-md font-medium hover:bg-gray-100 transition-colors">
-              Learn More
-            </button>
-          </Link>
+          <p className="text-xl max-w-md mx-auto">Award-winning bass clef a cappella chorus performing in the barbershop tradition.</p>
+          <button
+            onClick={() => handleChorusSelect("harmony")}
+            className="mt-6 px-6 py-2 bg-white text-gray-900 rounded-md font-medium hover:bg-gray-100 transition-colors"
+          >
+            Enter
+          </button>
         </motion.div>
       </motion.div>
 
@@ -74,11 +83,14 @@ const SplitScreen = () => {
         onMouseEnter={() => setHoveredSide("center")}
         onMouseLeave={() => setHoveredSide(null)}
       >
-        <Link href="/home" className="flex flex-col items-center">
+        <button
+          onClick={() => handleChorusSelect("voices")}
+          className="flex flex-col items-center cursor-pointer"
+        >
           <div className="bg-white rounded-full shadow-lg flex items-center justify-center" style={{ width: '240px', height: '240px' }}>
-            <Image 
-              src="/images/parkside-logo copy.png" 
-              alt="Parkside Barbershop Harmony Society"
+            <Image
+              src="/images/parkside-logo copy.png"
+              alt="Parkside Voices"
               width={230}
               height={230}
               className="object-contain"
@@ -86,10 +98,10 @@ const SplitScreen = () => {
             />
           </div>
           <div className="text-white text-center mt-4 bg-black/50 px-6 py-3 rounded-md">
-            <p className="font-medium text-lg">Hershey Chapter</p>
-            <p className="text-base">Barbershop Harmony Society</p>
+            <p className="font-medium text-lg">Parkside Voices</p>
+            <p className="text-base">Hershey Chapter - BHS</p>
           </div>
-        </Link>
+        </button>
       </motion.div>
 
       {/* Right Side - Parkside Melody */}
@@ -135,12 +147,13 @@ const SplitScreen = () => {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-5xl font-bold mb-4">Parkside Melody</h2>
-          <p className="text-xl max-w-md mx-auto">Exceptional treble chorus bringing vibrant a cappella performances to the Hershey area.</p>
-          <Link href="/choruses/melody">
-            <button className="mt-6 px-6 py-2 bg-white text-gray-900 rounded-md font-medium hover:bg-gray-100 transition-colors">
-              Learn More
-            </button>
-          </Link>
+          <p className="text-xl max-w-md mx-auto">Exceptional treble clef chorus bringing vibrant a cappella performances to the Hershey area.</p>
+          <button
+            onClick={() => handleChorusSelect("melody")}
+            className="mt-6 px-6 py-2 bg-white text-gray-900 rounded-md font-medium hover:bg-gray-100 transition-colors"
+          >
+            Enter
+          </button>
         </motion.div>
       </motion.div>
     </div>

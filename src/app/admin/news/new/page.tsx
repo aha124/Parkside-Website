@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
+import ChorusSelector from "@/components/admin/ChorusSelector";
+import { ChorusTag } from "@/types/admin";
 
 export default function NewNewsPage() {
   const router = useRouter();
@@ -20,6 +22,7 @@ export default function NewNewsPage() {
     summary: "",
     content: "",
     imageUrl: "",
+    chorus: "voices" as ChorusTag,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -172,6 +175,11 @@ export default function NewNewsPage() {
               here
             </p>
           </div>
+
+          <ChorusSelector
+            value={formData.chorus}
+            onChange={(chorus) => setFormData({ ...formData, chorus })}
+          />
         </div>
 
         <div className="flex items-center justify-end gap-4">

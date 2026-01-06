@@ -15,6 +15,7 @@ export async function POST(request: Request) {
     const name = formData.get("name") as string;
     const category = formData.get("category") as string;
     const alt = formData.get("alt") as string;
+    const chorus = (formData.get("chorus") as string) || "voices";
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -40,6 +41,7 @@ export async function POST(request: Request) {
       name,
       url: blob.url,
       category: category as "slideshow" | "hero" | "banner" | "progression" | "other",
+      chorus: chorus as "harmony" | "melody" | "voices",
       alt: alt || undefined,
       createdBy: session.user.email || undefined,
     });
