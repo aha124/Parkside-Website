@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Upload, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
+import { ImageIcon, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import type { SiteSettings, PageKey, ChorusKey } from "@/types/admin";
+import ImagePickerModal from "@/components/admin/ImagePickerModal";
 
 // Utility to process images before upload
 // - Adds white background to transparent PNGs (fixes black background issue)
@@ -116,13 +117,21 @@ const pageInfo: Record<PageKey, { name: string; description: string }> = {
 const pages: PageKey[] = ["home", "about", "join", "media", "donate", "events", "gear", "contact"];
 const choruses: ChorusKey[] = ["harmony", "melody", "voices"];
 
+// Types for image picker modal state
+interface PickerState {
+  isOpen: boolean;
+  type: "logo" | "banner" | "splash" | "heroSlide";
+  chorus: ChorusKey;
+  page?: PageKey;
+}
+
 export default function BrandingPage() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ logos: true, home: true });
-  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ logos: true, splash: true });
+  const [pickerState, setPickerState] = useState<PickerState | null>(null);
 
   useEffect(() => {
     fetchSettings();
@@ -143,137 +152,161 @@ export default function BrandingPage() {
     }
   };
 
-  const handleFileUpload = async (
-    type: "logo" | "banner" | "splash" | "heroSlide",
-    chorus: ChorusKey,
-    page?: PageKey,
-    file?: File
-  ) => {
-    if (!file) return;
+  const openPicker = (type: PickerState["type"], chorus: ChorusKey, page?: PageKey) => {
+    setPickerState({ isOpen: true, type, chorus, page });
+  };
 
-    const uploadKey = type === "logo" ? `logo-${chorus}`
-      : type === "splash" ? `splash-${chorus}`
-      : type === "heroSlide" ? `heroSlide-${chorus}`
-      : `banner-${page}-${chorus}`;
-    setUploading(uploadKey);
+  const closePicker = () => {
+    setPickerState(null);
+  };
+
+  const handleImageSelect = async (imageUrl: string) => {
+    if (!pickerState || !settings) return;
+
+    const { type, chorus, page } = pickerState;
+    setSaving(true);
     setMessage(null);
 
     try {
-      // Process image: add white background for logos (fixes transparent PNG issue)
-      // Also compress if needed (logos: 1MB max, banners/backgrounds: 2MB max)
-      const processedFile = await processImage(file, {
-        maxSizeMB: type === "logo" ? 1 : 2,
-        maxDimension: type === "logo" ? 500 : 2000,
-        addWhiteBackground: type === "logo", // Add white background to logos
-      });
-
-      const formData = new FormData();
-      formData.append("file", processedFile);
-
-      // Set name and metadata based on type
-      const nameMap = {
-        logo: `${chorus}-logo`,
-        splash: `${chorus}-splash-bg`,
-        heroSlide: `${chorus}-hero-slide-bg`,
-        banner: `${page}-${chorus}-banner`,
-      };
-      const altMap = {
-        logo: `${chorusInfo[chorus].name} logo`,
-        splash: `${chorusInfo[chorus].name} splash background`,
-        heroSlide: `${chorusInfo[chorus].name} hero slideshow background`,
-        banner: `${pageInfo[page!].name} banner for ${chorusInfo[chorus].name}`,
-      };
-
-      formData.append("name", nameMap[type]);
-      formData.append("category", type === "logo" ? "other" : type === "heroSlide" ? "slideshow" : "banner");
-      formData.append("alt", altMap[type]);
-      formData.append("chorus", chorus);
-
-      const uploadResponse = await fetch("/api/admin/images/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const uploadData = await uploadResponse.json();
-      if (!uploadData.success) {
-        throw new Error(uploadData.error || "Upload failed");
-      }
-
-      // Update settings with new URL
       let newSettings: SiteSettings;
       if (type === "logo") {
         newSettings = {
-          ...settings!,
+          ...settings,
           logos: {
-            ...settings!.logos,
-            [chorus]: uploadData.data.url,
+            ...settings.logos,
+            [chorus]: imageUrl,
           },
         };
       } else if (type === "splash") {
         newSettings = {
-          ...settings!,
+          ...settings,
           splashBackgrounds: {
-            ...settings!.splashBackgrounds,
-            [chorus]: uploadData.data.url,
+            ...settings.splashBackgrounds,
+            [chorus]: imageUrl,
           },
         };
       } else if (type === "heroSlide") {
         newSettings = {
-          ...settings!,
+          ...settings,
           heroSlideBackground: {
-            ...settings!.heroSlideBackground,
-            [chorus]: uploadData.data.url,
+            ...settings.heroSlideBackground,
+            [chorus]: imageUrl,
           },
         };
       } else {
         newSettings = {
-          ...settings!,
+          ...settings,
           pageBanners: {
-            ...settings!.pageBanners,
+            ...settings.pageBanners,
             [page!]: {
-              ...settings!.pageBanners[page!],
-              [chorus]: uploadData.data.url,
+              ...settings.pageBanners[page!],
+              [chorus]: imageUrl,
             },
           },
         };
       }
-      setSettings(newSettings);
 
-      // Save to server
+      setSettings(newSettings);
       await saveSettings(newSettings);
       setMessage({ type: "success", text: "Image updated successfully!" });
     } catch (error) {
-      console.error("Error uploading:", error);
-      setMessage({ type: "error", text: "Failed to upload image" });
+      console.error("Error updating image:", error);
+      setMessage({ type: "error", text: "Failed to update image" });
     } finally {
-      setUploading(null);
+      setSaving(false);
+      closePicker();
     }
   };
 
   const saveSettings = async (settingsToSave: SiteSettings) => {
-    try {
-      const response = await fetch("/api/admin/site-settings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settingsToSave),
-      });
+    const response = await fetch("/api/admin/site-settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(settingsToSave),
+    });
 
-      const data = await response.json();
-      if (!data.success) {
-        throw new Error(data.error);
-      }
-    } catch (error) {
-      console.error("Error saving settings:", error);
-      setMessage({ type: "error", text: "Failed to save settings" });
+    const data = await response.json();
+    if (!data.success) {
+      throw new Error(data.error);
     }
-  };
-
-  const triggerFileInput = (key: string) => {
-    fileInputRefs.current[key]?.click();
   };
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  // Get upload config for the image picker modal
+  const getUploadConfig = () => {
+    if (!pickerState) return undefined;
+    const { type, chorus, page } = pickerState;
+
+    const nameMap = {
+      logo: `${chorus}-logo`,
+      splash: `${chorus}-splash-bg`,
+      heroSlide: `${chorus}-hero-slide-bg`,
+      banner: `${page}-${chorus}-banner`,
+    };
+    const altMap = {
+      logo: `${chorusInfo[chorus].name} logo`,
+      splash: `${chorusInfo[chorus].name} splash background`,
+      heroSlide: `${chorusInfo[chorus].name} hero slideshow background`,
+      banner: page ? `${pageInfo[page].name} banner for ${chorusInfo[chorus].name}` : "",
+    };
+    const categoryMap = {
+      logo: "other",
+      splash: "banner",
+      heroSlide: "slideshow",
+      banner: "banner",
+    };
+
+    return {
+      name: nameMap[type],
+      category: categoryMap[type],
+      alt: altMap[type],
+      chorus,
+      processImage: type === "logo"
+        ? (file: File) => processImage(file, { maxSizeMB: 1, maxDimension: 500, addWhiteBackground: true })
+        : (file: File) => processImage(file, { maxSizeMB: 2, maxDimension: 2000 }),
+    };
+  };
+
+  // Get current image for the picker
+  const getCurrentImage = () => {
+    if (!pickerState || !settings) return undefined;
+    const { type, chorus, page } = pickerState;
+
+    switch (type) {
+      case "logo":
+        return settings.logos?.[chorus];
+      case "splash":
+        return settings.splashBackgrounds?.[chorus];
+      case "heroSlide":
+        return settings.heroSlideBackground?.[chorus];
+      case "banner":
+        return settings.pageBanners?.[page!]?.[chorus];
+      default:
+        return undefined;
+    }
+  };
+
+  // Get picker title
+  const getPickerTitle = () => {
+    if (!pickerState) return "Select Image";
+    const { type, chorus, page } = pickerState;
+    const chorusName = chorusInfo[chorus].name;
+
+    switch (type) {
+      case "logo":
+        return `Select ${chorusName} Logo`;
+      case "splash":
+        return `Select ${chorusName} Splash Background`;
+      case "heroSlide":
+        return `Select ${chorusName} Hero Slideshow Background`;
+      case "banner":
+        return `Select ${pageInfo[page!].name} Banner for ${chorusName}`;
+      default:
+        return "Select Image";
+    }
   };
 
   if (loading) {
@@ -289,7 +322,7 @@ export default function BrandingPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Site Branding</h1>
         <p className="text-gray-600 mt-1">
-          Manage logos and page banners for each chorus. Each page can have different images depending on which chorus the visitor selected.
+          Manage logos and page banners for each chorus. Click any image slot to select from the library or upload a new image.
         </p>
       </div>
 
@@ -302,6 +335,15 @@ export default function BrandingPage() {
           }`}
         >
           {message.text}
+        </div>
+      )}
+
+      {saving && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-40">
+          <div className="bg-white rounded-lg px-6 py-4 flex items-center gap-3 shadow-lg">
+            <RefreshCw className="w-5 h-5 animate-spin text-indigo-600" />
+            <span>Saving...</span>
+          </div>
         </div>
       )}
 
@@ -322,7 +364,10 @@ export default function BrandingPage() {
                 <label className={`block text-sm font-medium mb-2 ${chorusInfo[chorus].color}`}>
                   {chorusInfo[chorus].name} Logo
                 </label>
-                <div className={`border-2 border-dashed rounded-lg p-4 text-center ${chorusInfo[chorus].bgColor} border-gray-300`}>
+                <button
+                  onClick={() => openPicker("logo", chorus)}
+                  className={`w-full border-2 border-dashed rounded-lg p-4 text-center ${chorusInfo[chorus].bgColor} border-gray-300 hover:border-gray-400 hover:bg-opacity-70 transition-all cursor-pointer group`}
+                >
                   {settings?.logos?.[chorus] ? (
                     <div className="relative h-20 w-20 mx-auto mb-2">
                       <Image
@@ -334,32 +379,13 @@ export default function BrandingPage() {
                     </div>
                   ) : (
                     <div className="h-20 w-20 mx-auto mb-2 bg-white/50 rounded flex items-center justify-center">
-                      <span className="text-gray-400 text-xs">No logo</span>
+                      <ImageIcon className="w-8 h-8 text-gray-400" />
                     </div>
                   )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    ref={(el) => { fileInputRefs.current[`logo-${chorus}`] = el; }}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileUpload("logo", chorus, undefined, file);
-                    }}
-                  />
-                  <button
-                    onClick={() => triggerFileInput(`logo-${chorus}`)}
-                    disabled={uploading === `logo-${chorus}`}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-white hover:bg-gray-50 rounded-md transition-colors disabled:opacity-50 border border-gray-300"
-                  >
-                    {uploading === `logo-${chorus}` ? (
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Upload className="w-4 h-4" />
-                    )}
-                    Upload
-                  </button>
-                </div>
+                  <span className="text-sm text-gray-600 group-hover:text-gray-900">
+                    {settings?.logos?.[chorus] ? "Change Image" : "Select Image"}
+                  </span>
+                </button>
               </div>
             ))}
           </div>
@@ -386,7 +412,10 @@ export default function BrandingPage() {
                 <label className={`block text-sm font-medium mb-2 ${chorusInfo[chorus].color}`}>
                   {chorusInfo[chorus].name} Background
                 </label>
-                <div className={`border-2 border-dashed rounded-lg p-3 text-center ${chorusInfo[chorus].bgColor} border-gray-300`}>
+                <button
+                  onClick={() => openPicker("splash", chorus)}
+                  className={`w-full border-2 border-dashed rounded-lg p-3 text-center ${chorusInfo[chorus].bgColor} border-gray-300 hover:border-gray-400 hover:bg-opacity-70 transition-all cursor-pointer group`}
+                >
                   {settings?.splashBackgrounds?.[chorus] ? (
                     <div className="relative h-24 w-full mb-2">
                       <Image
@@ -398,32 +427,13 @@ export default function BrandingPage() {
                     </div>
                   ) : (
                     <div className="h-24 w-full mb-2 bg-white/50 rounded flex items-center justify-center">
-                      <span className="text-gray-400 text-xs">No background set</span>
+                      <ImageIcon className="w-8 h-8 text-gray-400" />
                     </div>
                   )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    ref={(el) => { fileInputRefs.current[`splash-${chorus}`] = el; }}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileUpload("splash", chorus, undefined, file);
-                    }}
-                  />
-                  <button
-                    onClick={() => triggerFileInput(`splash-${chorus}`)}
-                    disabled={uploading === `splash-${chorus}`}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-white hover:bg-gray-50 rounded-md transition-colors disabled:opacity-50 border border-gray-300"
-                  >
-                    {uploading === `splash-${chorus}` ? (
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Upload className="w-4 h-4" />
-                    )}
-                    Upload
-                  </button>
-                </div>
+                  <span className="text-sm text-gray-600 group-hover:text-gray-900">
+                    {settings?.splashBackgrounds?.[chorus] ? "Change Image" : "Select Image"}
+                  </span>
+                </button>
               </div>
             ))}
           </div>
@@ -450,7 +460,10 @@ export default function BrandingPage() {
                 <label className={`block text-sm font-medium mb-2 ${chorusInfo[chorus].color}`}>
                   {chorusInfo[chorus].name} Hero Background
                 </label>
-                <div className={`border-2 border-dashed rounded-lg p-3 text-center ${chorusInfo[chorus].bgColor} border-gray-300`}>
+                <button
+                  onClick={() => openPicker("heroSlide", chorus)}
+                  className={`w-full border-2 border-dashed rounded-lg p-3 text-center ${chorusInfo[chorus].bgColor} border-gray-300 hover:border-gray-400 hover:bg-opacity-70 transition-all cursor-pointer group`}
+                >
                   {settings?.heroSlideBackground?.[chorus] ? (
                     <div className="relative h-24 w-full mb-2">
                       <Image
@@ -462,32 +475,13 @@ export default function BrandingPage() {
                     </div>
                   ) : (
                     <div className="h-24 w-full mb-2 bg-white/50 rounded flex items-center justify-center">
-                      <span className="text-gray-400 text-xs">No background set</span>
+                      <ImageIcon className="w-8 h-8 text-gray-400" />
                     </div>
                   )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    ref={(el) => { fileInputRefs.current[`heroSlide-${chorus}`] = el; }}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileUpload("heroSlide", chorus, undefined, file);
-                    }}
-                  />
-                  <button
-                    onClick={() => triggerFileInput(`heroSlide-${chorus}`)}
-                    disabled={uploading === `heroSlide-${chorus}`}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-white hover:bg-gray-50 rounded-md transition-colors disabled:opacity-50 border border-gray-300"
-                  >
-                    {uploading === `heroSlide-${chorus}` ? (
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Upload className="w-4 h-4" />
-                    )}
-                    Upload
-                  </button>
-                </div>
+                  <span className="text-sm text-gray-600 group-hover:text-gray-900">
+                    {settings?.heroSlideBackground?.[chorus] ? "Change Image" : "Select Image"}
+                  </span>
+                </button>
               </div>
             ))}
           </div>
@@ -515,7 +509,10 @@ export default function BrandingPage() {
                   <label className={`block text-sm font-medium mb-2 ${chorusInfo[chorus].color}`}>
                     {chorusInfo[chorus].name} Banner
                   </label>
-                  <div className={`border-2 border-dashed rounded-lg p-3 text-center ${chorusInfo[chorus].bgColor} border-gray-300`}>
+                  <button
+                    onClick={() => openPicker("banner", chorus, page)}
+                    className={`w-full border-2 border-dashed rounded-lg p-3 text-center ${chorusInfo[chorus].bgColor} border-gray-300 hover:border-gray-400 hover:bg-opacity-70 transition-all cursor-pointer group`}
+                  >
                     {settings?.pageBanners?.[page]?.[chorus] ? (
                       <div className="relative h-24 w-full mb-2">
                         <Image
@@ -527,32 +524,13 @@ export default function BrandingPage() {
                       </div>
                     ) : (
                       <div className="h-24 w-full mb-2 bg-white/50 rounded flex items-center justify-center">
-                        <span className="text-gray-400 text-xs">No banner</span>
+                        <ImageIcon className="w-8 h-8 text-gray-400" />
                       </div>
                     )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      ref={(el) => { fileInputRefs.current[`banner-${page}-${chorus}`] = el; }}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleFileUpload("banner", chorus, page, file);
-                      }}
-                    />
-                    <button
-                      onClick={() => triggerFileInput(`banner-${page}-${chorus}`)}
-                      disabled={uploading === `banner-${page}-${chorus}`}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-white hover:bg-gray-50 rounded-md transition-colors disabled:opacity-50 border border-gray-300"
-                    >
-                      {uploading === `banner-${page}-${chorus}` ? (
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Upload className="w-4 h-4" />
-                      )}
-                      Upload
-                    </button>
-                  </div>
+                    <span className="text-sm text-gray-600 group-hover:text-gray-900">
+                      {settings?.pageBanners?.[page]?.[chorus] ? "Change Image" : "Select Image"}
+                    </span>
+                  </button>
                 </div>
               ))}
             </div>
@@ -566,6 +544,16 @@ export default function BrandingPage() {
           {settings.updatedBy && ` by ${settings.updatedBy}`}
         </p>
       )}
+
+      {/* Image Picker Modal */}
+      <ImagePickerModal
+        isOpen={pickerState?.isOpen ?? false}
+        onClose={closePicker}
+        onSelect={handleImageSelect}
+        title={getPickerTitle()}
+        currentImage={getCurrentImage()}
+        uploadConfig={getUploadConfig()}
+      />
     </div>
   );
 }
