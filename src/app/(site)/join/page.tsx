@@ -17,14 +17,14 @@ export default function JoinPage() {
     harmony: {
       name: "Parkside Harmony",
       subtitle:
-        "Join our award-winning men's barbershop chorus and experience the thrill of four-part harmony.",
+        "Join our award-winning bass clef barbershop chorus and experience the thrill of four-part harmony.",
       voiceType: "TTBB (Tenor, Lead, Baritone, Bass)",
       rehearsal: "Tuesdays, 7:00 PM - 9:30 PM",
     },
     melody: {
       name: "Parkside Melody",
       subtitle:
-        "Join our vibrant women's barbershop chorus and discover the joy of singing in harmony.",
+        "Join our vibrant treble clef barbershop chorus and discover the joy of singing in harmony.",
       voiceType: "SSAA (Soprano, Alto)",
       rehearsal: "Thursdays, 7:00 PM - 9:00 PM",
     },

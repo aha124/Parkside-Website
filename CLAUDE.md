@@ -5,8 +5,8 @@ This document provides context for AI assistants and developers working on this 
 ## Project Overview
 
 This is a Next.js 14+ website for **Parkside Barbershop** - a barbershop organization with two choruses:
-- **Parkside Harmony** - Men's chorus (TTBB)
-- **Parkside Melody** - Women's chorus (SSAA)
+- **Parkside Harmony** - Bass clef chorus (TTBB)
+- **Parkside Melody** - Treble clef chorus (SSAA)
 
 The site dynamically changes content based on which chorus the visitor selects.
 

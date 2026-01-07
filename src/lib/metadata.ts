@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const siteConfig = {
   name: "Parkside",
-  description: "Parkside - featuring Parkside Harmony (men's chorus) and Parkside Melody (treble chorus). Bringing barbershop harmony to our community.",
+  description: "Parkside - featuring Parkside Harmony (bass clef chorus) and Parkside Melody (treble clef chorus). Bringing barbershop harmony to our community.",
   url: "https://parksideharmony.org", // Replace with your actual domain when available
   ogImage: "/og-image.jpg",
   links: {

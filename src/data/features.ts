@@ -4,7 +4,7 @@ export const features: FeatureType[] = [
   {
     id: "1",
     title: "Parkside Harmony",
-    description: "Our men's chorus dedicated to the art of barbershop harmony, bringing rich, four-part a cappella music to our community.",
+    description: "Our bass clef chorus dedicated to the art of barbershop harmony, bringing rich, four-part a cappella music to our community.",
   },
   {
     id: "2",
