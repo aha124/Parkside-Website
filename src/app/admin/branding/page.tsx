@@ -5,11 +5,25 @@ import Image from "next/image";
 import { Upload, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import type { SiteSettings, PageKey, ChorusKey } from "@/types/admin";
 
-// Utility to compress images before upload (max 2MB, max 2000px dimension)
-async function compressImage(file: File, maxSizeMB = 2, maxDimension = 2000): Promise<File> {
+// Utility to process images before upload
+// - Adds white background to transparent PNGs (fixes black background issue)
+// - Compresses and resizes if needed
+async function processImage(
+  file: File,
+  options: {
+    maxSizeMB?: number;
+    maxDimension?: number;
+    addWhiteBackground?: boolean;
+  } = {}
+): Promise<File> {
+  const { maxSizeMB = 2, maxDimension = 2000, addWhiteBackground = false } = options;
+
   return new Promise((resolve, reject) => {
-    // If file is already small enough, return as-is
-    if (file.size <= maxSizeMB * 1024 * 1024) {
+    const isPng = file.type === "image/png" || file.name.toLowerCase().endsWith(".png");
+    const needsProcessing = addWhiteBackground || file.size > maxSizeMB * 1024 * 1024;
+
+    // If no processing needed and file is small enough, return as-is
+    if (!needsProcessing && !isPng) {
       resolve(file);
       return;
     }
@@ -34,29 +48,42 @@ async function compressImage(file: File, maxSizeMB = 2, maxDimension = 2000): Pr
 
       canvas.width = width;
       canvas.height = height;
-      ctx?.drawImage(img, 0, 0, width, height);
+
+      if (ctx) {
+        // Add white background for transparent images (especially PNGs)
+        if (addWhiteBackground || isPng) {
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillRect(0, 0, width, height);
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+      }
 
       // Try different quality levels to get under size limit
       const tryCompress = (quality: number): void => {
         canvas.toBlob(
           (blob) => {
             if (!blob) {
-              reject(new Error("Failed to compress image"));
+              reject(new Error("Failed to process image"));
               return;
             }
 
             if (blob.size <= maxSizeMB * 1024 * 1024 || quality <= 0.1) {
-              const compressedFile = new File([blob], file.name, {
-                type: "image/jpeg",
+              // Use PNG for logos (to maintain quality), JPEG for banners
+              const outputType = addWhiteBackground ? "image/png" : "image/jpeg";
+              const extension = addWhiteBackground ? ".png" : ".jpg";
+              const fileName = file.name.replace(/\.[^/.]+$/, "") + extension;
+
+              const processedFile = new File([blob], fileName, {
+                type: outputType,
                 lastModified: Date.now(),
               });
-              resolve(compressedFile);
+              resolve(processedFile);
             } else {
               // Try again with lower quality
               tryCompress(quality - 0.1);
             }
           },
-          "image/jpeg",
+          addWhiteBackground ? "image/png" : "image/jpeg",
           quality
         );
       };
@@ -129,12 +156,16 @@ export default function BrandingPage() {
     setMessage(null);
 
     try {
-      // Compress image if too large (logos: 1MB max, banners: 2MB max)
-      const maxSize = type === "logo" ? 1 : 2;
-      const compressedFile = await compressImage(file, maxSize);
+      // Process image: add white background for logos (fixes transparent PNG issue)
+      // Also compress if needed (logos: 1MB max, banners: 2MB max)
+      const processedFile = await processImage(file, {
+        maxSizeMB: type === "logo" ? 1 : 2,
+        maxDimension: type === "logo" ? 500 : 2000,
+        addWhiteBackground: type === "logo", // Add white background to logos
+      });
 
       const formData = new FormData();
-      formData.append("file", compressedFile);
+      formData.append("file", processedFile);
       formData.append("name", type === "logo" ? `${chorus}-logo` : `${page}-${chorus}-banner`);
       formData.append("category", type === "logo" ? "other" : "banner");
       formData.append("alt", type === "logo" ? `${chorusInfo[chorus].name} logo` : `${pageInfo[page!].name} banner for ${chorusInfo[chorus].name}`);
