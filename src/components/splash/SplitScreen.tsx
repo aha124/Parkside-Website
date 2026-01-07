@@ -5,16 +5,17 @@ import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useChorus, ChorusType } from "@/lib/chorus-context";
+import type { SiteSettings } from "@/types/admin";
 
-// Slide data for mobile carousel
-const slides = [
+// Default slide data for mobile carousel
+const defaultSlides = [
   {
     id: "voices",
     chorus: "voices" as ChorusType,
     title: "Parkside Voices",
     subtitle: "Hershey Chapter - BHS",
     description: "Experience the best of both worlds. Explore our award-winning men's and women's barbershop choruses.",
-    image: "/images/hero-bg.jpg",
+    defaultImage: "/images/hero-bg.jpg",
     buttonColor: "bg-purple-600 hover:bg-purple-700",
   },
   {
@@ -23,7 +24,7 @@ const slides = [
     title: "Parkside Harmony",
     subtitle: "Bass Clef Chorus",
     description: "Award-winning men's barbershop chorus performing in the traditional four-part harmony style.",
-    image: "/images/harmony-bg.jpg",
+    defaultImage: "/images/harmony-bg.jpg",
     buttonColor: "bg-indigo-600 hover:bg-indigo-700",
   },
   {
@@ -32,7 +33,7 @@ const slides = [
     title: "Parkside Melody",
     subtitle: "Treble Clef Chorus",
     description: "Vibrant women's chorus bringing exceptional a cappella performances to the Hershey area.",
-    image: "/images/melody-bg.jpg",
+    defaultImage: "/images/melody-bg.jpg",
     buttonColor: "bg-amber-600 hover:bg-amber-700",
   },
 ];
@@ -43,8 +44,33 @@ const SplitScreen = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState(0);
   const [showSwipeHint, setShowSwipeHint] = useState(true);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const { setChorus } = useChorus();
   const router = useRouter();
+
+  // Fetch site settings for custom backgrounds
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch("/api/admin/site-settings");
+        const data = await response.json();
+        if (data.success) {
+          setSiteSettings(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching site settings:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  // Get background image for a chorus, using custom from settings or default
+  const getBackgroundImage = (chorusId: string) => {
+    const customBg = siteSettings?.splashBackgrounds?.[chorusId as keyof typeof siteSettings.splashBackgrounds];
+    if (customBg) return customBg;
+    const slide = defaultSlides.find(s => s.id === chorusId);
+    return slide?.defaultImage || "/images/hero-bg.jpg";
+  };
 
   // Detect mobile/tablet
   useEffect(() => {
@@ -77,8 +103,8 @@ const SplitScreen = () => {
     setDirection(newDirection);
     setCurrentSlide((prev) => {
       let next = prev + newDirection;
-      if (next < 0) next = slides.length - 1;
-      if (next >= slides.length) next = 0;
+      if (next < 0) next = defaultSlides.length - 1;
+      if (next >= defaultSlides.length) next = 0;
       return next;
     });
   };
@@ -94,7 +120,7 @@ const SplitScreen = () => {
 
   // Mobile swipeable carousel
   if (isMobile) {
-    const slide = slides[currentSlide];
+    const slide = defaultSlides[currentSlide];
 
     return (
       <div className="h-screen w-screen overflow-hidden bg-gray-900 relative">
@@ -109,7 +135,7 @@ const SplitScreen = () => {
             transition={{ duration: 0.5 }}
           >
             <Image
-              src={slide.image}
+              src={getBackgroundImage(slide.id)}
               alt={slide.title}
               fill
               className="object-cover"
@@ -234,7 +260,7 @@ const SplitScreen = () => {
 
             {/* Dot indicators */}
             <div className="flex justify-center gap-3">
-              {slides.map((s, index) => (
+              {defaultSlides.map((s, index) => (
                 <button
                   key={s.id}
                   onClick={() => {
@@ -259,7 +285,7 @@ const SplitScreen = () => {
 
             {/* Quick navigation buttons */}
             <div className="flex justify-center gap-2 mt-4">
-              {slides.map((s, index) => (
+              {defaultSlides.map((s, index) => (
                 <button
                   key={s.id + "-quick"}
                   onClick={() => {
@@ -332,7 +358,7 @@ const SplitScreen = () => {
           >
             <div className="relative w-full h-full">
               <Image
-                src="/images/harmony-bg.jpg"
+                src={getBackgroundImage("harmony")}
                 alt="Parkside Harmony Chorus"
                 fill
                 style={{
@@ -417,7 +443,7 @@ const SplitScreen = () => {
           >
             <div className="relative w-full h-full">
               <Image
-                src="/images/melody-bg.jpg"
+                src={getBackgroundImage("melody")}
                 alt="Parkside Melody Chorus"
                 fill
                 style={{ objectFit: "cover" }}

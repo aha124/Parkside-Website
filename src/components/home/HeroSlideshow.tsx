@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useChorus } from "@/lib/chorus-context";
+import type { SiteSettings } from "@/types/admin";
 
 // Define the slide interface
 interface Slide {
@@ -16,6 +18,7 @@ interface Slide {
   buttonUrl: string;
   secondaryButtonText?: string;
   secondaryButtonUrl?: string;
+  chorusAware?: boolean; // If true, this slide's image changes based on chorus selection
 }
 
 // Define the component props
@@ -24,18 +27,53 @@ interface HeroSlideshowProps {
 }
 
 export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
+  const { chorus } = useChorus();
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
+
+  // Fetch site settings for custom hero slide backgrounds
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch("/api/admin/site-settings");
+        const data = await response.json();
+        if (data.success) {
+          setSiteSettings(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching site settings:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  // Get the hero slide background based on chorus selection
+  const getHeroSlideBackground = () => {
+    const customBg = siteSettings?.heroSlideBackground?.[chorus];
+    if (customBg) return customBg;
+    // Default fallback based on chorus
+    switch (chorus) {
+      case "harmony":
+        return "/images/harmony-bg.jpg";
+      case "melody":
+        return "/images/melody-bg.jpg";
+      default:
+        return "/images/slideshow/slide1-main.jpg";
+    }
+  };
+
   // Define the slides
   const slides: Slide[] = [
     {
       id: 1,
       title: "Parkside Hershey, PA",
       description: "The Hershey Chapter of the Barbershop Harmony Society, featuring Parkside Harmony and Parkside Melody a cappella choruses.",
-      imageUrl: "/images/slideshow/slide1-main.jpg",
+      imageUrl: getHeroSlideBackground(),
       fallbackImageUrl: "/images/hero-bg.jpg",
       buttonText: "Learn More",
       buttonUrl: "/about",
       secondaryButtonText: "Join Us",
-      secondaryButtonUrl: "/contact"
+      secondaryButtonUrl: "/contact",
+      chorusAware: true,
     },
     {
       id: 2,
@@ -80,6 +118,31 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
   const [imageSources, setImageSources] = useState<string[]>(
     slides.map(slide => slide.imageUrl)
   );
+
+  // Update first slide image when chorus or settings change
+  useEffect(() => {
+    const customBg = siteSettings?.heroSlideBackground?.[chorus];
+    let newBg: string;
+    if (customBg) {
+      newBg = customBg;
+    } else {
+      switch (chorus) {
+        case "harmony":
+          newBg = "/images/harmony-bg.jpg";
+          break;
+        case "melody":
+          newBg = "/images/melody-bg.jpg";
+          break;
+        default:
+          newBg = "/images/slideshow/slide1-main.jpg";
+      }
+    }
+    setImageSources(prev => {
+      const newSources = [...prev];
+      newSources[0] = newBg;
+      return newSources;
+    });
+  }, [chorus, siteSettings]);
 
   // Auto-advance slides
   useEffect(() => {
