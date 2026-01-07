@@ -108,7 +108,7 @@ export interface PageBanners {
 }
 
 // All pages that can have custom banners
-export type PageKey = "home" | "about" | "join" | "media" | "donate" | "events" | "gear" | "contact";
+export type PageKey = "home" | "about" | "join" | "media" | "donate" | "events" | "gear" | "contact" | "leadership";
 
 export interface SiteSettings {
   // Logos per chorus

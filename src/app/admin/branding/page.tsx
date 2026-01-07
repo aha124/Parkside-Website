@@ -112,9 +112,10 @@ const pageInfo: Record<PageKey, { name: string; description: string }> = {
   events: { name: "Events", description: "Events listing page banner" },
   gear: { name: "Purchase Gear", description: "Shop/merchandise page banner" },
   contact: { name: "Contact", description: "Contact us page banner" },
+  leadership: { name: "Leadership", description: "Leadership team page banner" },
 };
 
-const pages: PageKey[] = ["home", "about", "join", "media", "donate", "events", "gear", "contact"];
+const pages: PageKey[] = ["home", "about", "join", "media", "donate", "events", "gear", "contact", "leadership"];
 const choruses: ChorusKey[] = ["harmony", "melody", "voices"];
 
 // Types for image picker modal state

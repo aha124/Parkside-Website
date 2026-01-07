@@ -4,6 +4,7 @@ import PageTransition from "@/components/ui/PageTransition";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import HeroSection from "@/components/ui/HeroSection";
 import LeadershipProfile from "@/components/leadership/LeadershipProfile";
+import { usePageBanner } from "@/hooks/usePageBanner";
 
 type ChorusAffiliation = 'harmony' | 'melody' | 'both';
 
@@ -116,13 +117,15 @@ const boardMembersAtLarge = [
 ];
 
 export default function LeadershipPage() {
+  const bannerImage = usePageBanner("leadership");
+
   return (
     <PageTransition>
       <div className="bg-white">
         <HeroSection
           title="Our Leadership"
           subtitle="Meet the dedicated team guiding Parkside's musical excellence and organizational success."
-          imagePath="/images/leadership-hero.jpg"
+          imagePath={bannerImage}
           imageAlt="Parkside Leadership Team"
         />
 

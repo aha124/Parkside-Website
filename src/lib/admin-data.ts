@@ -373,6 +373,11 @@ const DEFAULT_SITE_SETTINGS: SiteSettings = {
       melody: "/images/melody-performance.jpg",
       voices: "/images/slideshow/slide5-contact.jpg",
     },
+    leadership: {
+      harmony: "/images/leadership-hero.jpg",
+      melody: "/images/leadership-hero.jpg",
+      voices: "/images/leadership-hero.jpg",
+    },
   },
 };
 
@@ -392,6 +397,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
           events: { ...DEFAULT_SITE_SETTINGS.pageBanners.events, ...settings.pageBanners?.events },
           gear: { ...DEFAULT_SITE_SETTINGS.pageBanners.gear, ...settings.pageBanners?.gear },
           contact: { ...DEFAULT_SITE_SETTINGS.pageBanners.contact, ...settings.pageBanners?.contact },
+          leadership: { ...DEFAULT_SITE_SETTINGS.pageBanners.leadership, ...settings.pageBanners?.leadership },
         },
         splashBackgrounds: settings.splashBackgrounds,
         heroSlideBackground: settings.heroSlideBackground,
@@ -422,6 +428,7 @@ export async function updateSiteSettings(
       events: { ...current.pageBanners.events, ...data.pageBanners?.events },
       gear: { ...current.pageBanners.gear, ...data.pageBanners?.gear },
       contact: { ...current.pageBanners.contact, ...data.pageBanners?.contact },
+      leadership: { ...current.pageBanners.leadership, ...data.pageBanners?.leadership },
     },
     splashBackgrounds: { ...current.splashBackgrounds, ...data.splashBackgrounds },
     heroSlideBackground: { ...current.heroSlideBackground, ...data.heroSlideBackground },
