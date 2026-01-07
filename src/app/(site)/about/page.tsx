@@ -55,11 +55,11 @@ export default function AboutPage() {
       />
 
       {/* Our Story Section */}
-      <section className="py-24">
+      <section className="py-12 sm:py-16 md:py-24">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
             <ScrollAnimation direction="right">
-              <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl">
+              <div className="relative h-[250px] sm:h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
                   src="/images/placeholder-story.jpg"
                   alt={`${content.name} History`}
@@ -71,10 +71,10 @@ export default function AboutPage() {
 
             <ScrollAnimation direction="left">
               <div>
-                <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 md:mb-6">
                   Our Story
                 </h2>
-                <div className="prose prose-lg">
+                <div className="prose prose-sm sm:prose-base md:prose-lg">
                   <p>{content.storyIntro}</p>
                   <p>{content.storyDetail}</p>
                 </div>
@@ -85,21 +85,21 @@ export default function AboutPage() {
       </section>
 
       {/* Mission & Values */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-12 sm:py-16 md:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <ScrollAnimation>
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <div className="text-center mb-8 sm:mb-12 md:mb-16">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 md:mb-4">
                 Mission & Values
               </h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
                 Our commitment to musical excellence is guided by these core
                 principles
               </p>
             </div>
           </ScrollAnimation>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
             {[
               {
                 title: "Excellence",
@@ -183,14 +183,14 @@ export default function AboutPage() {
               },
             ].map((item, index) => (
               <ScrollAnimation key={item.title} delay={index * 0.1}>
-                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-                  <div className="w-16 h-16 bg-indigo-50 rounded-xl flex items-center justify-center mb-6">
+                <div className="bg-white p-4 sm:p-6 md:p-8 rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-indigo-50 rounded-lg md:rounded-xl flex items-center justify-center mb-4 md:mb-6">
                     {item.icon}
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-4">
                     {item.title}
                   </h3>
-                  <p className="text-gray-600">{item.description}</p>
+                  <p className="text-sm sm:text-base text-gray-600">{item.description}</p>
                 </div>
               </ScrollAnimation>
             ))}
@@ -199,14 +199,14 @@ export default function AboutPage() {
       </section>
 
       {/* Achievements & Community Section */}
-      <section className="py-24">
+      <section className="py-12 sm:py-16 md:py-24">
         <div className="container mx-auto px-4">
           <ScrollAnimation>
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <div className="text-center mb-8 sm:mb-12 md:mb-16">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 md:mb-4">
                 Our Achievements
               </h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
                 Celebrating our journey of musical excellence and community
                 impact
               </p>
@@ -214,9 +214,9 @@ export default function AboutPage() {
           </ScrollAnimation>
 
           {/* Photo Gallery */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mt-8 sm:mt-12 md:mt-16">
             <ScrollAnimation delay={0.1}>
-              <div className="relative h-[200px] rounded-xl overflow-hidden">
+              <div className="relative h-[120px] sm:h-[150px] md:h-[200px] rounded-lg md:rounded-xl overflow-hidden">
                 <Image
                   src="/images/placeholder-gallery-1.jpg"
                   alt="Parkside Performance Moment"
@@ -226,7 +226,7 @@ export default function AboutPage() {
               </div>
             </ScrollAnimation>
             <ScrollAnimation delay={0.2}>
-              <div className="relative h-[200px] rounded-xl overflow-hidden">
+              <div className="relative h-[120px] sm:h-[150px] md:h-[200px] rounded-lg md:rounded-xl overflow-hidden">
                 <Image
                   src="/images/placeholder-gallery-2.jpg"
                   alt="Parkside Behind the Scenes"
@@ -236,7 +236,7 @@ export default function AboutPage() {
               </div>
             </ScrollAnimation>
             <ScrollAnimation delay={0.3}>
-              <div className="relative h-[200px] rounded-xl overflow-hidden">
+              <div className="relative h-[120px] sm:h-[150px] md:h-[200px] rounded-lg md:rounded-xl overflow-hidden">
                 <Image
                   src="/images/placeholder-gallery-3.jpg"
                   alt="Parkside Celebration"
@@ -246,7 +246,7 @@ export default function AboutPage() {
               </div>
             </ScrollAnimation>
             <ScrollAnimation delay={0.4}>
-              <div className="relative h-[200px] rounded-xl overflow-hidden">
+              <div className="relative h-[120px] sm:h-[150px] md:h-[200px] rounded-lg md:rounded-xl overflow-hidden">
                 <Image
                   src="/images/placeholder-gallery-4.jpg"
                   alt="Parkside Community Event"
@@ -260,14 +260,14 @@ export default function AboutPage() {
       </section>
 
       {/* Inclusion Statement Section */}
-      <section className="py-24 bg-indigo-900 text-white">
+      <section className="py-12 sm:py-16 md:py-24 bg-indigo-900 text-white">
         <div className="container mx-auto px-4">
           <ScrollAnimation>
             <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-4xl font-bold mb-8">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 md:mb-8">
                 Our Commitment to Inclusion
               </h2>
-              <div className="space-y-6 text-lg font-light">
+              <div className="space-y-4 sm:space-y-6 text-sm sm:text-base md:text-lg font-light">
                 <p>
                   Parkside does not discriminate based on age, race, physical
                   ability, gender, sexual orientation, religion, education, or
@@ -289,26 +289,26 @@ export default function AboutPage() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-24">
+      <section className="py-12 sm:py-16 md:py-24">
         <div className="container mx-auto px-4 text-center">
           <ScrollAnimation>
-            <h2 className="text-4xl font-bold text-gray-900 mb-8">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6 md:mb-8">
               {content.joinTitle}
             </h2>
-            <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 md:mb-12 max-w-2xl mx-auto">
               {content.joinCTA} Join us in creating unforgettable musical
               experiences.
             </p>
-            <div className="flex flex-wrap justify-center gap-6">
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 md:gap-6">
               <Link
                 href="/join"
-                className="inline-flex items-center px-8 py-4 bg-indigo-600 text-white rounded-full text-lg font-semibold hover:bg-indigo-700 transition-colors duration-300"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-indigo-600 text-white rounded-full text-base sm:text-lg font-semibold hover:bg-indigo-700 transition-colors duration-300"
               >
                 Join Us
               </Link>
               <Link
                 href="/events"
-                className="inline-flex items-center px-8 py-4 bg-white text-indigo-600 rounded-full text-lg font-semibold border-2 border-indigo-600 hover:bg-indigo-50 transition-colors duration-300"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-white text-indigo-600 rounded-full text-base sm:text-lg font-semibold border-2 border-indigo-600 hover:bg-indigo-50 transition-colors duration-300"
               >
                 See Upcoming Performances
               </Link>
