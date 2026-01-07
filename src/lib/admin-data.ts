@@ -421,6 +421,8 @@ export async function updateSiteSettings(
       gear: { ...current.pageBanners.gear, ...data.pageBanners?.gear },
       contact: { ...current.pageBanners.contact, ...data.pageBanners?.contact },
     },
+    splashBackgrounds: { ...current.splashBackgrounds, ...data.splashBackgrounds },
+    heroSlideBackground: { ...current.heroSlideBackground, ...data.heroSlideBackground },
     updatedAt: new Date().toISOString(),
     updatedBy,
   };
