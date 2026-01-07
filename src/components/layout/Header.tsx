@@ -131,12 +131,12 @@ export default function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center min-w-0">
             <Link
               href="/splash"
-              className="flex items-center gap-2"
+              className="flex items-center gap-1.5 sm:gap-2 min-w-0"
             >
-              <div className="relative h-10 w-10">
+              <div className="relative h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
                 <Image
                   src={currentConfig.logo}
                   alt={`${currentConfig.name} Logo`}
@@ -144,9 +144,9 @@ export default function Header() {
                   className="object-contain"
                 />
               </div>
-              <span className="text-xl font-bold">{currentConfig.name}</span>
+              <span className="text-base sm:text-lg md:text-xl font-bold truncate">{currentConfig.name}</span>
             </Link>
-            <div className="hidden sm:block text-xs text-gray-500 ml-2">
+            <div className="hidden lg:block text-xs text-gray-500 ml-2 flex-shrink-0">
               <div>{currentConfig.tagline}</div>
             </div>
           </div>
@@ -260,25 +260,25 @@ export default function Header() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden mt-4"
+            className="md:hidden mt-4 border-t border-gray-100 pt-4"
           >
-            <div className="flex flex-col space-y-4 pb-4">
+            <div className="flex flex-col space-y-1 pb-4">
               {navItems.map((item) => (
                 <div key={item.name}>
                   <Link
                     href={item.href}
-                    className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                    className="block py-3 px-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md font-medium transition-colors text-base"
                     onClick={() => !item.submenu && setMobileMenuOpen(false)}
                   >
                     {item.name}
                   </Link>
                   {item.submenu && (
-                    <div className="ml-4 mt-2 space-y-2">
+                    <div className="ml-4 space-y-1">
                       {item.submenu.map((subItem) => (
                         <Link
                           key={subItem.name}
                           href={subItem.href}
-                          className="block text-gray-500 hover:text-gray-900 font-medium transition-colors"
+                          className="block py-2.5 px-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-md font-medium transition-colors text-sm"
                           onClick={() => setMobileMenuOpen(false)}
                         >
                           {subItem.name}
@@ -290,7 +290,7 @@ export default function Header() {
               ))}
               <Link
                 href="/splash"
-                className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+                className="block py-3 px-2 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 rounded-md font-medium transition-colors text-base"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Choose Chorus

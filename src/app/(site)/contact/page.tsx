@@ -99,7 +99,7 @@ export default function ContactPage() {
   return (
     <PageTransition>
       {/* Hero Section */}
-      <section className="relative h-[300px] bg-gray-900">
+      <section className="relative h-[200px] sm:h-[250px] md:h-[300px] bg-gray-900">
         <div className="absolute inset-0">
           <Image
             src={bannerImage}
@@ -112,10 +112,10 @@ export default function ContactPage() {
         </div>
 
         <div className="relative container mx-auto px-4 h-full flex flex-col justify-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2 sm:mb-4">
             Contact Us
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl">
+          <p className="text-sm sm:text-base md:text-xl text-white/90 max-w-2xl">
             {chorus === "voices"
               ? "Get in touch with Parkside Barbershop. Join our chorus, book a performance, or just say hello!"
               : `Get in touch with ${currentInfo.name}. We'd love to hear from you!`}
@@ -124,13 +124,13 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Content */}
-      <section className="py-16">
+      <section className="py-8 sm:py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
             {/* Contact Form */}
             <ScrollAnimation direction="right">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Send Us a Message
                 </h2>
 
@@ -259,7 +259,7 @@ export default function ContactPage() {
             {/* Contact Information */}
             <ScrollAnimation direction="left" delay={0.2}>
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Contact Information
                 </h2>
 
@@ -449,17 +449,17 @@ export default function ContactPage() {
       </section>
 
       {/* Join Us Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-8 sm:py-12 md:py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <ScrollAnimation>
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center">
               Join Our Chorus
             </h2>
           </ScrollAnimation>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
             <ScrollAnimation delay={0.1}>
-              <div className="relative h-[300px] rounded-lg overflow-hidden shadow-xl">
+              <div className="relative h-[200px] sm:h-[250px] md:h-[300px] rounded-lg overflow-hidden shadow-xl">
                 <Image
                   src="/images/harmony-bg.jpg"
                   alt={`Join ${currentInfo.name}`}
@@ -471,10 +471,10 @@ export default function ContactPage() {
 
             <ScrollAnimation delay={0.2}>
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
                   Experience the Joy of Harmony
                 </h3>
-                <p className="text-lg text-gray-600 mb-6">
+                <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6">
                   Whether you&apos;re an experienced singer or just love to sing
                   in the shower, there&apos;s a place for you in our chorus.
                   Join us for a rehearsal and discover the magic of barbershop
@@ -482,7 +482,7 @@ export default function ContactPage() {
                 </p>
                 <a
                   href="/join"
-                  className="inline-block px-6 py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 transition-colors"
+                  className="inline-block px-5 sm:px-6 py-2.5 sm:py-3 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 transition-colors text-sm sm:text-base"
                 >
                   Learn About Membership →
                 </a>

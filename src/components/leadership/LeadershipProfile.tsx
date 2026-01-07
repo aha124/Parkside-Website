@@ -25,9 +25,9 @@ export default function LeadershipProfile({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const sizeClasses = {
-    large: 'w-72 h-72',
-    medium: 'w-56 h-56',
-    small: 'w-40 h-40'
+    large: 'w-40 h-40 sm:w-56 sm:h-56 md:w-72 md:h-72',
+    medium: 'w-32 h-32 sm:w-44 sm:h-44 md:w-56 md:h-56',
+    small: 'w-28 h-28 sm:w-32 sm:h-32 md:w-40 md:h-40'
   };
 
   // Split bio into paragraphs
@@ -57,16 +57,16 @@ export default function LeadershipProfile({
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
           </div>
         </button>
-        <h3 className="text-xl font-semibold text-gray-900">{name}</h3>
-        <p className="text-indigo-600 font-medium">{title}</p>
+        <h3 className="text-base sm:text-lg md:text-xl font-semibold text-gray-900">{name}</h3>
+        <p className="text-sm sm:text-base text-indigo-600 font-medium">{title}</p>
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <div className="p-6 md:p-8 max-w-3xl mx-auto">
-          <div className="flex items-start justify-between mb-6">
+        <div className="p-4 sm:p-6 md:p-8 max-w-3xl mx-auto">
+          <div className="flex items-start justify-between mb-4 sm:mb-6">
             <div>
-              <h3 className="text-2xl font-bold text-gray-900">{name}</h3>
-              <p className="text-lg text-indigo-600 font-medium">{title}</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900">{name}</h3>
+              <p className="text-base sm:text-lg text-indigo-600 font-medium">{title}</p>
             </div>
             <button
               onClick={() => setIsModalOpen(false)}
@@ -79,7 +79,7 @@ export default function LeadershipProfile({
             </button>
           </div>
 
-          <div className="aspect-[4/5] relative rounded-lg overflow-hidden mb-8">
+          <div className="aspect-[4/5] relative rounded-lg overflow-hidden mb-4 sm:mb-6 md:mb-8">
             {photoUrl ? (
               <Image
                 src={photoUrl}
@@ -90,15 +90,15 @@ export default function LeadershipProfile({
                 priority
               />
             ) : (
-              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center text-gray-400">
+              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center text-gray-400 text-sm sm:text-base">
                 Photo Coming Soon
               </div>
             )}
           </div>
 
-          <div className="prose prose-lg max-w-none">
+          <div className="prose prose-sm sm:prose-base md:prose-lg max-w-none">
             {bioParagraphs.map((paragraph, index) => (
-              <p key={index} className="mb-4 text-gray-700 leading-relaxed">
+              <p key={index} className="mb-3 sm:mb-4 text-gray-700 leading-relaxed text-sm sm:text-base">
                 {paragraph}
               </p>
             ))}

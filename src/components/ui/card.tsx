@@ -33,7 +33,7 @@ const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
     return (
       <div
         ref={ref}
-        className={cn("p-6 space-y-1.5", className)}
+        className={cn("p-4 sm:p-5 md:p-6 space-y-1 sm:space-y-1.5", className)}
         {...props}
       />
     );
@@ -48,7 +48,7 @@ const CardTitle = forwardRef<HTMLHeadingElement, CardTitleProps>(
     return (
       <h3
         ref={ref}
-        className={cn("text-xl font-semibold leading-none tracking-tight", className)}
+        className={cn("text-lg sm:text-xl font-semibold leading-none tracking-tight", className)}
         {...props}
       />
     );
@@ -63,7 +63,7 @@ const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
     return (
       <p
         ref={ref}
-        className={cn("text-sm text-muted-foreground", className)}
+        className={cn("text-xs sm:text-sm text-muted-foreground", className)}
         {...props}
       />
     );
@@ -78,7 +78,7 @@ const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
     return (
       <div
         ref={ref}
-        className={cn("p-6 pt-0", className)}
+        className={cn("p-4 sm:p-5 md:p-6 pt-0", className)}
         {...props}
       />
     );
@@ -93,7 +93,7 @@ const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
     return (
       <div
         ref={ref}
-        className={cn("p-6 pt-0 flex items-center", className)}
+        className={cn("p-4 sm:p-5 md:p-6 pt-0 flex items-center", className)}
         {...props}
       />
     );
