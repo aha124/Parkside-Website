@@ -11,6 +11,7 @@ interface SyncResult {
     sourceCount: number;
     existingCount: number;
     addedCount: number;
+    removedCount: number;
     totalCount: number;
   };
 }
@@ -57,9 +58,12 @@ export default function SyncEventsButton() {
             <>
               <CheckCircle className="w-4 h-4" />
               <span>
-                {result.stats?.addedCount === 0
-                  ? 'No new events found'
-                  : `Added ${result.stats?.addedCount} new events`}
+                {result.stats?.addedCount === 0 && result.stats?.removedCount === 0
+                  ? 'No changes'
+                  : [
+                      result.stats?.addedCount ? `Added ${result.stats.addedCount} new` : '',
+                      result.stats?.removedCount ? `Removed ${result.stats.removedCount} old` : ''
+                    ].filter(Boolean).join(', ') || 'Sync complete'}
               </span>
             </>
           ) : (

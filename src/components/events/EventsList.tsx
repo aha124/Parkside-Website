@@ -29,6 +29,7 @@ interface EventsListProps {
   showViewAllButton?: boolean;
   viewAllUrl?: string;
   showFilters?: boolean;
+  showTimePeriodTabs?: boolean;
 }
 
 export default function EventsList({
@@ -39,14 +40,33 @@ export default function EventsList({
   apiUrl = "/api/events",
   showViewAllButton = false,
   viewAllUrl = "/events",
-  showFilters = false
+  showFilters = false,
+  showTimePeriodTabs = false
 }: EventsListProps) {
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>("All");
+  const [timePeriod, setTimePeriod] = useState<"upcoming" | "past">("upcoming");
   const { chorus: selectedChorus } = useChorus();
+
+  // Helper function to parse event date string to Date object
+  const parseEventDate = (dateStr: string): Date => {
+    // Handle various date formats like "Jan 15, 2025", "January 15, 2025", "March 5-7, 2025"
+    // For date ranges, use the first date
+    const cleanDate = dateStr.split('-')[0].trim().replace(/,\s*$/, '');
+    const parsed = new Date(cleanDate.replace(/(\w{3,})\s+(\d+),?\s+(\d{4})/, "$1 $2 $3"));
+    return isNaN(parsed.getTime()) ? new Date(dateStr) : parsed;
+  };
+
+  // Check if an event is in the past
+  const isEventPast = (event: Event): boolean => {
+    const eventDate = parseEventDate(event.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
+    return eventDate < today;
+  };
 
   // Static fallback events in case the fetch fails
   const staticEvents: Event[] = [
@@ -104,10 +124,16 @@ export default function EventsList({
     return formatted.split('\n').slice(0, 2).join(', ').replace(/\s+/g, ' ').trim();
   };
 
-  // Apply filters to events - first filter by selected chorus from context, then by UI filter
-  const applyFilters = (allEvents: Event[], filter: string) => {
-    // First, filter by the selected chorus from context
-    let filtered = allEvents.filter(event =>
+  // Apply filters to events - filter by time period, selected chorus from context, then by UI filter
+  const applyFilters = (allEvents: Event[], filter: string, period: "upcoming" | "past") => {
+    // First, filter by time period
+    let filtered = allEvents.filter(event => {
+      const isPast = isEventPast(event);
+      return period === "past" ? isPast : !isPast;
+    });
+
+    // Then filter by the selected chorus from context
+    filtered = filtered.filter(event =>
       shouldShowForChorus(event.chorus, selectedChorus)
     );
 
@@ -127,6 +153,15 @@ export default function EventsList({
         return true;
       });
     }
+
+    // Sort: upcoming events ascending (soonest first), past events descending (most recent first)
+    filtered.sort((a, b) => {
+      const dateA = parseEventDate(a.date);
+      const dateB = parseEventDate(b.date);
+      return period === "past"
+        ? dateB.getTime() - dateA.getTime()  // Past: most recent first
+        : dateA.getTime() - dateB.getTime(); // Upcoming: soonest first
+    });
 
     return filtered;
   };
@@ -158,23 +193,9 @@ export default function EventsList({
           fetchedEvents = staticEvents;
         }
         
-        // Sort events by date
-        fetchedEvents.sort((a, b) => {
-          // Handle various date formats
-          const dateA = new Date(a.date.replace(/(\w{3})\s+(\d+),?\s+(\d{4})/, "$1 $2 $3"));
-          const dateB = new Date(b.date.replace(/(\w{3})\s+(\d+),?\s+(\d{4})/, "$1 $2 $3"));
-          
-          // If dates can't be parsed, try a simple string comparison
-          if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) {
-            return a.date.localeCompare(b.date);
-          }
-          
-          return dateA.getTime() - dateB.getTime();
-        });
-        
         setEvents(fetchedEvents);
-        // Apply initial filtering
-        setFilteredEvents(applyFilters(fetchedEvents, activeFilter).slice(0, maxEvents));
+        // Apply initial filtering (sorting is now handled in applyFilters)
+        setFilteredEvents(applyFilters(fetchedEvents, activeFilter, timePeriod).slice(0, maxEvents));
         setError(null);
       } catch (err) {
         console.error("Error fetching events:", err);
@@ -189,10 +210,10 @@ export default function EventsList({
     fetchEvents();
   }, [dataSource, jsonUrl, apiUrl, maxEvents]);
 
-  // Update filtered events when filter or selectedChorus changes
+  // Update filtered events when filter, selectedChorus, or timePeriod changes
   useEffect(() => {
-    setFilteredEvents(applyFilters(events, activeFilter).slice(0, maxEvents));
-  }, [activeFilter, events, maxEvents, selectedChorus]);
+    setFilteredEvents(applyFilters(events, activeFilter, timePeriod).slice(0, maxEvents));
+  }, [activeFilter, events, maxEvents, selectedChorus, timePeriod]);
 
   return (
     <section className="py-16 bg-gray-50">
@@ -212,6 +233,33 @@ export default function EventsList({
           {error && <p className="text-amber-600 mb-4">Note: {error}</p>}
         </ScrollAnimation>
         
+        {showTimePeriodTabs && (
+          <ScrollAnimation>
+            <div className="flex border-b border-gray-200 mb-6">
+              <button
+                onClick={() => setTimePeriod("upcoming")}
+                className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  timePeriod === "upcoming"
+                    ? "border-indigo-600 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                Upcoming Events
+              </button>
+              <button
+                onClick={() => setTimePeriod("past")}
+                className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  timePeriod === "past"
+                    ? "border-indigo-600 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                Past Events
+              </button>
+            </div>
+          </ScrollAnimation>
+        )}
+
         {showFilters && (
           <ScrollAnimation>
             <div className="flex flex-wrap gap-2 mb-8">
@@ -319,7 +367,9 @@ export default function EventsList({
           <div className="bg-white p-8 rounded-lg shadow-md text-center">
             <h3 className="text-xl font-bold text-gray-900 mb-2">No events found</h3>
             <p className="text-gray-600">
-              There are no upcoming events matching your filter criteria.
+              {timePeriod === "past"
+                ? "There are no past events matching your filter criteria."
+                : "There are no upcoming events matching your filter criteria."}
             </p>
           </div>
         )}

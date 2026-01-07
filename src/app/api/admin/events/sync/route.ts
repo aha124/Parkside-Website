@@ -134,6 +134,30 @@ function saveEvents(events: ScrapedEvent[]): void {
   fs.writeFileSync(filePath, JSON.stringify(events, null, 2));
 }
 
+function parseEventDate(dateStr: string): Date {
+  // Handle various date formats like "Jan 15, 2025", "January 15, 2025", "Mar 5-7, 2025"
+  // For date ranges, use the first date
+  const cleanDate = dateStr.split('-')[0].trim().replace(/,\s*$/, '');
+  const parsed = new Date(cleanDate.replace(/(\w{3,})\s+(\d+),?\s+(\d{4})/, "$1 $2 $3"));
+  return isNaN(parsed.getTime()) ? new Date(dateStr) : parsed;
+}
+
+function filterOldEvents(events: ScrapedEvent[], maxAgeDays: number = 180): { filtered: ScrapedEvent[], removedCount: number } {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
+  cutoffDate.setHours(0, 0, 0, 0);
+
+  const filtered = events.filter(event => {
+    const eventDate = parseEventDate(event.date);
+    return eventDate >= cutoffDate;
+  });
+
+  return {
+    filtered,
+    removedCount: events.length - filtered.length
+  };
+}
+
 export async function POST() {
   const session = await auth();
   if (!session?.user?.isAdmin) {
@@ -161,20 +185,24 @@ export async function POST() {
     // Merge: keep existing events and add new ones
     const mergedEvents = [...existingEvents, ...eventsToAdd];
 
+    // Clean up events older than 180 days
+    const { filtered: cleanedEvents, removedCount } = filterOldEvents(mergedEvents, 180);
+
     // Sort by date
-    mergedEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    cleanedEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     // Save
-    saveEvents(mergedEvents);
+    saveEvents(cleanedEvents);
 
     return NextResponse.json({
       success: true,
-      message: `Sync complete. Found ${newScrapedEvents.length} events on source. Added ${eventsToAdd.length} new events.`,
+      message: `Sync complete. Found ${newScrapedEvents.length} events on source. Added ${eventsToAdd.length} new events.${removedCount > 0 ? ` Cleaned up ${removedCount} old events.` : ''}`,
       stats: {
         sourceCount: newScrapedEvents.length,
         existingCount: existingEvents.length,
         addedCount: eventsToAdd.length,
-        totalCount: mergedEvents.length
+        removedCount,
+        totalCount: cleanedEvents.length
       }
     });
 
