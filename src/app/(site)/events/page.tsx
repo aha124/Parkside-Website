@@ -31,8 +31,8 @@ export default function EventsPage() {
       <EventsList
         title="Events"
         maxEvents={100}
-        dataSource="json"
-        jsonUrl="/data/events.json"
+        dataSource="api"
+        apiUrl="/api/events"
         showFilters={true}
         showTimePeriodTabs={true}
       />

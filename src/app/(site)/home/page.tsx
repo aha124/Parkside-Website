@@ -19,11 +19,11 @@ export default function HomePage() {
       <HeroSlideshow interval={6000} />
 
       {/* Events Section */}
-      <EventsList 
-        title="Upcoming Events" 
-        maxEvents={3} 
-        dataSource="json" 
-        jsonUrl="/data/events.json" 
+      <EventsList
+        title="Upcoming Events"
+        maxEvents={3}
+        dataSource="api"
+        apiUrl="/api/events"
         showViewAllButton={true}
         viewAllUrl="/events"
       />

@@ -15,7 +15,9 @@ The site dynamically changes content based on which chorus the visitor selects.
 - **Framework**: Next.js 14 (App Router)
 - **Styling**: Tailwind CSS
 - **Animations**: Framer Motion (drag gestures, transitions, animations)
-- **Data Storage**: JSON files in `/data/` directory (no database)
+- **Data Storage**: Dual-source system:
+  - **Scraped content**: JSON files in `public/data/` (events.json, news.json)
+  - **Admin edits**: Vercel KV (overrides, admin-created content)
 - **Authentication**: Simple password-based admin (stored in cookies)
 
 ## Project Structure
@@ -59,16 +61,25 @@ const filtered = items.filter(item => shouldShowForChorus(item.chorus, chorus));
 
 **Important:** The `shouldShowForChorus()` function does case-insensitive comparison. Content with chorus "voices" or "both" shows for all selections.
 
-### 2. Admin Data System
+### 2. Admin Data System (Dual-Source Architecture)
 
-All admin data is stored as JSON files in `/data/`:
-- `events.json` - Events/performances
-- `news.json` - News articles
-- `images.json` - Image metadata for tagging
-- `videos.json` - YouTube video data
-- `site-settings.json` - Site branding (logos, banners)
+The site uses a **dual-source data architecture**:
 
-**Key file:** `src/lib/admin-data.ts` - Contains all CRUD functions for admin data.
+1. **Scraped JSON files** (`public/data/`): Content scraped from parksideharmony.org
+   - `events.json` - Events from external calendar
+   - `news.json` - News articles from external site
+
+2. **Vercel KV**: Admin-created content and overrides
+   - Event overrides (edits to scraped events)
+   - Admin-created news articles
+   - Images, videos, site settings
+
+**Key file:** `src/lib/admin-data.ts` - Contains all CRUD functions for Vercel KV data.
+
+**How it works:**
+- Public APIs (`/api/events`, `/api/news`) merge both sources
+- Admin edits are stored as "overrides" that take precedence over scraped content
+- Sync buttons import scraped content into admin for editing
 
 ### 3. Site Branding System
 
@@ -91,13 +102,61 @@ const bannerImage = usePageBanner("about"); // Returns URL for current chorus
 ### 4. API Routes
 
 All in `src/app/api/`:
-- `/api/events` - CRUD for events
-- `/api/news` - CRUD for news
+- `/api/events` - Public events (merges scraped JSON + admin overrides)
+- `/api/news` - Public news (merges scraped JSON + admin KV)
+- `/api/admin/events/sync` - Sync events from parksideharmony.org
+- `/api/admin/events/scraped/[id]` - Get/update scraped event overrides
+- `/api/admin/news/sync` - Import scraped news into admin
 - `/api/images` - Image metadata
 - `/api/videos` - Video management
 - `/api/admin/site-settings` - Site branding
 - `/api/admin/images/seed` - Seeds existing repo images to admin
 - `/api/contact` - Contact form submissions
+
+### 5. Events System
+
+Events are scraped from parksideharmony.org and can be edited via admin.
+
+**Files:**
+- `src/app/api/admin/events/sync/route.ts` - Scrapes events, delta checking, 180-day cleanup
+- `src/app/api/events/route.ts` - Public API merging scraped + overrides
+- `src/components/admin/SyncEventsButton.tsx` - UI for triggering sync
+- `src/components/events/EventsList.tsx` - Displays events with filtering
+
+**Features:**
+- **Sync from source**: Fetches events from parksideharmony.org using cheerio
+- **Delta checking**: Only adds events not already present (by title+date)
+- **180-day cleanup**: Automatically removes events older than 180 days during sync
+- **Admin overrides**: Edit scraped events; changes stored in KV and merged at display time
+- **Past events tab**: Toggle between "Upcoming" and "Past" events on public page
+
+**Usage:**
+```tsx
+<EventsList
+  title="Events"
+  maxEvents={100}
+  dataSource="api"
+  apiUrl="/api/events"
+  showFilters={true}
+  showTimePeriodTabs={true}  // Enables Upcoming/Past tabs
+/>
+```
+
+### 6. News System
+
+News articles are scraped from parksideharmony.org and can be managed via admin.
+
+**Files:**
+- `src/app/api/admin/news/sync/route.ts` - Imports scraped news to admin KV
+- `src/app/api/news/route.ts` - Public API merging scraped + admin news
+- `src/components/admin/SyncNewsButton.tsx` - UI for importing news
+- `src/components/news/NewsList.tsx` - Displays news with chorus filtering
+
+**How it works:**
+1. News is scraped to `public/data/news.json`
+2. Admin clicks "Sync News" to import into Vercel KV
+3. Once in KV, articles can be edited via admin
+4. Public API merges both sources (admin takes precedence for duplicates)
 
 ## Component Patterns
 
@@ -331,6 +390,66 @@ const updated: SiteSettings = {
 };
 ```
 
+### 11. Data Source Disconnect (Admin vs Public)
+The most critical architectural pattern to understand:
+
+- **Admin pages** read from Vercel KV (`getNews()`, `getEventOverrides()`)
+- **Public pages** originally read from static JSON files (`/data/events.json`)
+- **This causes edits in admin to not appear on the public site!**
+
+**Solution:** Public API routes must merge both sources:
+```typescript
+// In /api/events/route.ts
+const scrapedEvents = JSON.parse(fs.readFileSync('public/data/events.json'));
+const overrides = await getEventOverrides();
+
+// Merge overrides with scraped events
+const events = scrapedEvents.map(event => {
+  const override = overrideMap.get(event.id);
+  return override ? { ...event, ...override } : event;
+});
+```
+
+**Key rule:** If admin edits aren't showing on the public site, check if the public component is using the API (which merges sources) or reading directly from JSON.
+
+### 12. Adding New Pages to Branding System
+When adding a new page that needs configurable banners:
+
+1. Add the page key to `PageKey` type in `src/types/admin.ts`
+2. Add default banner in `usePageBanner.ts` `defaultBanners` object
+3. Add to `pageInfo` and `pages` array in `src/app/admin/branding/page.tsx`
+4. Add to `DEFAULT_SITE_SETTINGS.pageBanners` in `src/lib/admin-data.ts`
+5. Add to both `getSiteSettings()` and `updateSiteSettings()` pageBanners merging
+
+### 13. ImagePickerModal in Admin Forms
+For event/news edit pages, use `ImagePickerModal` instead of text input for image URLs:
+
+```tsx
+import ImagePickerModal from "@/components/admin/ImagePickerModal";
+
+const [imagePickerOpen, setImagePickerOpen] = useState(false);
+
+// In the form:
+<div className="relative h-40 bg-gray-100 rounded-lg">
+  {formData.imageUrl ? (
+    <img src={formData.imageUrl} className="w-full h-full object-cover" />
+  ) : (
+    <div className="flex items-center justify-center h-full">
+      <span>No image selected</span>
+    </div>
+  )}
+</div>
+<button onClick={() => setImagePickerOpen(true)}>Select Image</button>
+
+<ImagePickerModal
+  isOpen={imagePickerOpen}
+  onClose={() => setImagePickerOpen(false)}
+  onSelect={(url) => setFormData({ ...formData, imageUrl: url })}
+  title="Select Image"
+  currentImage={formData.imageUrl}
+/>
+```
+
 ## Admin Access
 
 - URL: `/admin`
@@ -353,6 +472,14 @@ const updated: SiteSettings = {
 | Images API | `src/app/api/admin/images/route.ts` |
 | Splash page (mobile carousel) | `src/components/splash/SplitScreen.tsx` |
 | Hero slideshow | `src/components/home/HeroSlideshow.tsx` |
+| Events list component | `src/components/events/EventsList.tsx` |
+| Events public API | `src/app/api/events/route.ts` |
+| Events sync API | `src/app/api/admin/events/sync/route.ts` |
+| Events sync button | `src/components/admin/SyncEventsButton.tsx` |
+| News list component | `src/components/news/NewsList.tsx` |
+| News public API | `src/app/api/news/route.ts` |
+| News sync API | `src/app/api/admin/news/sync/route.ts` |
+| News sync button | `src/components/admin/SyncNewsButton.tsx` |
 
 ## Development Commands
 
