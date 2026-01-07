@@ -1,27 +1,31 @@
-import { Metadata } from "next";
+"use client";
+
 import PageTransition from "@/components/ui/PageTransition";
 import EventsList from "@/components/events/EventsList";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
-
-export const metadata: Metadata = {
-  title: "Events - Parkside Barbershop Harmony",
-  description: "Upcoming performances and events for Parkside Harmony and Parkside Melody choruses.",
-};
+import HeroSection from "@/components/ui/HeroSection";
+import { useChorus } from "@/lib/chorus-context";
+import { usePageBanner } from "@/hooks/usePageBanner";
 
 export default function EventsPage() {
+  const { chorus } = useChorus();
+  const bannerImage = usePageBanner("events");
+
+  const chorusNames = {
+    harmony: "Parkside Harmony",
+    melody: "Parkside Melody",
+    voices: "Parkside Harmony and Parkside Melody",
+  };
+
   return (
     <PageTransition>
-      {/* Page Header */}
-      <section className="bg-gray-900 py-16">
-        <div className="container mx-auto px-4">
-          <ScrollAnimation>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Events Calendar</h1>
-            <p className="text-xl text-white/80 max-w-3xl">
-              Find upcoming performances, competitions, and community events featuring Parkside Harmony and Parkside Melody choruses.
-            </p>
-          </ScrollAnimation>
-        </div>
-      </section>
+      {/* Hero Section with Dynamic Banner */}
+      <HeroSection
+        title="Events Calendar"
+        subtitle={`Find upcoming performances, competitions, and community events featuring ${chorusNames[chorus]}.`}
+        imagePath={bannerImage}
+        imageAlt="Parkside Events"
+      />
       
       {/* Events List */}
       <EventsList 
