@@ -3,6 +3,9 @@ import { auth } from "@/lib/auth";
 import { put } from "@vercel/blob";
 import { createImage } from "@/lib/admin-data";
 
+// Note: For large image uploads on Vercel, files should be under ~4.5MB due to serverless payload limits.
+// For larger files, consider using client-side direct uploads to Vercel Blob.
+
 export async function POST(request: Request) {
   const session = await auth();
   if (!session?.user?.isAdmin) {
