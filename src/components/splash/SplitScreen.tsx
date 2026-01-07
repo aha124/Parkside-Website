@@ -22,8 +22,8 @@ const defaultSlides = [
     id: "harmony",
     chorus: "harmony" as ChorusType,
     title: "Parkside Harmony",
-    subtitle: "Bass Clef Chorus",
-    description: "Award-winning bass clef barbershop chorus performing in the traditional four-part harmony style.",
+    subtitle: "A Cappella Chorus",
+    description: "Award-winning a cappella chorus performing in the traditional four-part barbershop harmony style.",
     defaultImage: "/images/harmony-bg.jpg",
     buttonColor: "bg-indigo-600 hover:bg-indigo-700",
   },
@@ -31,8 +31,8 @@ const defaultSlides = [
     id: "melody",
     chorus: "melody" as ChorusType,
     title: "Parkside Melody",
-    subtitle: "Treble Clef Chorus",
-    description: "Vibrant treble clef chorus bringing exceptional a cappella performances to the Hershey area.",
+    subtitle: "Treble-Voiced Ensemble",
+    description: "Vibrant treble-voiced ensemble bringing exceptional a cappella performances to the Hershey area.",
     defaultImage: "/images/melody-bg.jpg",
     buttonColor: "bg-amber-600 hover:bg-amber-700",
   },
@@ -381,7 +381,7 @@ const SplitScreen = () => {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">Parkside Harmony</h2>
-          <p className="text-base md:text-lg lg:text-xl max-w-md mx-auto">Award-winning bass clef a cappella chorus performing in the barbershop tradition.</p>
+          <p className="text-base md:text-lg lg:text-xl max-w-md mx-auto">Award-winning a cappella chorus performing in the barbershop tradition.</p>
           <button
             onClick={() => handleChorusSelect("harmony")}
             className="mt-4 md:mt-6 px-5 md:px-6 py-2 bg-white text-gray-900 rounded-md font-medium hover:bg-gray-100 transition-colors"
@@ -464,7 +464,7 @@ const SplitScreen = () => {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">Parkside Melody</h2>
-          <p className="text-base md:text-lg lg:text-xl max-w-md mx-auto">Exceptional treble clef chorus bringing vibrant a cappella performances to the Hershey area.</p>
+          <p className="text-base md:text-lg lg:text-xl max-w-md mx-auto">Exceptional treble-voiced ensemble bringing vibrant a cappella performances to the Hershey area.</p>
           <button
             onClick={() => handleChorusSelect("melody")}
             className="mt-4 md:mt-6 px-5 md:px-6 py-2 bg-white text-gray-900 rounded-md font-medium hover:bg-gray-100 transition-colors"
