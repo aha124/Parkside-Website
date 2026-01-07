@@ -2,6 +2,7 @@ import { getNews } from "@/lib/admin-data";
 import Link from "next/link";
 import { Plus, Edit, ExternalLink } from "lucide-react";
 import DeleteButton from "@/components/admin/DeleteButton";
+import SyncNewsButton from "@/components/admin/SyncNewsButton";
 
 export default async function AdminNewsPage() {
   const news = await getNews();
@@ -15,24 +16,31 @@ export default async function AdminNewsPage() {
             Manage news articles and announcements
           </p>
         </div>
-        <Link
-          href="/admin/news/new"
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Add News</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <SyncNewsButton />
+          <Link
+            href="/admin/news/new"
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add News</span>
+          </Link>
+        </div>
       </div>
 
       {news.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-          <p className="text-gray-500 mb-4">No news articles yet</p>
+          <p className="text-gray-500 mb-4">No news articles in admin yet</p>
+          <p className="text-gray-400 text-sm mb-6">
+            Click &quot;Sync News&quot; above to import existing articles from parksideharmony.org,
+            or create a new article manually.
+          </p>
           <Link
             href="/admin/news/new"
             className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
           >
             <Plus className="w-5 h-5" />
-            <span>Create Your First Article</span>
+            <span>Create New Article</span>
           </Link>
         </div>
       ) : (

@@ -107,8 +107,8 @@ export default function NewsList({
     const fetchNews = async () => {
       setLoading(true);
       try {
-        // Fetch news from JSON file
-        const response = await fetch('/data/news.json');
+        // Fetch news from API (merges scraped JSON with admin KV)
+        const response = await fetch('/api/news');
         if (!response.ok) {
           throw new Error(`Failed to fetch news: ${response.status}`);
         }
