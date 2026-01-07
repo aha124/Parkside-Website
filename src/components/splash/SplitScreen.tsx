@@ -15,7 +15,6 @@ const slides = [
     subtitle: "Hershey Chapter - BHS",
     description: "Experience the best of both worlds. Explore our award-winning men's and women's barbershop choruses.",
     image: "/images/hero-bg.jpg",
-    accentColor: "from-purple-600/80 to-indigo-900/90",
     buttonColor: "bg-purple-600 hover:bg-purple-700",
   },
   {
@@ -25,9 +24,7 @@ const slides = [
     subtitle: "Bass Clef Chorus",
     description: "Award-winning men's barbershop chorus performing in the traditional four-part harmony style.",
     image: "/images/harmony-bg.jpg",
-    accentColor: "from-indigo-600/80 to-slate-900/90",
     buttonColor: "bg-indigo-600 hover:bg-indigo-700",
-    grayscale: true,
   },
   {
     id: "melody",
@@ -36,7 +33,6 @@ const slides = [
     subtitle: "Treble Clef Chorus",
     description: "Vibrant women's chorus bringing exceptional a cappella performances to the Hershey area.",
     image: "/images/melody-bg.jpg",
-    accentColor: "from-amber-600/80 to-orange-900/90",
     buttonColor: "bg-amber-600 hover:bg-amber-700",
   },
 ];
@@ -116,11 +112,11 @@ const SplitScreen = () => {
               src={slide.image}
               alt={slide.title}
               fill
-              className={`object-cover ${slide.grayscale ? "grayscale" : ""}`}
+              className="object-cover"
               priority
             />
-            {/* Gradient overlay */}
-            <div className={`absolute inset-0 bg-gradient-to-t ${slide.accentColor}`} />
+            {/* Subtle dark overlay for text readability */}
+            <div className="absolute inset-0 bg-black/30" />
           </motion.div>
         </AnimatePresence>
 

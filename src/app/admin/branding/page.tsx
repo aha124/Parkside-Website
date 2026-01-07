@@ -5,6 +5,70 @@ import Image from "next/image";
 import { Upload, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import type { SiteSettings, PageKey, ChorusKey } from "@/types/admin";
 
+// Utility to compress images before upload (max 2MB, max 2000px dimension)
+async function compressImage(file: File, maxSizeMB = 2, maxDimension = 2000): Promise<File> {
+  return new Promise((resolve, reject) => {
+    // If file is already small enough, return as-is
+    if (file.size <= maxSizeMB * 1024 * 1024) {
+      resolve(file);
+      return;
+    }
+
+    const img = document.createElement("img");
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    img.onload = () => {
+      let { width, height } = img;
+
+      // Scale down if too large
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = (height / width) * maxDimension;
+          width = maxDimension;
+        } else {
+          width = (width / height) * maxDimension;
+          height = maxDimension;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      ctx?.drawImage(img, 0, 0, width, height);
+
+      // Try different quality levels to get under size limit
+      const tryCompress = (quality: number): void => {
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Failed to compress image"));
+              return;
+            }
+
+            if (blob.size <= maxSizeMB * 1024 * 1024 || quality <= 0.1) {
+              const compressedFile = new File([blob], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              // Try again with lower quality
+              tryCompress(quality - 0.1);
+            }
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+
+      tryCompress(0.9);
+    };
+
+    img.onerror = () => reject(new Error("Failed to load image"));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 const chorusInfo: Record<ChorusKey, { name: string; color: string; bgColor: string }> = {
   harmony: { name: "Harmony", color: "text-indigo-700", bgColor: "bg-indigo-100" },
   melody: { name: "Melody", color: "text-amber-700", bgColor: "bg-amber-100" },
@@ -65,8 +129,12 @@ export default function BrandingPage() {
     setMessage(null);
 
     try {
+      // Compress image if too large (logos: 1MB max, banners: 2MB max)
+      const maxSize = type === "logo" ? 1 : 2;
+      const compressedFile = await compressImage(file, maxSize);
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", compressedFile);
       formData.append("name", type === "logo" ? `${chorus}-logo` : `${page}-${chorus}-banner`);
       formData.append("category", type === "logo" ? "other" : "banner");
       formData.append("alt", type === "logo" ? `${chorusInfo[chorus].name} logo` : `${pageInfo[page!].name} banner for ${chorusInfo[chorus].name}`);
