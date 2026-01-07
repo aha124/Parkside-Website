@@ -221,6 +221,42 @@ Transparent PNGs are problematic because:
 1. Client-side: `processImage()` draws white background before drawing image
 2. Display-side: Logo containers have `bg-white` fallback
 
+### Image Picker Modal
+
+**File:** `src/components/admin/ImagePickerModal.tsx`
+
+A reusable modal for selecting images with two modes:
+- **Image Library**: Browse and select from previously uploaded images with category filtering
+- **Upload New**: Upload a new image directly (with automatic processing)
+
+**Usage in branding page:**
+```tsx
+<ImagePickerModal
+  isOpen={pickerState?.isOpen ?? false}
+  onClose={closePicker}
+  onSelect={handleImageSelect}
+  title="Select Image"
+  currentImage={currentImageUrl}
+  uploadConfig={{
+    name: "image-name",
+    category: "banner",
+    alt: "Image description",
+    chorus: "voices",
+    processImage: (file) => processImage(file, options),
+  }}
+/>
+```
+
+### Image Edit Page
+
+**File:** `src/app/admin/images/[id]/edit/page.tsx`
+
+Allows editing image metadata:
+- **Name**: Descriptive name for the image
+- **Alt Text / Description**: Keywords and tags for searchability
+- **Category**: slideshow, hero, banner, progression, other
+- **Chorus Association**: harmony, melody, voices
+
 ## Common Gotchas & Lessons Learned
 
 ### 1. Case Sensitivity in Chorus Filtering
@@ -266,6 +302,35 @@ When implementing swipeable carousels:
 - Use `animate` prop with slide index to control position
 - Threshold of ~50px works well for swipe detection
 
+### 10. Adding New Fields to SiteSettings
+When adding new fields to the `SiteSettings` type in `src/types/admin.ts`, you MUST update **BOTH** functions in `src/lib/admin-data.ts`:
+
+1. **`getSiteSettings()`** - Must include the new fields in the returned object when merging saved settings with defaults
+2. **`updateSiteSettings()`** - Must include the new fields when constructing the updated settings object
+
+**Example:** When `splashBackgrounds` and `heroSlideBackground` were added, settings weren't persisting because `getSiteSettings()` was omitting them from the return object, even though `updateSiteSettings()` was saving them correctly.
+
+```typescript
+// In getSiteSettings() - must return new fields:
+return {
+  logos: { ...DEFAULT_SITE_SETTINGS.logos, ...settings.logos },
+  pageBanners: { ... },
+  splashBackgrounds: settings.splashBackgrounds,  // Don't forget!
+  heroSlideBackground: settings.heroSlideBackground,  // Don't forget!
+  updatedAt: settings.updatedAt,
+  updatedBy: settings.updatedBy,
+};
+
+// In updateSiteSettings() - must save new fields:
+const updated: SiteSettings = {
+  logos: { ...current.logos, ...data.logos },
+  pageBanners: { ... },
+  splashBackgrounds: { ...current.splashBackgrounds, ...data.splashBackgrounds },
+  heroSlideBackground: { ...current.heroSlideBackground, ...data.heroSlideBackground },
+  ...
+};
+```
+
 ## Admin Access
 
 - URL: `/admin`
@@ -283,6 +348,9 @@ When implementing swipeable carousels:
 | Site settings API | `src/app/api/admin/site-settings/route.ts` |
 | Header/Logo | `src/components/layout/Header.tsx` |
 | Branding admin | `src/app/admin/branding/page.tsx` |
+| Image picker modal | `src/components/admin/ImagePickerModal.tsx` |
+| Image edit page | `src/app/admin/images/[id]/edit/page.tsx` |
+| Images API | `src/app/api/admin/images/route.ts` |
 | Splash page (mobile carousel) | `src/components/splash/SplitScreen.tsx` |
 | Hero slideshow | `src/components/home/HeroSlideshow.tsx` |
 
