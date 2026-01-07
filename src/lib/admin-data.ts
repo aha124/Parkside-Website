@@ -327,27 +327,77 @@ export async function fetchYouTubeMetadata(videoIdOrUrl: string): Promise<{
 // ============ SITE SETTINGS MANAGEMENT ============
 
 const DEFAULT_SITE_SETTINGS: SiteSettings = {
-  harmony: {
-    logoUrl: "/images/parkside-logo.png",
-    bannerUrl: "/images/harmony-banner.jpg",
-    heroImageUrl: "/images/harmony-hero.jpg",
+  logos: {
+    harmony: "/images/parkside-logo.png",
+    melody: "/images/parkside-logo.png",
+    voices: "/images/parkside-logo.png",
   },
-  melody: {
-    logoUrl: "/images/parkside-logo.png",
-    bannerUrl: "/images/melody-banner.jpg",
-    heroImageUrl: "/images/melody-hero.jpg",
-  },
-  voices: {
-    logoUrl: "/images/parkside-logo.png",
-    bannerUrl: "/images/parkside-banner.jpg",
-    heroImageUrl: "/images/parkside-hero.jpg",
+  pageBanners: {
+    home: {
+      harmony: "/images/harmony-bg.jpg",
+      melody: "/images/melody-bg.jpg",
+      voices: "/images/slideshow/slide1-main.jpg",
+    },
+    about: {
+      harmony: "/images/harmony-performance.jpg",
+      melody: "/images/melody-performance.jpg",
+      voices: "/images/placeholder-hero.jpg",
+    },
+    join: {
+      harmony: "/images/harmony-bg.jpg",
+      melody: "/images/melody-bg.jpg",
+      voices: "/images/join-hero.jpg",
+    },
+    media: {
+      harmony: "/images/harmony-performance.jpg",
+      melody: "/images/melody-performance.jpg",
+      voices: "/images/placeholder-hero.jpg",
+    },
+    donate: {
+      harmony: "/images/harmony-bg.jpg",
+      melody: "/images/melody-bg.jpg",
+      voices: "/images/slideshow/slide2-donate.jpg",
+    },
+    events: {
+      harmony: "/images/harmony-performance.jpg",
+      melody: "/images/melody-performance.jpg",
+      voices: "/images/slideshow/slide3-events.jpg",
+    },
+    gear: {
+      harmony: "/images/harmony-bg.jpg",
+      melody: "/images/melody-bg.jpg",
+      voices: "/images/slideshow/slide4-shop.jpg",
+    },
+    contact: {
+      harmony: "/images/harmony-performance.jpg",
+      melody: "/images/melody-performance.jpg",
+      voices: "/images/slideshow/slide5-contact.jpg",
+    },
   },
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   try {
     const settings = await kv.get<SiteSettings>(KEYS.SITE_SETTINGS);
-    return settings || DEFAULT_SITE_SETTINGS;
+    // Merge with defaults to ensure all fields exist
+    if (settings) {
+      return {
+        logos: { ...DEFAULT_SITE_SETTINGS.logos, ...settings.logos },
+        pageBanners: {
+          home: { ...DEFAULT_SITE_SETTINGS.pageBanners.home, ...settings.pageBanners?.home },
+          about: { ...DEFAULT_SITE_SETTINGS.pageBanners.about, ...settings.pageBanners?.about },
+          join: { ...DEFAULT_SITE_SETTINGS.pageBanners.join, ...settings.pageBanners?.join },
+          media: { ...DEFAULT_SITE_SETTINGS.pageBanners.media, ...settings.pageBanners?.media },
+          donate: { ...DEFAULT_SITE_SETTINGS.pageBanners.donate, ...settings.pageBanners?.donate },
+          events: { ...DEFAULT_SITE_SETTINGS.pageBanners.events, ...settings.pageBanners?.events },
+          gear: { ...DEFAULT_SITE_SETTINGS.pageBanners.gear, ...settings.pageBanners?.gear },
+          contact: { ...DEFAULT_SITE_SETTINGS.pageBanners.contact, ...settings.pageBanners?.contact },
+        },
+        updatedAt: settings.updatedAt,
+        updatedBy: settings.updatedBy,
+      };
+    }
+    return DEFAULT_SITE_SETTINGS;
   } catch (error) {
     console.error("Error fetching site settings:", error);
     return DEFAULT_SITE_SETTINGS;
@@ -360,14 +410,84 @@ export async function updateSiteSettings(
 ): Promise<SiteSettings> {
   const current = await getSiteSettings();
   const updated: SiteSettings = {
-    ...current,
-    ...data,
-    harmony: { ...current.harmony, ...data.harmony },
-    melody: { ...current.melody, ...data.melody },
-    voices: { ...current.voices, ...data.voices },
+    logos: { ...current.logos, ...data.logos },
+    pageBanners: {
+      home: { ...current.pageBanners.home, ...data.pageBanners?.home },
+      about: { ...current.pageBanners.about, ...data.pageBanners?.about },
+      join: { ...current.pageBanners.join, ...data.pageBanners?.join },
+      media: { ...current.pageBanners.media, ...data.pageBanners?.media },
+      donate: { ...current.pageBanners.donate, ...data.pageBanners?.donate },
+      events: { ...current.pageBanners.events, ...data.pageBanners?.events },
+      gear: { ...current.pageBanners.gear, ...data.pageBanners?.gear },
+      contact: { ...current.pageBanners.contact, ...data.pageBanners?.contact },
+    },
     updatedAt: new Date().toISOString(),
     updatedBy,
   };
   await kv.set(KEYS.SITE_SETTINGS, updated);
   return updated;
+}
+
+// ============ SEED EXISTING IMAGES ============
+
+// Predefined list of existing images in the repo
+const EXISTING_IMAGES: Array<{
+  name: string;
+  url: string;
+  category: SiteImage["category"];
+  chorus: SiteImage["chorus"];
+  alt: string;
+}> = [
+  // Harmony images
+  { name: "Harmony Background", url: "/images/harmony-bg.jpg", category: "hero", chorus: "harmony", alt: "Parkside Harmony background" },
+  { name: "Harmony Performance", url: "/images/harmony-performance.jpg", category: "banner", chorus: "harmony", alt: "Parkside Harmony performance" },
+  // Melody images
+  { name: "Melody Background", url: "/images/melody-bg.jpg", category: "hero", chorus: "melody", alt: "Parkside Melody background" },
+  { name: "Melody Performance", url: "/images/melody-performance.jpg", category: "banner", chorus: "melody", alt: "Parkside Melody performance" },
+  // Voices/Combined images
+  { name: "Main Hero", url: "/images/placeholder-hero.jpg", category: "hero", chorus: "voices", alt: "Parkside Voices hero" },
+  { name: "Join Page Hero", url: "/images/join-hero.jpg", category: "hero", chorus: "voices", alt: "Join Parkside" },
+  { name: "Progression Hero", url: "/images/progression_hero.jpg", category: "progression", chorus: "voices", alt: "Parkside progression" },
+  // Slideshow images
+  { name: "Slideshow - Main", url: "/images/slideshow/slide1-main.jpg", category: "slideshow", chorus: "voices", alt: "Main slideshow" },
+  { name: "Slideshow - Donate", url: "/images/slideshow/slide2-donate.jpg", category: "slideshow", chorus: "voices", alt: "Donate slideshow" },
+  { name: "Slideshow - Events", url: "/images/slideshow/slide3-events.jpg", category: "slideshow", chorus: "voices", alt: "Events slideshow" },
+  { name: "Slideshow - Shop", url: "/images/slideshow/slide4-shop.jpg", category: "slideshow", chorus: "voices", alt: "Shop slideshow" },
+  { name: "Slideshow - Contact", url: "/images/slideshow/slide5-contact.jpg", category: "slideshow", chorus: "voices", alt: "Contact slideshow" },
+  // Gallery images
+  { name: "Gallery 1", url: "/images/placeholder-gallery-1.jpg", category: "other", chorus: "voices", alt: "Gallery image 1" },
+  { name: "Gallery 2", url: "/images/placeholder-gallery-2.jpg", category: "other", chorus: "voices", alt: "Gallery image 2" },
+  { name: "Gallery 3", url: "/images/placeholder-gallery-3.jpg", category: "other", chorus: "voices", alt: "Gallery image 3" },
+  { name: "Gallery 4", url: "/images/placeholder-gallery-4.jpg", category: "other", chorus: "voices", alt: "Gallery image 4" },
+  // Logos
+  { name: "Parkside Logo", url: "/images/parkside-logo.png", category: "other", chorus: "voices", alt: "Parkside logo" },
+  { name: "BHS Logo", url: "/images/bhs-logo.png", category: "other", chorus: "voices", alt: "BHS logo" },
+  { name: "MAD Logo", url: "/images/MAD_logo.gif", category: "other", chorus: "voices", alt: "MAD District logo" },
+];
+
+export async function seedExistingImages(createdBy?: string): Promise<{ added: number; skipped: number }> {
+  const existingImages = await getImages();
+  const existingUrls = new Set(existingImages.map(img => img.url));
+
+  let added = 0;
+  let skipped = 0;
+
+  for (const img of EXISTING_IMAGES) {
+    if (existingUrls.has(img.url)) {
+      skipped++;
+      continue;
+    }
+
+    await createImage({
+      name: img.name,
+      url: img.url,
+      category: img.category,
+      chorus: img.chorus,
+      alt: img.alt,
+      createdBy,
+    });
+    added++;
+  }
+
+  return { added, skipped };
 }

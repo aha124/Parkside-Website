@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Plus, Edit } from "lucide-react";
 import DeleteButton from "@/components/admin/DeleteButton";
 import CopyUrlButton from "@/components/admin/CopyUrlButton";
+import SeedImagesButton from "@/components/admin/SeedImagesButton";
 
 export default async function AdminImagesPage() {
   const images = await getImages();
@@ -28,20 +29,23 @@ export default async function AdminImagesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Images</h1>
           <p className="text-gray-600 mt-1">
             Manage site images, banners, and slideshows
           </p>
         </div>
-        <Link
-          href="/admin/images/upload"
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Upload Image</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <SeedImagesButton />
+          <Link
+            href="/admin/images/upload"
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Upload Image</span>
+          </Link>
+        </div>
       </div>
 
       {images.length === 0 ? (

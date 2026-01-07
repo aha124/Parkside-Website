@@ -97,17 +97,35 @@ export interface YouTubeOEmbed {
   html: string;
 }
 
-// Site branding settings per chorus
+// Site branding settings - per page, per chorus
+export type ChorusKey = "harmony" | "melody" | "voices";
+
+// Banner URLs for each chorus selection
+export interface PageBanners {
+  harmony?: string;
+  melody?: string;
+  voices?: string;
+}
+
+// All pages that can have custom banners
+export type PageKey = "home" | "about" | "join" | "media" | "donate" | "events" | "gear" | "contact";
+
+export interface SiteSettings {
+  // Logos per chorus
+  logos: {
+    harmony?: string;
+    melody?: string;
+    voices?: string;
+  };
+  // Page banners - each page can have different banner per chorus
+  pageBanners: Record<PageKey, PageBanners>;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
+// Legacy type for backwards compatibility
 export interface ChorusBranding {
   logoUrl?: string;
   bannerUrl?: string;
   heroImageUrl?: string;
-}
-
-export interface SiteSettings {
-  harmony: ChorusBranding;
-  melody: ChorusBranding;
-  voices: ChorusBranding;
-  updatedAt?: string;
-  updatedBy?: string;
 }
