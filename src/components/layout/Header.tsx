@@ -136,7 +136,7 @@ export default function Header() {
               href="/splash"
               className="flex items-center gap-1.5 sm:gap-2 min-w-0"
             >
-              <div className="relative h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
+              <div className="relative h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0 bg-white rounded-full">
                 <Image
                   src={currentConfig.logo}
                   alt={`${currentConfig.name} Logo`}
