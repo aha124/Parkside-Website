@@ -393,6 +393,8 @@ export async function getSiteSettings(): Promise<SiteSettings> {
           gear: { ...DEFAULT_SITE_SETTINGS.pageBanners.gear, ...settings.pageBanners?.gear },
           contact: { ...DEFAULT_SITE_SETTINGS.pageBanners.contact, ...settings.pageBanners?.contact },
         },
+        splashBackgrounds: settings.splashBackgrounds,
+        heroSlideBackground: settings.heroSlideBackground,
         updatedAt: settings.updatedAt,
         updatedBy: settings.updatedBy,
       };
