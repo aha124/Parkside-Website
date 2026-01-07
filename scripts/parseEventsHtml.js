@@ -14,10 +14,10 @@ const { v4: uuidv4 } = require('uuid');
 const OUTPUT_FILE = path.join(__dirname, '..', 'public', 'data', 'events.json');
 
 const DEFAULT_IMAGES = {
-  'Harmony': '/images/harmony-event.jpg',
-  'Melody': '/images/melody-event.jpg',
-  'Both': '/images/parkside-event.jpg',
-  'default': '/images/event-default.jpg'
+  'Harmony': '/images/harmony-performance.jpg',
+  'Melody': '/images/melody-performance.jpg',
+  'Both': '/images/hero-bg.jpg',
+  'default': '/images/hero-bg.jpg'
 };
 
 function determineChorus(text) {

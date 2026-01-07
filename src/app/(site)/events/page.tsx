@@ -28,12 +28,13 @@ export default function EventsPage() {
       />
       
       {/* Events List */}
-      <EventsList 
-        title="All Upcoming Events" 
-        maxEvents={100} 
-        dataSource="json" 
-        jsonUrl="/data/events.json" 
+      <EventsList
+        title="Events"
+        maxEvents={100}
+        dataSource="json"
+        jsonUrl="/data/events.json"
         showFilters={true}
+        showTimePeriodTabs={true}
       />
       
       {/* Calendar Integration Info */}

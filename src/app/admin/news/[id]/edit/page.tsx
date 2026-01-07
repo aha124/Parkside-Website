@@ -2,69 +2,62 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Save, Loader2, AlertCircle, ImageIcon } from "lucide-react";
+import { ArrowLeft, Save, Loader2, ImageIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import ChorusSelector from "@/components/admin/ChorusSelector";
 import ImagePickerModal from "@/components/admin/ImagePickerModal";
+import { ChorusTag } from "@/types/admin";
 
-interface EventData {
+interface NewsData {
   id: string;
   title: string;
   date: string;
-  startTime: string;
-  endTime: string;
-  description: string;
-  location: string;
+  summary: string;
+  content: string;
   imageUrl: string;
-  chorus: string;
-  url: string;
-  hasOverride?: boolean;
+  chorus: ChorusTag;
 }
 
-export default function EditScrapedEventPage() {
+export default function EditNewsPage() {
   const router = useRouter();
   const params = useParams();
-  const eventId = params.id as string;
+  const newsId = params.id as string;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [hasOverride, setHasOverride] = useState(false);
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
-  const [formData, setFormData] = useState<EventData>({
+  const [formData, setFormData] = useState<NewsData>({
     id: "",
     title: "",
     date: "",
-    startTime: "",
-    endTime: "",
-    description: "",
-    location: "",
+    summary: "",
+    content: "",
     imageUrl: "",
     chorus: "voices",
-    url: "",
   });
 
   useEffect(() => {
-    async function fetchEvent() {
+    async function fetchNews() {
       try {
-        const response = await fetch(`/api/admin/events/scraped/${eventId}`);
+        const response = await fetch(`/api/admin/news/${newsId}`);
         if (!response.ok) {
-          throw new Error("Event not found");
+          throw new Error("News article not found");
         }
         const data = await response.json();
         setFormData({
           ...data.data,
           chorus: data.data.chorus?.toLowerCase() || "voices",
         });
-        setHasOverride(data.data.hasOverride || false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load event");
+        setError(err instanceof Error ? err.message : "Failed to load news article");
       } finally {
         setLoading(false);
       }
     }
-    fetchEvent();
-  }, [eventId]);
+    fetchNews();
+  }, [newsId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +65,7 @@ export default function EditScrapedEventPage() {
     setError("");
 
     try {
-      const response = await fetch(`/api/admin/events/scraped/${eventId}`, {
+      const response = await fetch(`/api/admin/news/${newsId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -80,10 +73,10 @@ export default function EditScrapedEventPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Failed to update event");
+        throw new Error(data.error || "Failed to update news article");
       }
 
-      router.push("/admin/events");
+      router.push("/admin/news");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -104,28 +97,14 @@ export default function EditScrapedEventPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link
-          href="/admin/events"
+          href="/admin/news"
           className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Edit Scraped Event</h1>
-          <p className="text-gray-600 mt-1">
-            Override scraped event details
-          </p>
-        </div>
-      </div>
-
-      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-        <div>
-          <p className="text-amber-800 font-medium">Scraped Event Override</p>
-          <p className="text-amber-700 text-sm mt-1">
-            {hasOverride
-              ? "This event has been modified. Changes here will update your existing override."
-              : "This event was automatically imported. Any changes you make will create an override that takes precedence over the scraped data."}
-          </p>
+          <h1 className="text-2xl font-bold text-gray-900">Edit News Article</h1>
+          <p className="text-gray-600 mt-1">Update article details</p>
         </div>
       </div>
 
@@ -142,7 +121,7 @@ export default function EditScrapedEventPage() {
               htmlFor="title"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Event Title *
+              Title *
             </label>
             <input
               type="text"
@@ -153,145 +132,79 @@ export default function EditScrapedEventPage() {
                 setFormData({ ...formData, title: e.target.value })
               }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Enter event title"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <label
-                htmlFor="date"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Date *
-              </label>
-              <input
-                type="text"
-                id="date"
-                required
-                value={formData.date}
-                onChange={(e) =>
-                  setFormData({ ...formData, date: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="e.g., Jan 15, 2025"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="startTime"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Start Time
-              </label>
-              <input
-                type="text"
-                id="startTime"
-                value={formData.startTime}
-                onChange={(e) =>
-                  setFormData({ ...formData, startTime: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="e.g., 7:00pm"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="endTime"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                End Time
-              </label>
-              <input
-                type="text"
-                id="endTime"
-                value={formData.endTime}
-                onChange={(e) =>
-                  setFormData({ ...formData, endTime: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="e.g., 10:00pm"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="chorus"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Chorus *
-            </label>
-            <select
-              id="chorus"
-              required
-              value={formData.chorus.toLowerCase()}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  chorus: e.target.value,
-                })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="harmony">Parkside Harmony</option>
-              <option value="melody">Parkside Melody</option>
-              <option value="voices">Parkside Voices (Both)</option>
-              <option value="both">Both</option>
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Description *
-            </label>
-            <textarea
-              id="description"
-              required
-              rows={4}
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Event description"
+              placeholder="Enter article title"
             />
           </div>
 
           <div>
             <label
-              htmlFor="location"
+              htmlFor="date"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Location
+              Date *
             </label>
             <input
               type="text"
-              id="location"
-              value={formData.location}
+              id="date"
+              required
+              value={formData.date}
               onChange={(e) =>
-                setFormData({ ...formData, location: e.target.value })
+                setFormData({ ...formData, date: e.target.value })
               }
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Event location"
+              placeholder="e.g., January 6, 2025"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="summary"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Summary *
+            </label>
+            <textarea
+              id="summary"
+              required
+              rows={3}
+              value={formData.summary}
+              onChange={(e) =>
+                setFormData({ ...formData, summary: e.target.value })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Brief summary shown in news listings"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="content"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Full Content
+            </label>
+            <textarea
+              id="content"
+              rows={8}
+              value={formData.content}
+              onChange={(e) =>
+                setFormData({ ...formData, content: e.target.value })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Full article content (optional)"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Event Image
+              Article Image
             </label>
             <div className="flex items-start gap-4">
               {formData.imageUrl ? (
                 <div className="relative w-40 h-24 rounded-lg overflow-hidden border border-gray-200">
                   <Image
                     src={formData.imageUrl}
-                    alt="Event image"
+                    alt="Article image"
                     fill
                     className="object-cover"
                   />
@@ -322,29 +235,15 @@ export default function EditScrapedEventPage() {
             </div>
           </div>
 
-          <div>
-            <label
-              htmlFor="url"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              External URL
-            </label>
-            <input
-              type="url"
-              id="url"
-              value={formData.url}
-              onChange={(e) =>
-                setFormData({ ...formData, url: e.target.value })
-              }
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="https://..."
-            />
-          </div>
+          <ChorusSelector
+            value={formData.chorus}
+            onChange={(chorus) => setFormData({ ...formData, chorus })}
+          />
         </div>
 
         <div className="flex items-center justify-end gap-4">
           <Link
-            href="/admin/events"
+            href="/admin/news"
             className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
           >
             Cancel
@@ -359,7 +258,7 @@ export default function EditScrapedEventPage() {
             ) : (
               <Save className="w-5 h-5" />
             )}
-            <span>{saving ? "Saving..." : "Save Override"}</span>
+            <span>{saving ? "Saving..." : "Save Changes"}</span>
           </button>
         </div>
       </form>
@@ -368,12 +267,12 @@ export default function EditScrapedEventPage() {
         isOpen={imagePickerOpen}
         onClose={() => setImagePickerOpen(false)}
         onSelect={(url) => setFormData({ ...formData, imageUrl: url })}
-        title="Select Event Image"
+        title="Select Article Image"
         currentImage={formData.imageUrl}
         uploadConfig={{
-          name: formData.title || "event-image",
+          name: formData.title || "news-image",
           category: "other",
-          alt: formData.title || "Event image",
+          alt: formData.title || "News article image",
           chorus: formData.chorus,
         }}
       />

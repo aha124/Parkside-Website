@@ -2,6 +2,7 @@ import { getEventOverrides } from "@/lib/admin-data";
 import Link from "next/link";
 import { Plus, Edit, Eye, EyeOff, Calendar } from "lucide-react";
 import DeleteButton from "@/components/admin/DeleteButton";
+import SyncEventsButton from "@/components/admin/SyncEventsButton";
 import fs from "fs";
 import path from "path";
 
@@ -43,13 +44,16 @@ export default async function AdminEventsPage() {
             Manage events - scraped automatically with manual overrides
           </p>
         </div>
-        <Link
-          href="/admin/events/new"
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Add Event</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <SyncEventsButton />
+          <Link
+            href="/admin/events/new"
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add Event</span>
+          </Link>
+        </div>
       </div>
 
       {/* Manual Events Section */}

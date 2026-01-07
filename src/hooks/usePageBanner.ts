@@ -14,6 +14,7 @@ const defaultBanners: Record<PageKey, string> = {
   events: "/images/slideshow/slide3-events.jpg",
   gear: "/images/slideshow/slide4-shop.jpg",
   contact: "/images/slideshow/slide5-contact.jpg",
+  leadership: "/images/leadership-hero.jpg",
 };
 
 // Pages that should have the SAME banner regardless of chorus selection
