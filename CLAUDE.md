@@ -14,6 +14,7 @@ The site dynamically changes content based on which chorus the visitor selects.
 
 - **Framework**: Next.js 14 (App Router)
 - **Styling**: Tailwind CSS
+- **Animations**: Framer Motion (drag gestures, transitions, animations)
 - **Data Storage**: JSON files in `/data/` directory (no database)
 - **Authentication**: Simple password-based admin (stored in cookies)
 
@@ -132,6 +133,94 @@ Animates children when they enter viewport.
 - **Melody**: Amber (`#F59E0B`, `amber-500`)
 - **Combined/Voices**: Purple (`#8B5CF6`)
 
+## Mobile/Tablet Responsive Design
+
+The site uses mobile-first responsive design with Tailwind CSS breakpoints.
+
+### Responsive Patterns
+
+**Text sizing:**
+```tsx
+className="text-sm sm:text-base md:text-xl lg:text-2xl"
+```
+
+**Spacing:**
+```tsx
+className="py-12 sm:py-16 md:py-24"
+className="px-4 sm:px-6 md:px-8"
+```
+
+**Layout changes:**
+```tsx
+className="flex flex-col sm:flex-row"  // Stack on mobile, row on larger
+className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+```
+
+**Responsive heights:**
+```tsx
+className="h-[300px] sm:h-[400px] md:h-[500px]"
+```
+
+### Mobile Detection Pattern
+
+For components needing JavaScript-based mobile detection:
+
+```tsx
+const [isMobile, setIsMobile] = useState(false);
+
+useEffect(() => {
+  const checkMobile = () => setIsMobile(window.innerWidth < 768);
+  checkMobile();
+  window.addEventListener("resize", checkMobile);
+  return () => window.removeEventListener("resize", checkMobile);
+}, []);
+```
+
+### Mobile Splash Page (Swipeable Carousel)
+
+**File:** `src/components/splash/SplitScreen.tsx`
+
+On mobile, the splash page transforms into a full-screen swipeable carousel:
+- Uses Framer Motion drag gestures for swipe navigation
+- Glassmorphism card design with `backdrop-blur-md`
+- Dot indicators for current slide position
+- Quick navigation buttons at bottom
+- Subtle dark overlay on background images (`bg-black/30`)
+
+**Key implementation details:**
+- Desktop: Side-by-side 50/50 split with hover effects
+- Mobile: Full-screen slides with swipe gestures
+- Breakpoint: 768px (md)
+
+## Image Upload & Processing
+
+### Client-Side Image Processing
+
+**File:** `src/app/admin/branding/page.tsx`
+
+The `processImage()` function handles image uploads with:
+- **Compression**: Resizes large images to reduce file size
+- **White background**: Automatically adds white background to transparent PNGs
+- **Size limits**: Logos max 500px/1MB, banners max 2000px/2MB
+
+```tsx
+const processedFile = await processImage(file, {
+  maxSizeMB: type === "logo" ? 1 : 2,
+  maxDimension: type === "logo" ? 500 : 2000,
+  addWhiteBackground: type === "logo",
+});
+```
+
+### Transparent PNG Handling
+
+Transparent PNGs are problematic because:
+- Browsers render transparency as black by default
+- Dark logos on transparent backgrounds become invisible
+
+**Solution:**
+1. Client-side: `processImage()` draws white background before drawing image
+2. Display-side: Logo containers have `bg-white` fallback
+
 ## Common Gotchas & Lessons Learned
 
 ### 1. Case Sensitivity in Chorus Filtering
@@ -157,6 +246,26 @@ Client components can't export `metadata`. Either:
 ### 6. Form Submissions
 Contact form posts to `/api/contact` which currently logs submissions. To enable actual email sending, integrate a service like SendGrid, Resend, or Nodemailer.
 
+### 7. Image Upload 413 Errors
+Vercel serverless functions have a ~4.5MB payload limit. Large image uploads will fail with "413 Request Entity Too Large".
+
+**Solution:** Always compress images client-side before uploading. The `processImage()` function in the branding page handles this automatically.
+
+### 8. Transparent PNG Logos
+When users upload logos with transparent backgrounds, browsers render the transparency as black, making dark logos invisible.
+
+**Solution:**
+- Process uploads to add white background using Canvas API
+- Add `bg-white` to logo containers as a fallback
+- See `src/app/admin/branding/page.tsx` for implementation
+
+### 9. Framer Motion Drag Gestures
+When implementing swipeable carousels:
+- Use `drag="x"` with `dragConstraints={{ left: 0, right: 0 }}`
+- Handle `onDragEnd` with `PanInfo` to detect swipe direction
+- Use `animate` prop with slide index to control position
+- Threshold of ~50px works well for swipe detection
+
 ## Admin Access
 
 - URL: `/admin`
@@ -174,6 +283,8 @@ Contact form posts to `/api/contact` which currently logs submissions. To enable
 | Site settings API | `src/app/api/admin/site-settings/route.ts` |
 | Header/Logo | `src/components/layout/Header.tsx` |
 | Branding admin | `src/app/admin/branding/page.tsx` |
+| Splash page (mobile carousel) | `src/components/splash/SplitScreen.tsx` |
+| Hero slideshow | `src/components/home/HeroSlideshow.tsx` |
 
 ## Development Commands
 
@@ -197,6 +308,6 @@ If starting fresh, the admin panel will create these files with defaults.
 ## Future Considerations
 
 1. **Email Integration**: Contact form needs email service integration
-2. **Image Uploads**: Currently references existing images; could add upload functionality
-3. **Database**: Could migrate from JSON files to a proper database for scale
-4. **Authentication**: Current admin auth is basic; could upgrade to NextAuth.js
+2. **Database**: Could migrate from JSON files to a proper database for scale
+3. **Authentication**: Current admin auth is basic; could upgrade to NextAuth.js
+4. **Image CDN**: Consider using a dedicated image CDN for better performance
