@@ -144,20 +144,23 @@ export default function BrandingPage() {
   };
 
   const handleFileUpload = async (
-    type: "logo" | "banner",
+    type: "logo" | "banner" | "splash" | "heroSlide",
     chorus: ChorusKey,
     page?: PageKey,
     file?: File
   ) => {
     if (!file) return;
 
-    const uploadKey = type === "logo" ? `logo-${chorus}` : `banner-${page}-${chorus}`;
+    const uploadKey = type === "logo" ? `logo-${chorus}`
+      : type === "splash" ? `splash-${chorus}`
+      : type === "heroSlide" ? `heroSlide-${chorus}`
+      : `banner-${page}-${chorus}`;
     setUploading(uploadKey);
     setMessage(null);
 
     try {
       // Process image: add white background for logos (fixes transparent PNG issue)
-      // Also compress if needed (logos: 1MB max, banners: 2MB max)
+      // Also compress if needed (logos: 1MB max, banners/backgrounds: 2MB max)
       const processedFile = await processImage(file, {
         maxSizeMB: type === "logo" ? 1 : 2,
         maxDimension: type === "logo" ? 500 : 2000,
@@ -166,9 +169,24 @@ export default function BrandingPage() {
 
       const formData = new FormData();
       formData.append("file", processedFile);
-      formData.append("name", type === "logo" ? `${chorus}-logo` : `${page}-${chorus}-banner`);
-      formData.append("category", type === "logo" ? "other" : "banner");
-      formData.append("alt", type === "logo" ? `${chorusInfo[chorus].name} logo` : `${pageInfo[page!].name} banner for ${chorusInfo[chorus].name}`);
+
+      // Set name and metadata based on type
+      const nameMap = {
+        logo: `${chorus}-logo`,
+        splash: `${chorus}-splash-bg`,
+        heroSlide: `${chorus}-hero-slide-bg`,
+        banner: `${page}-${chorus}-banner`,
+      };
+      const altMap = {
+        logo: `${chorusInfo[chorus].name} logo`,
+        splash: `${chorusInfo[chorus].name} splash background`,
+        heroSlide: `${chorusInfo[chorus].name} hero slideshow background`,
+        banner: `${pageInfo[page!].name} banner for ${chorusInfo[chorus].name}`,
+      };
+
+      formData.append("name", nameMap[type]);
+      formData.append("category", type === "logo" ? "other" : type === "heroSlide" ? "slideshow" : "banner");
+      formData.append("alt", altMap[type]);
       formData.append("chorus", chorus);
 
       const uploadResponse = await fetch("/api/admin/images/upload", {
@@ -188,6 +206,22 @@ export default function BrandingPage() {
           ...settings!,
           logos: {
             ...settings!.logos,
+            [chorus]: uploadData.data.url,
+          },
+        };
+      } else if (type === "splash") {
+        newSettings = {
+          ...settings!,
+          splashBackgrounds: {
+            ...settings!.splashBackgrounds,
+            [chorus]: uploadData.data.url,
+          },
+        };
+      } else if (type === "heroSlide") {
+        newSettings = {
+          ...settings!,
+          heroSlideBackground: {
+            ...settings!.heroSlideBackground,
             [chorus]: uploadData.data.url,
           },
         };
@@ -319,6 +353,134 @@ export default function BrandingPage() {
                     className="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-white hover:bg-gray-50 rounded-md transition-colors disabled:opacity-50 border border-gray-300"
                   >
                     {uploading === `logo-${chorus}` ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                    Upload
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Splash Page Backgrounds Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <button
+          onClick={() => toggleSection("splash")}
+          className="w-full px-6 py-4 bg-gray-800 text-white flex items-center justify-between"
+        >
+          <div className="text-left">
+            <h2 className="font-semibold text-lg">Splash Page Backgrounds</h2>
+            <p className="text-sm text-gray-300">Background images for the landing/splash page carousel</p>
+          </div>
+          {expandedSections.splash ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+        </button>
+
+        {expandedSections.splash && (
+          <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {choruses.map((chorus) => (
+              <div key={chorus}>
+                <label className={`block text-sm font-medium mb-2 ${chorusInfo[chorus].color}`}>
+                  {chorusInfo[chorus].name} Background
+                </label>
+                <div className={`border-2 border-dashed rounded-lg p-3 text-center ${chorusInfo[chorus].bgColor} border-gray-300`}>
+                  {settings?.splashBackgrounds?.[chorus] ? (
+                    <div className="relative h-24 w-full mb-2">
+                      <Image
+                        src={settings.splashBackgrounds[chorus]!}
+                        alt={`${chorusInfo[chorus].name} splash background`}
+                        fill
+                        className="object-cover rounded"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-24 w-full mb-2 bg-white/50 rounded flex items-center justify-center">
+                      <span className="text-gray-400 text-xs">No background set</span>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    ref={(el) => { fileInputRefs.current[`splash-${chorus}`] = el; }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload("splash", chorus, undefined, file);
+                    }}
+                  />
+                  <button
+                    onClick={() => triggerFileInput(`splash-${chorus}`)}
+                    disabled={uploading === `splash-${chorus}`}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-white hover:bg-gray-50 rounded-md transition-colors disabled:opacity-50 border border-gray-300"
+                  >
+                    {uploading === `splash-${chorus}` ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                    Upload
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Hero Slideshow First Slide Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <button
+          onClick={() => toggleSection("heroSlide")}
+          className="w-full px-6 py-4 bg-gray-700 text-white flex items-center justify-between"
+        >
+          <div className="text-left">
+            <h2 className="font-semibold text-lg">Hero Slideshow - First Slide</h2>
+            <p className="text-sm text-gray-300">Background image for the main hero slideshow (changes based on chorus selection)</p>
+          </div>
+          {expandedSections.heroSlide ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+        </button>
+
+        {expandedSections.heroSlide && (
+          <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+            {choruses.map((chorus) => (
+              <div key={chorus}>
+                <label className={`block text-sm font-medium mb-2 ${chorusInfo[chorus].color}`}>
+                  {chorusInfo[chorus].name} Hero Background
+                </label>
+                <div className={`border-2 border-dashed rounded-lg p-3 text-center ${chorusInfo[chorus].bgColor} border-gray-300`}>
+                  {settings?.heroSlideBackground?.[chorus] ? (
+                    <div className="relative h-24 w-full mb-2">
+                      <Image
+                        src={settings.heroSlideBackground[chorus]!}
+                        alt={`${chorusInfo[chorus].name} hero slideshow background`}
+                        fill
+                        className="object-cover rounded"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-24 w-full mb-2 bg-white/50 rounded flex items-center justify-center">
+                      <span className="text-gray-400 text-xs">No background set</span>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    ref={(el) => { fileInputRefs.current[`heroSlide-${chorus}`] = el; }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileUpload("heroSlide", chorus, undefined, file);
+                    }}
+                  />
+                  <button
+                    onClick={() => triggerFileInput(`heroSlide-${chorus}`)}
+                    disabled={uploading === `heroSlide-${chorus}`}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 text-sm bg-white hover:bg-gray-50 rounded-md transition-colors disabled:opacity-50 border border-gray-300"
+                  >
+                    {uploading === `heroSlide-${chorus}` ? (
                       <RefreshCw className="w-4 h-4 animate-spin" />
                     ) : (
                       <Upload className="w-4 h-4" />

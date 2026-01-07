@@ -119,6 +119,18 @@ export interface SiteSettings {
   };
   // Page banners - each page can have different banner per chorus
   pageBanners: Record<PageKey, PageBanners>;
+  // Splash page backgrounds per chorus (mobile carousel & desktop split)
+  splashBackgrounds?: {
+    harmony?: string;
+    melody?: string;
+    voices?: string;
+  };
+  // Hero slideshow first slide background per chorus
+  heroSlideBackground?: {
+    harmony?: string;
+    melody?: string;
+    voices?: string;
+  };
   updatedAt?: string;
   updatedBy?: string;
 }
