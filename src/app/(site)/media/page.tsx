@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import PageTransition from "@/components/ui/PageTransition";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import type { YouTubeProps } from "react-youtube";
 import { useState, useMemo, useEffect } from "react";
 import { useChorus, shouldShowForChorus } from "@/lib/chorus-context";
+import { usePageBanner } from "@/hooks/usePageBanner";
 
 // Dynamically import YouTube component to avoid SSR issues
 const YouTube = dynamic(() => import("react-youtube"), { ssr: false });
@@ -221,6 +222,7 @@ export default function MediaPage() {
   const [visibleCount, setVisibleCount] = useState(6);
   const [loading, setLoading] = useState(true);
   const { chorus: selectedChorus } = useChorus();
+  const bannerImage = usePageBanner("media");
 
   // Fetch admin-managed videos
   useEffect(() => {
@@ -295,7 +297,7 @@ export default function MediaPage() {
         <HeroSection
           title="Media Gallery"
           subtitle={heroVideo ? `Featuring: ${heroVideo.title}` : "Performance Videos"}
-          imagePath="/images/media-hero.jpg"
+          imagePath={bannerImage}
           imageAlt="Parkside Performance"
           videoId={heroVideo?.id}
         />

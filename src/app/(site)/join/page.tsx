@@ -1,18 +1,52 @@
+"use client";
+
 import PageTransition from "@/components/ui/PageTransition";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import HeroSection from "@/components/ui/HeroSection";
 import Link from "next/link";
 import Image from "next/image";
+import { useChorus } from "@/lib/chorus-context";
+import { usePageBanner } from "@/hooks/usePageBanner";
 
 export default function JoinPage() {
+  const { chorus } = useChorus();
+  const bannerImage = usePageBanner("join");
+
+  // Chorus-specific content
+  const chorusInfo = {
+    harmony: {
+      name: "Parkside Harmony",
+      subtitle:
+        "Join our award-winning men's barbershop chorus and experience the thrill of four-part harmony.",
+      voiceType: "TTBB (Tenor, Lead, Baritone, Bass)",
+      rehearsal: "Tuesdays, 7:00 PM - 9:30 PM",
+    },
+    melody: {
+      name: "Parkside Melody",
+      subtitle:
+        "Join our vibrant women's barbershop chorus and discover the joy of singing in harmony.",
+      voiceType: "SSAA (Soprano, Alto)",
+      rehearsal: "Thursdays, 7:00 PM - 9:00 PM",
+    },
+    voices: {
+      name: "Parkside",
+      subtitle:
+        "We are proud to have both Parkside Harmony (TTBB) and Parkside Melody (SSAA) ensembles as part of our Parkside Chorus Family.",
+      voiceType: "TTBB and SSAA",
+      rehearsal: "Tuesdays & Thursdays evenings",
+    },
+  };
+
+  const info = chorusInfo[chorus];
+
   return (
     <PageTransition>
       <div className="bg-white">
         <HeroSection
-          title="Join Parkside!"
-          subtitle="We are proud to have both Parkside Harmony (TTBB) and Parkside Melody (SSAA) ensembles as part of our Parkside Chorus Family."
-          imagePath="/images/join-hero.jpg"
-          imageAlt="Parkside Chorus Performance"
+          title={`Join ${info.name}!`}
+          subtitle={info.subtitle}
+          imagePath={bannerImage}
+          imageAlt={`${info.name} Performance`}
         />
 
         {/* Audition Process Section */}
@@ -24,7 +58,11 @@ export default function JoinPage() {
                   Audition Process
                 </h2>
                 <p className="text-lg text-gray-600 mb-8 text-center">
-                  To become a performing member of one of our groups, we invite you to go through our audition process:
+                  To become a performing member{" "}
+                  {chorus === "voices"
+                    ? "of one of our groups"
+                    : `of ${info.name}`}
+                  , we invite you to go through our audition process:
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
                   {/* Step 1 */}
@@ -32,9 +70,12 @@ export default function JoinPage() {
                     <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
                       1
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Performance Skills</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Performance Skills
+                    </h3>
                     <p className="text-gray-600">
-                      Learn and demonstrate basic performance staging/choreography
+                      Learn and demonstrate basic performance
+                      staging/choreography
                     </p>
                   </div>
 
@@ -43,7 +84,9 @@ export default function JoinPage() {
                     <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
                       2
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Quartet Performance</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Quartet Performance
+                    </h3>
                     <p className="text-gray-600">
                       Learn and perform your part in a quartet setting
                     </p>
@@ -54,7 +97,9 @@ export default function JoinPage() {
                     <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
                       3
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Interview</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Interview
+                    </h3>
                     <p className="text-gray-600">
                       Personal interview with Music Leadership
                     </p>
@@ -74,7 +119,11 @@ export default function JoinPage() {
                   Ready to Take the Next Step?
                 </h2>
                 <p className="text-lg text-gray-600 mb-8">
-                  If you&apos;d like more information on our audition process for either group, contact us:
+                  If you&apos;d like more information on our audition process
+                  {chorus === "voices"
+                    ? " for either group"
+                    : ` for ${info.name}`}
+                  , contact us:
                 </p>
                 <a
                   href="mailto:audition@parksideharmony.org"
@@ -82,6 +131,18 @@ export default function JoinPage() {
                 >
                   audition@parksideharmony.org
                 </a>
+
+                {chorus !== "voices" && (
+                  <div className="mt-6 p-4 bg-white rounded-lg shadow-sm">
+                    <p className="text-gray-700">
+                      <strong>Voice Parts:</strong> {info.voiceType}
+                    </p>
+                    <p className="text-gray-700">
+                      <strong>Rehearsals:</strong> {info.rehearsal}
+                    </p>
+                  </div>
+                )}
+
                 <div className="mt-12">
                   <Link
                     href="/events"
@@ -126,4 +187,4 @@ export default function JoinPage() {
       </div>
     </PageTransition>
   );
-} 
+}
