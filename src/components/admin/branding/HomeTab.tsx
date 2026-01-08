@@ -16,7 +16,7 @@ const choruses: ChorusKey[] = ["harmony", "melody", "voices"];
 interface HomeTabProps {
   settings: SiteSettings | null;
   pageContent: PageContent;
-  onImageSelect: (type: "banner", chorus: ChorusKey, page: "home") => void;
+  onImageSelect: (type: "banner" | "chorusCard", chorus: ChorusKey, page: "home") => void;
   onContentSave: (pageKey: "home", content: PageContent) => Promise<void>;
   saving: boolean;
 }
@@ -150,22 +150,55 @@ export default function HomeTab({
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h3 className="text-md font-medium text-gray-900 mb-2">&quot;Our Choruses&quot; Section</h3>
         <p className="text-sm text-gray-500 mb-4">
-          Edit the descriptions that appear in the &quot;Our Choruses&quot; section on the home page.
+          Edit the images and descriptions that appear in the &quot;Our Choruses&quot; section on the home page.
           Each chorus card has a &quot;Learn More&quot; button that links to the About page.
         </p>
-        <div className="space-y-4">
+        <div className="space-y-6">
           {choruses.map((chorus) => (
             <div key={chorus} className={`p-4 rounded-lg ${chorusInfo[chorus].bgColor}`}>
-              <label className={`block text-sm font-medium mb-1 ${chorusInfo[chorus].color}`}>
-                {chorusInfo[chorus].name} - Card Description
-              </label>
-              <textarea
-                value={localContent[`chorusCard_${chorus}`] || ""}
-                onChange={(e) => handleFieldChange(`chorusCard_${chorus}`, e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white"
-                rows={3}
-                placeholder={`Description for ${chorusInfo[chorus].name} chorus card...`}
-              />
+              <div className="flex gap-4">
+                {/* Image picker */}
+                <div className="flex-shrink-0">
+                  <label className={`block text-sm font-medium mb-2 ${chorusInfo[chorus].color}`}>
+                    Card Image
+                  </label>
+                  <button
+                    onClick={() => onImageSelect("chorusCard", chorus, "home")}
+                    className="w-32 border-2 border-dashed rounded-lg p-2 text-center bg-white/50 border-gray-300 hover:border-gray-400 hover:bg-white/70 transition-all cursor-pointer group"
+                  >
+                    {settings?.chorusCardImages?.[chorus] ? (
+                      <div className="relative h-20 w-full mb-1 rounded overflow-hidden">
+                        <Image
+                          src={settings.chorusCardImages[chorus]!}
+                          alt={`${chorusInfo[chorus].name} card image`}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-20 w-full mb-1 bg-gray-100 rounded flex items-center justify-center">
+                        <ImageIcon className="w-6 h-6 text-gray-400" />
+                      </div>
+                    )}
+                    <span className="text-xs text-gray-600 group-hover:text-gray-900">
+                      {settings?.chorusCardImages?.[chorus] ? "Change" : "Select"}
+                    </span>
+                  </button>
+                </div>
+                {/* Description textarea */}
+                <div className="flex-grow">
+                  <label className={`block text-sm font-medium mb-2 ${chorusInfo[chorus].color}`}>
+                    {chorusInfo[chorus].name} - Card Description
+                  </label>
+                  <textarea
+                    value={localContent[`chorusCard_${chorus}`] || ""}
+                    onChange={(e) => handleFieldChange(`chorusCard_${chorus}`, e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white"
+                    rows={4}
+                    placeholder={`Description for ${chorusInfo[chorus].name} chorus card...`}
+                  />
+                </div>
+              </div>
             </div>
           ))}
         </div>
