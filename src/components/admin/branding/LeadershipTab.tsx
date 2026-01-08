@@ -46,6 +46,75 @@ const chorusAffiliationOptions: { value: ChorusAffiliation | ""; label: string }
 
 // No props needed - leadership tab only manages members, not page content
 
+// Process images for member photos (resize/compress)
+async function processImage(file: File): Promise<File> {
+  const maxSizeMB = 1;
+  const maxDimension = 800;
+
+  return new Promise((resolve, reject) => {
+    const needsProcessing = file.size > maxSizeMB * 1024 * 1024;
+
+    if (!needsProcessing) {
+      resolve(file);
+      return;
+    }
+
+    const img = document.createElement("img");
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    img.onload = () => {
+      let { width, height } = img;
+
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = (height / width) * maxDimension;
+          width = maxDimension;
+        } else {
+          width = (width / height) * maxDimension;
+          height = maxDimension;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, width, height);
+      }
+
+      const tryCompress = (quality: number): void => {
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Failed to process image"));
+              return;
+            }
+
+            if (blob.size <= maxSizeMB * 1024 * 1024 || quality <= 0.1) {
+              const fileName = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+              const processedFile = new File([blob], fileName, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              resolve(processedFile);
+            } else {
+              tryCompress(quality - 0.1);
+            }
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+
+      tryCompress(0.9);
+    };
+
+    img.onerror = () => reject(new Error("Failed to load image"));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
 interface MemberFormData {
   name: string;
   title: string;
@@ -498,6 +567,15 @@ export default function LeadershipTab() {
         }}
         title="Select Member Photo"
         currentImage={formData.photoUrl}
+        uploadConfig={{
+          name: formData.name
+            ? `leadership-${formData.name.toLowerCase().replace(/\s+/g, "-")}`
+            : "leadership-member",
+          category: "other",
+          alt: formData.name ? `${formData.name} photo` : "Leadership member photo",
+          chorus: "voices",
+          processImage,
+        }}
       />
     </div>
   );
