@@ -495,6 +495,33 @@ When adding a new type of image to the admin branding system (e.g., `chorusCardI
 
 **Also update `src/types/admin.ts`** and **`src/lib/admin-data.ts`** per gotcha #10.
 
+### 15. Admin Fields Should Match Display Structure
+
+When creating admin editing fields, match the visual structure of the public page. If content displays as a single text block on the site, use a single textarea in the admin - don't split into multiple fields (e.g., "intro" and "detail").
+
+**Bad approach:**
+```typescript
+// Two separate fields that display as one continuous block
+{ key: "storyIntro_harmony", label: "Story Intro", type: "textarea" },
+{ key: "storyDetail_harmony", label: "Story Detail", type: "textarea" },
+```
+
+**Good approach:**
+```typescript
+// Single field with paragraph support (users separate with blank lines)
+{ key: "story_harmony", label: "Our Story", type: "textarea" },
+```
+
+**Why this matters:**
+- Reduces confusion for admins who see the final output as one block
+- Simpler data model and fewer fields to maintain
+- Users can naturally add paragraphs by pressing Enter twice
+
+**For multi-paragraph support**, split on `\n\n` when rendering:
+```tsx
+{text.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
+```
+
 ## Admin Access
 
 - URL: `/admin`
@@ -550,13 +577,16 @@ The admin branding page uses a tabbed interface for managing all site content.
 **Tabs:**
 - **General** - Combined tab for logos, splash page backgrounds, and hero slideshow backgrounds (all per-chorus)
 - **Home** - Hero slide banners/descriptions per chorus + "Our Choruses" section (card images and descriptions for Harmony, Melody, Voices)
-- **Page tabs** (About, Leadership, Join, etc.) - Banners + editable text content
+- **About** - Page banners + "Our Story" section (per-chorus images and text)
+- **Leadership** - Leadership member management
+- **Page tabs** (Join, Events, Media, etc.) - Banners + editable text content
 
 **Files:**
 - `src/app/admin/branding/page.tsx` - Main page with tab logic and image picker handling
 - `src/components/admin/branding/AdminTabs.tsx` - Tab navigation component
 - `src/components/admin/branding/GeneralTab.tsx` - Combined logos, splash backgrounds, hero slideshow backgrounds
 - `src/components/admin/branding/HomeTab.tsx` - Home page specific: hero descriptions + chorus card images/descriptions
+- `src/components/admin/branding/AboutTab.tsx` - About page: story images and text per chorus
 - `src/components/admin/branding/PageContentTab.tsx` - Reusable page banner + content editor for other pages
 - `src/components/admin/branding/LeadershipTab.tsx` - Leadership member management
 
@@ -566,7 +596,33 @@ The admin branding page uses a tabbed interface for managing all site content.
 3. Add to `PAGE_CONTENT_SCHEMA` in types/admin.ts
 4. Add default content in `DEFAULT_PAGE_CONTENT` in admin-data.ts
 
-### 10. Home Page "Our Choruses" Section
+### 10. About Page "Our Story" Section
+
+The About page displays per-chorus content that changes based on which chorus the visitor selected.
+
+**Editable content:**
+- **Story Image** - One image per chorus (stored in `SiteSettings.aboutStoryImages`)
+- **Story Text** - Single text block per chorus with paragraph support (stored in `PageContent.about` with keys `story_harmony`, `story_melody`, `story_voices`)
+
+**Non-editable (hardcoded):**
+- Mission & Values section
+- Our Achievements section
+- Our Commitment to Inclusion section
+- "Join our Harmony/Melody/Voices" CTA (dynamic based on chorus selection)
+
+**Files:**
+- `src/app/(site)/about/page.tsx` - Public About page that fetches and displays content
+- `src/components/admin/branding/AboutTab.tsx` - Admin UI for editing story images and text
+
+**How paragraph rendering works:**
+The story text supports multiple paragraphs. Users separate paragraphs with blank lines in the textarea, and the page splits on `\n\n` to render each as a `<p>` tag:
+```tsx
+{storyText.split('\n\n').map((paragraph, index) => (
+  <p key={index}>{paragraph}</p>
+))}
+```
+
+### 11. Home Page "Our Choruses" Section
 
 The home page displays three chorus cards (Harmony, Melody, Voices) with editable images and descriptions.
 
@@ -598,6 +654,7 @@ The home page displays three chorus cards (Harmony, Melody, Voices) with editabl
 | Admin tabs component | `src/components/admin/branding/AdminTabs.tsx` |
 | General tab (logos/splash/hero) | `src/components/admin/branding/GeneralTab.tsx` |
 | Home tab (chorus cards) | `src/components/admin/branding/HomeTab.tsx` |
+| About tab (story images/text) | `src/components/admin/branding/AboutTab.tsx` |
 | Page content tab | `src/components/admin/branding/PageContentTab.tsx` |
 | Leadership tab | `src/components/admin/branding/LeadershipTab.tsx` |
 | Image picker modal | `src/components/admin/ImagePickerModal.tsx` |
@@ -606,6 +663,7 @@ The home page displays three chorus cards (Harmony, Melody, Voices) with editabl
 | Splash page (mobile carousel) | `src/components/splash/SplitScreen.tsx` |
 | Hero slideshow | `src/components/home/HeroSlideshow.tsx` |
 | Our Choruses section | `src/components/home/ChorusesSection.tsx` |
+| About page | `src/app/(site)/about/page.tsx` |
 | Events list component | `src/components/events/EventsList.tsx` |
 | Events public API | `src/app/api/events/route.ts` |
 | Events sync API | `src/app/api/admin/events/sync/route.ts` |
