@@ -143,6 +143,11 @@ export interface SiteSettings {
     melody?: string;
     voices?: string;
   };
+  // Gear page store images
+  gearStoreImages?: {
+    etown?: string; // eTown Sporting Goods (Chipply)
+    cafepress?: string; // CafePress
+  };
   updatedAt?: string;
   updatedBy?: string;
 }
