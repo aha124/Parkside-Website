@@ -17,7 +17,7 @@ const defaultChorusContent = {
     tagline: "Celebrating barbershop excellence in Hershey since 2015",
     storyIntro: "Parkside Harmony has grown from a small group of passionate singers into one of the premier barbershop choruses in the Mid-Atlantic region.",
     storyDetail: "Since our founding in 2015, we have achieved multiple district championships and international recognition, including a Silver Medal at the 2023 BHS International Competition in Louisville, Kentucky.",
-    joinTitle: "Join Parkside Harmony",
+    joinTitle: "Join our Harmony",
     joinCTA: "Experience the thrill of barbershop at its finest.",
   },
   melody: {
@@ -25,7 +25,7 @@ const defaultChorusContent = {
     tagline: "Celebrating barbershop harmony since 2018",
     storyIntro: "Parkside Melody was born from a shared love of harmony singing and a desire to create a welcoming space for singers to experience the joy of barbershop.",
     storyDetail: "Founded in 2018, we have quickly grown into a dynamic chorus that combines competitive excellence with community outreach and musical education.",
-    joinTitle: "Join Parkside Melody",
+    joinTitle: "Join our Melody",
     joinCTA: "Discover the power of voices in harmony.",
   },
   voices: {
@@ -33,7 +33,7 @@ const defaultChorusContent = {
     tagline: "Celebrating barbershop excellence in Hershey since 2015",
     storyIntro: "Founded in 2015, Parkside has grown from a small group of passionate singers into two vibrant choruses that represent the very best of barbershop harmony in the mid-atlantic region.",
     storyDetail: "Our journey began with a vision to create a space where singers could pursue musical excellence while fostering meaningful connections within our community. Today, that vision has blossomed into a thriving organization that continues to push the boundaries of a cappella performance.",
-    joinTitle: "Join Parkside Voices",
+    joinTitle: "Join our Voices",
     joinCTA: "Be part of something extraordinary.",
   },
 };
