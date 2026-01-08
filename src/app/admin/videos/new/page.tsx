@@ -43,10 +43,11 @@ export default function NewVideoPage() {
       const data = await response.json();
 
       if (data.success && data.data) {
-        // Only auto-populate the YouTube ID and thumbnail - title should be entered manually
+        // Auto-populate the YouTube ID, title, and thumbnail - admin can edit if needed
         setFormData((prev) => ({
           ...prev,
           youtubeId: data.data.id,
+          title: data.data.title,
           thumbnailUrl: data.data.thumbnailUrl,
         }));
       }
@@ -139,8 +140,7 @@ export default function NewVideoPage() {
             </button>
           </div>
           <p className="mt-2 text-sm text-gray-500">
-            Enter a YouTube URL and click Fetch to auto-fill the video ID and
-            thumbnail
+            Enter a YouTube URL and click Fetch to auto-fill the video details
           </p>
         </div>
 
