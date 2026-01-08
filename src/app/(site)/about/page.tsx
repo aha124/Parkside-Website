@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
@@ -7,51 +8,80 @@ import HeroSection from "@/components/ui/HeroSection";
 import PageTransition from "@/components/ui/PageTransition";
 import { useChorus } from "@/lib/chorus-context";
 import { usePageBanner } from "@/hooks/usePageBanner";
+import type { PageContent, SiteSettings } from "@/types/admin";
+
+// Default content for fallback
+const defaultChorusContent = {
+  harmony: {
+    name: "Parkside Harmony",
+    tagline: "Celebrating barbershop excellence in Hershey since 2015",
+    storyIntro: "Parkside Harmony has grown from a small group of passionate singers into one of the premier barbershop choruses in the Mid-Atlantic region.",
+    storyDetail: "Since our founding in 2015, we have achieved multiple district championships and international recognition, including a Silver Medal at the 2023 BHS International Competition in Louisville, Kentucky.",
+    joinTitle: "Join our Harmony",
+    joinCTA: "Experience the thrill of barbershop at its finest.",
+  },
+  melody: {
+    name: "Parkside Melody",
+    tagline: "Celebrating barbershop harmony since 2018",
+    storyIntro: "Parkside Melody was born from a shared love of harmony singing and a desire to create a welcoming space for singers to experience the joy of barbershop.",
+    storyDetail: "Founded in 2018, we have quickly grown into a dynamic chorus that combines competitive excellence with community outreach and musical education.",
+    joinTitle: "Join our Melody",
+    joinCTA: "Discover the power of voices in harmony.",
+  },
+  voices: {
+    name: "Parkside",
+    tagline: "Celebrating barbershop excellence in Hershey since 2015",
+    storyIntro: "Founded in 2015, Parkside has grown from a small group of passionate singers into two vibrant choruses that represent the very best of barbershop harmony in the mid-atlantic region.",
+    storyDetail: "Our journey began with a vision to create a space where singers could pursue musical excellence while fostering meaningful connections within our community. Today, that vision has blossomed into a thriving organization that continues to push the boundaries of a cappella performance.",
+    joinTitle: "Join our Voices",
+    joinCTA: "Be part of something extraordinary.",
+  },
+};
 
 export default function AboutPage() {
   const { chorus } = useChorus();
   const bannerImage = usePageBanner("about");
+  const [pageContent, setPageContent] = useState<PageContent | null>(null);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
 
-  // Chorus-specific content
-  const chorusContent = {
-    harmony: {
-      name: "Parkside Harmony",
-      tagline: "Celebrating barbershop excellence in Hershey since 2015",
-      description: "Parkside Harmony is an award-winning a cappella barbershop chorus, consistently ranked among the top choruses in the Mid-Atlantic District.",
-      storyIntro: "Parkside Harmony has grown from a small group of passionate singers into one of the premier barbershop choruses in the Mid-Atlantic region.",
-      storyDetail: "Since our founding in 2015, we have achieved multiple district championships and international recognition, including a Silver Medal at the 2023 BHS International Competition in Louisville, Kentucky.",
-      joinTitle: "Join Parkside Harmony",
-      joinCTA: "Experience the thrill of barbershop at its finest.",
-    },
-    melody: {
-      name: "Parkside Melody",
-      tagline: "Celebrating barbershop harmony since 2018",
-      description: "Parkside Melody is a vibrant treble-voiced barbershop ensemble dedicated to musical excellence and community.",
-      storyIntro: "Parkside Melody was born from a shared love of harmony singing and a desire to create a welcoming space for singers to experience the joy of barbershop.",
-      storyDetail: "Founded in 2018, we have quickly grown into a dynamic chorus that combines competitive excellence with community outreach and musical education.",
-      joinTitle: "Join Parkside Melody",
-      joinCTA: "Discover the power of voices in harmony.",
-    },
-    voices: {
-      name: "Parkside",
-      tagline: "Celebrating barbershop excellence in Hershey since 2015",
-      description: "Parkside is home to two award-winning barbershop choruses - Parkside Harmony and Parkside Melody.",
-      storyIntro: "Founded in 2015, Parkside has grown from a small group of passionate singers into two vibrant choruses that represent the very best of barbershop harmony in the mid-atlantic region.",
-      storyDetail: "Our journey began with a vision to create a space where singers could pursue musical excellence while fostering meaningful connections within our community. Today, that vision has blossomed into a thriving organization that continues to push the boundaries of a cappella performance.",
-      joinTitle: "Join Our Harmony",
-      joinCTA: "Be part of something extraordinary.",
-    },
-  };
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const [contentRes, settingsRes] = await Promise.all([
+          fetch("/api/admin/page-content?page=about"),
+          fetch("/api/admin/site-settings"),
+        ]);
 
-  const content = chorusContent[chorus];
+        const contentData = await contentRes.json();
+        const settingsData = await settingsRes.json();
+
+        if (contentData.success) {
+          setPageContent(contentData.data);
+        }
+        if (settingsData.success) {
+          setSiteSettings(settingsData.data);
+        }
+      } catch (error) {
+        console.error("Error fetching about page content:", error);
+      }
+    };
+    fetchContent();
+  }, []);
+
+  const defaultContent = defaultChorusContent[chorus];
+
+  // Get story content from API or fallback to defaults
+  const storyIntro = pageContent?.[`storyIntro_${chorus}`] || defaultContent.storyIntro;
+  const storyDetail = pageContent?.[`storyDetail_${chorus}`] || defaultContent.storyDetail;
+  const storyImage = siteSettings?.aboutStoryImages?.[chorus] || "/images/placeholder-story.jpg";
 
   return (
     <PageTransition>
       <HeroSection
-        title={`ABOUT ${content.name.toUpperCase()}`}
-        subtitle={content.tagline}
+        title={`ABOUT ${defaultContent.name.toUpperCase()}`}
+        subtitle={defaultContent.tagline}
         imagePath={bannerImage}
-        imageAlt={`${content.name} in Performance`}
+        imageAlt={`${defaultContent.name} in Performance`}
       />
 
       {/* Our Story Section */}
@@ -61,8 +91,8 @@ export default function AboutPage() {
             <ScrollAnimation direction="right">
               <div className="relative h-[250px] sm:h-[300px] md:h-[400px] rounded-2xl overflow-hidden shadow-2xl">
                 <Image
-                  src="/images/placeholder-story.jpg"
-                  alt={`${content.name} History`}
+                  src={storyImage}
+                  alt={`${defaultContent.name} History`}
                   fill
                   className="object-cover"
                 />
@@ -75,8 +105,8 @@ export default function AboutPage() {
                   Our Story
                 </h2>
                 <div className="prose prose-sm sm:prose-base md:prose-lg">
-                  <p>{content.storyIntro}</p>
-                  <p>{content.storyDetail}</p>
+                  <p>{storyIntro}</p>
+                  <p>{storyDetail}</p>
                 </div>
               </div>
             </ScrollAnimation>
@@ -293,10 +323,10 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 text-center">
           <ScrollAnimation>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6 md:mb-8">
-              {content.joinTitle}
+              {defaultContent.joinTitle}
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 md:mb-12 max-w-2xl mx-auto">
-              {content.joinCTA} Join us in creating unforgettable musical
+              {defaultContent.joinCTA} Join us in creating unforgettable musical
               experiences.
             </p>
             <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4 md:gap-6">
