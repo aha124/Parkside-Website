@@ -141,3 +141,112 @@ export interface ChorusBranding {
   bannerUrl?: string;
   heroImageUrl?: string;
 }
+
+// ============ PAGE CONTENT TYPES ============
+
+// Editable text content for each page - flexible key-value structure
+export interface PageContent {
+  // Common fields for all pages
+  heroTitle?: string;
+  heroSubtitle?: string;
+
+  // Page-specific fields stored as key-value
+  [key: string]: string | undefined;
+}
+
+// All page content organized by page key
+export type AllPageContent = Record<PageKey, PageContent>;
+
+// ============ LEADERSHIP TYPES ============
+
+export type LeadershipCategory = "musicLeadership" | "boardMember" | "boardAtLarge";
+export type ChorusAffiliation = "harmony" | "melody" | "both";
+
+export interface LeadershipMember {
+  id: string;
+  name: string;
+  title: string;
+  bio: string;
+  photoUrl: string;
+  category: LeadershipCategory;
+  chorusAffiliation?: ChorusAffiliation;
+  order: number; // For drag-and-drop reordering within category
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: string;
+}
+
+// Default content for each page (used as fallback and for admin UI labels)
+export const PAGE_CONTENT_SCHEMA: Record<PageKey, { fields: Array<{ key: string; label: string; type: "text" | "textarea" }> }> = {
+  home: {
+    fields: [
+      { key: "heroTitle", label: "Hero Title", type: "text" },
+      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
+      { key: "ctaButtonText", label: "CTA Button Text", type: "text" },
+    ],
+  },
+  about: {
+    fields: [
+      { key: "heroTitle", label: "Hero Title", type: "text" },
+      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
+      { key: "historyTitle", label: "History Section Title", type: "text" },
+      { key: "historyContent", label: "History Content", type: "textarea" },
+    ],
+  },
+  leadership: {
+    fields: [
+      { key: "heroTitle", label: "Hero Title", type: "text" },
+      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
+      { key: "musicLeadershipTitle", label: "Music Leadership Section Title", type: "text" },
+      { key: "boardMembersTitle", label: "Board Members Section Title", type: "text" },
+      { key: "boardAtLargeTitle", label: "Board at Large Section Title", type: "text" },
+      { key: "getInvolvedTitle", label: "Get Involved Section Title", type: "text" },
+      { key: "getInvolvedText", label: "Get Involved Text", type: "textarea" },
+      { key: "getInvolvedButtonText", label: "Get Involved Button Text", type: "text" },
+    ],
+  },
+  join: {
+    fields: [
+      { key: "heroTitle", label: "Hero Title", type: "text" },
+      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
+      { key: "benefitsTitle", label: "Benefits Section Title", type: "text" },
+      { key: "ctaButtonText", label: "CTA Button Text", type: "text" },
+    ],
+  },
+  events: {
+    fields: [
+      { key: "heroTitle", label: "Hero Title", type: "text" },
+      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
+    ],
+  },
+  media: {
+    fields: [
+      { key: "heroTitle", label: "Hero Title", type: "text" },
+      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
+      { key: "videosTitle", label: "Videos Section Title", type: "text" },
+      { key: "photosTitle", label: "Photos Section Title", type: "text" },
+    ],
+  },
+  contact: {
+    fields: [
+      { key: "heroTitle", label: "Hero Title", type: "text" },
+      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
+      { key: "formTitle", label: "Form Title", type: "text" },
+      { key: "formIntro", label: "Form Introduction", type: "textarea" },
+    ],
+  },
+  donate: {
+    fields: [
+      { key: "heroTitle", label: "Hero Title", type: "text" },
+      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
+      { key: "mainMessage", label: "Main Message", type: "textarea" },
+      { key: "ctaButtonText", label: "Donate Button Text", type: "text" },
+    ],
+  },
+  gear: {
+    fields: [
+      { key: "heroTitle", label: "Hero Title", type: "text" },
+      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
+    ],
+  },
+};
