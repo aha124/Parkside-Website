@@ -662,6 +662,66 @@ const filteredVideos = videos.filter(video => {
 
 **Applied to:** Media page, Events page, News page (shows all with badges)
 
+### 19. Adding Non-Chorus Image Types to Branding
+
+Most image types in the branding system are keyed by chorus (`harmony`, `melody`, `voices`). However, some images aren't chorus-specific - like gear store images which are the same for all visitors.
+
+**For non-chorus image types:**
+
+1. **Use a different key structure** in `SiteSettings`:
+   ```typescript
+   // In src/types/admin.ts
+   gearStoreImages?: {
+     etown?: string;      // Keyed by store ID, not chorus
+     cafepress?: string;
+   };
+   ```
+
+2. **Add a `storeId` (or similar) field to `PickerState`**:
+   ```typescript
+   interface PickerState {
+     // ...existing fields
+     storeId?: "etown" | "cafepress";
+   }
+   ```
+
+3. **Handle the new type in all picker functions**:
+   - `openPicker()` - Accept the extra parameter
+   - `handleImageSelect()` - Save to correct location using the ID
+   - `getCurrentImage()` - Retrieve using ID instead of chorus
+   - `getPickerTitle()` - Show appropriate title
+   - `getUploadConfig()` - Generate names/alts using ID
+
+4. **Create a custom tab component** (like `GearTab`) that passes the extra parameter:
+   ```tsx
+   onImageSelect={(type, chorus, page, storeId) =>
+     openPicker(type, chorus, page, storeId)
+   }
+   ```
+
+**Key insight:** The `chorus` parameter is still required by the picker (for upload config), but it's not used for storage. Pass `"voices"` as a placeholder when the image isn't chorus-specific.
+
+### 20. CSS 3D Transforms with Framer Motion
+
+When implementing 3D flip card animations:
+
+1. **Parent needs perspective**:
+   ```css
+   .perspective-1000 {
+     perspective: 1000px;
+   }
+   ```
+
+2. **Container needs `transformStyle: "preserve-3d"`** for children to exist in 3D space
+
+3. **Both faces need `backfaceVisibility: "hidden"`** to hide when rotated away
+
+4. **Back face must be pre-rotated 180°** with `transform: "rotateY(180deg)"`
+
+5. **Use absolute positioning** so both faces occupy the same space
+
+**Mobile handling:** Use `onTouchStart` to toggle flip state on tap (hover doesn't work on touch devices).
+
 ## Admin Access
 
 - URL: `/admin`
@@ -729,6 +789,7 @@ The admin branding page uses a tabbed interface for managing all site content.
 - `src/components/admin/branding/AboutTab.tsx` - About page: story images and text per chorus
 - `src/components/admin/branding/PageContentTab.tsx` - Reusable page banner editor (content section only shows if schema has fields)
 - `src/components/admin/branding/LeadershipTab.tsx` - Leadership member management
+- `src/components/admin/branding/GearTab.tsx` - Gear page store images and banners
 
 **Adding a new page tab:**
 1. Add to `tabs` array in branding page
@@ -780,6 +841,57 @@ The home page displays three chorus cards (Harmony, Melody, Voices) with editabl
 3. Descriptions fall back to hardcoded defaults in the component
 4. Admin edits images via ImagePickerModal, descriptions via textarea
 
+### 12. Gear Shop System
+
+The gear page links to two external merchandise stores with flip card animations.
+
+**External Stores (hardcoded URLs):**
+- **eTown Sporting Goods** (Chipply): https://etownsportinggoods.chipply.com/ParksideHarmony/
+- **CafePress**: https://www.cafepress.com/shop/ParksideGear
+
+**Files:**
+- `src/app/(site)/gear/page.tsx` - Public gear page with flip cards
+- `src/components/admin/branding/GearTab.tsx` - Admin UI for gear settings
+
+**Data sources:**
+- Page banners: `SiteSettings.pageBanners.gear` (per-chorus like other pages)
+- Store card images: `SiteSettings.gearStoreImages.etown` and `.cafepress`
+
+**How the flip cards work:**
+1. Front shows merchandise image with store name overlay
+2. On hover (desktop) or tap (mobile), card flips 180° using Framer Motion
+3. Back shows store description and "Shop Now" button
+4. Button opens external store in new tab
+
+**Implementation details:**
+```tsx
+// Framer Motion 3D flip animation
+<motion.div
+  animate={{ rotateY: isFlipped ? 180 : 0 }}
+  transition={{ duration: 0.6, ease: "easeInOut" }}
+  style={{ transformStyle: "preserve-3d" }}
+>
+  {/* Front face */}
+  <div style={{ backfaceVisibility: "hidden" }}>...</div>
+  {/* Back face - rotated 180° */}
+  <div style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}>...</div>
+</motion.div>
+```
+
+**CSS requirement:**
+```css
+.perspective-1000 {
+  perspective: 1000px;
+}
+```
+
+**Admin controls:**
+- Per-chorus banner images (same as other pages)
+- Two store image pickers (not per-chorus - same for all visitors)
+
+**Why store URLs are hardcoded:**
+Neither Chipply nor CafePress offer public APIs for embedding store content. The URLs rarely change, so they're hardcoded rather than admin-editable to avoid accidental breakage.
+
 ## Key Files Quick Reference
 
 | Purpose | File |
@@ -822,6 +934,8 @@ The home page displays three chorus cards (Harmony, Melody, Voices) with editabl
 | Leadership API (admin) | `src/app/api/admin/leadership/route.ts` |
 | Leadership API (public) | `src/app/api/leadership/route.ts` |
 | Page content API | `src/app/api/admin/page-content/route.ts` |
+| Gear page (public) | `src/app/(site)/gear/page.tsx` |
+| Gear tab (admin) | `src/components/admin/branding/GearTab.tsx` |
 
 ## Development Commands
 
