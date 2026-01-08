@@ -398,6 +398,11 @@ const DEFAULT_SITE_SETTINGS: SiteSettings = {
     melody: "/images/melody-bg.jpg",
     voices: "/images/voices-bg.jpg",
   },
+  aboutStoryImages: {
+    harmony: "/images/placeholder-story.jpg",
+    melody: "/images/placeholder-story.jpg",
+    voices: "/images/placeholder-story.jpg",
+  },
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -421,6 +426,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
         splashBackgrounds: settings.splashBackgrounds,
         heroSlideBackground: settings.heroSlideBackground,
         chorusCardImages: { ...DEFAULT_SITE_SETTINGS.chorusCardImages, ...settings.chorusCardImages },
+        aboutStoryImages: { ...DEFAULT_SITE_SETTINGS.aboutStoryImages, ...settings.aboutStoryImages },
         updatedAt: settings.updatedAt,
         updatedBy: settings.updatedBy,
       };
@@ -453,6 +459,7 @@ export async function updateSiteSettings(
     splashBackgrounds: { ...current.splashBackgrounds, ...data.splashBackgrounds },
     heroSlideBackground: { ...current.heroSlideBackground, ...data.heroSlideBackground },
     chorusCardImages: { ...current.chorusCardImages, ...data.chorusCardImages },
+    aboutStoryImages: { ...current.aboutStoryImages, ...data.aboutStoryImages },
     updatedAt: new Date().toISOString(),
     updatedBy,
   };
@@ -539,10 +546,15 @@ const DEFAULT_PAGE_CONTENT: AllPageContent = {
     chorusCard_voices: "Experience the full Parkside sound with both choruses performing together. Unity through harmony.",
   },
   about: {
-    heroTitle: "About Parkside",
-    heroSubtitle: "Discover our story and mission",
-    historyTitle: "Our History",
-    historyContent: "",
+    // Harmony "Our Story" content
+    storyIntro_harmony: "Parkside Harmony has grown from a small group of passionate singers into one of the premier barbershop choruses in the Mid-Atlantic region.",
+    storyDetail_harmony: "Since our founding in 2015, we have achieved multiple district championships and international recognition, including a Silver Medal at the 2023 BHS International Competition in Louisville, Kentucky.",
+    // Melody "Our Story" content
+    storyIntro_melody: "Parkside Melody was born from a shared love of harmony singing and a desire to create a welcoming space for singers to experience the joy of barbershop.",
+    storyDetail_melody: "Founded in 2018, we have quickly grown into a dynamic chorus that combines competitive excellence with community outreach and musical education.",
+    // Voices "Our Story" content
+    storyIntro_voices: "Founded in 2015, Parkside has grown from a small group of passionate singers into two vibrant choruses that represent the very best of barbershop harmony in the mid-atlantic region.",
+    storyDetail_voices: "Our journey began with a vision to create a space where singers could pursue musical excellence while fostering meaningful connections within our community. Today, that vision has blossomed into a thriving organization that continues to push the boundaries of a cappella performance.",
   },
   leadership: {
     heroTitle: "Our Leadership",

@@ -137,6 +137,12 @@ export interface SiteSettings {
     melody?: string;
     voices?: string;
   };
+  // About page "Our Story" section images per chorus
+  aboutStoryImages?: {
+    harmony?: string;
+    melody?: string;
+    voices?: string;
+  };
   updatedAt?: string;
   updatedBy?: string;
 }
@@ -198,10 +204,13 @@ export const PAGE_CONTENT_SCHEMA: Record<PageKey, { fields: Array<{ key: string;
   },
   about: {
     fields: [
-      { key: "heroTitle", label: "Hero Title", type: "text" },
-      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
-      { key: "historyTitle", label: "History Section Title", type: "text" },
-      { key: "historyContent", label: "History Content", type: "textarea" },
+      // Per-chorus "Our Story" content
+      { key: "storyIntro_harmony", label: "Harmony - Our Story Intro", type: "textarea" },
+      { key: "storyDetail_harmony", label: "Harmony - Our Story Detail", type: "textarea" },
+      { key: "storyIntro_melody", label: "Melody - Our Story Intro", type: "textarea" },
+      { key: "storyDetail_melody", label: "Melody - Our Story Detail", type: "textarea" },
+      { key: "storyIntro_voices", label: "Voices - Our Story Intro", type: "textarea" },
+      { key: "storyDetail_voices", label: "Voices - Our Story Detail", type: "textarea" },
     ],
   },
   leadership: {

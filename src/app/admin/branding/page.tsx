@@ -19,6 +19,7 @@ import ImagePickerModal from "@/components/admin/ImagePickerModal";
 import AdminTabs, { Tab } from "@/components/admin/branding/AdminTabs";
 import GeneralTab from "@/components/admin/branding/GeneralTab";
 import HomeTab from "@/components/admin/branding/HomeTab";
+import AboutTab from "@/components/admin/branding/AboutTab";
 import PageContentTab from "@/components/admin/branding/PageContentTab";
 import LeadershipTab from "@/components/admin/branding/LeadershipTab";
 
@@ -139,7 +140,7 @@ const tabs: Tab[] = [
 
 interface PickerState {
   isOpen: boolean;
-  type: "logo" | "banner" | "splash" | "heroSlide" | "chorusCard";
+  type: "logo" | "banner" | "splash" | "heroSlide" | "chorusCard" | "aboutStory";
   chorus: ChorusKey;
   page?: PageKey;
 }
@@ -218,6 +219,11 @@ export default function BrandingPage() {
           ...settings,
           chorusCardImages: { ...settings.chorusCardImages, [chorus]: imageUrl },
         };
+      } else if (type === "aboutStory") {
+        newSettings = {
+          ...settings,
+          aboutStoryImages: { ...settings.aboutStoryImages, [chorus]: imageUrl },
+        };
       } else {
         newSettings = {
           ...settings,
@@ -294,6 +300,7 @@ export default function BrandingPage() {
       splash: `${chorus}-splash-bg`,
       heroSlide: `${chorus}-hero-slide-bg`,
       chorusCard: `${chorus}-chorus-card`,
+      aboutStory: `${chorus}-about-story`,
       banner: `${page}-${chorus}-banner`,
     };
     const altMap = {
@@ -301,6 +308,7 @@ export default function BrandingPage() {
       splash: `${chorusInfo[chorus].name} splash background`,
       heroSlide: `${chorusInfo[chorus].name} hero slideshow background`,
       chorusCard: `${chorusInfo[chorus].name} chorus card image`,
+      aboutStory: `${chorusInfo[chorus].name} story image`,
       banner: page ? `${pageInfo[page].name} banner for ${chorusInfo[chorus].name}` : "",
     };
     const categoryMap = {
@@ -308,6 +316,7 @@ export default function BrandingPage() {
       splash: "banner" as const,
       heroSlide: "slideshow" as const,
       chorusCard: "other" as const,
+      aboutStory: "other" as const,
       banner: "banner" as const,
     };
 
@@ -337,6 +346,8 @@ export default function BrandingPage() {
         return settings.heroSlideBackground?.[chorus];
       case "chorusCard":
         return settings.chorusCardImages?.[chorus];
+      case "aboutStory":
+        return settings.aboutStoryImages?.[chorus];
       case "banner":
         return settings.pageBanners?.[page!]?.[chorus];
       default:
@@ -358,6 +369,8 @@ export default function BrandingPage() {
         return `Select ${chorusName} Hero Slideshow Background`;
       case "chorusCard":
         return `Select ${chorusName} Card Image`;
+      case "aboutStory":
+        return `Select ${chorusName} Story Image`;
       case "banner":
         return `Select ${pageInfo[page!].name} Banner for ${chorusName}`;
       default:
@@ -390,6 +403,16 @@ export default function BrandingPage() {
         return (
           <LeadershipTab
             pageContent={pageContent.leadership}
+            onContentSave={handleContentSave}
+            saving={saving}
+          />
+        );
+      case "about":
+        return (
+          <AboutTab
+            settings={settings}
+            pageContent={pageContent.about || {}}
+            onImageSelect={(type, chorus, page) => openPicker(type, chorus, page)}
             onContentSave={handleContentSave}
             saving={saving}
           />
