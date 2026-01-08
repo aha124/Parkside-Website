@@ -40,7 +40,7 @@ const chorusData: Array<{
   },
   {
     key: "voices",
-    name: "All Voices",
+    name: "Parkside Voices",
     defaultDescription:
       "Experience the full Parkside sound with both choruses united in harmony. Our combined performances showcase the best of both ensembles creating a truly unique musical experience.",
     defaultImage: "/images/voices-bg.jpg",
