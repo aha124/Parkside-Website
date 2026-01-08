@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import {
-  ImageIcon,
   RefreshCw,
   Home,
   Info,
@@ -14,14 +13,12 @@ import {
   ShoppingBag,
   Crown,
   Layers,
-  Play,
 } from "lucide-react";
 import type { SiteSettings, PageKey, ChorusKey, PageContent, AllPageContent } from "@/types/admin";
 import ImagePickerModal from "@/components/admin/ImagePickerModal";
 import AdminTabs, { Tab } from "@/components/admin/branding/AdminTabs";
-import LogosTab from "@/components/admin/branding/LogosTab";
-import SplashTab from "@/components/admin/branding/SplashTab";
-import HeroSlideshowTab from "@/components/admin/branding/HeroSlideshowTab";
+import GeneralTab from "@/components/admin/branding/GeneralTab";
+import HomeTab from "@/components/admin/branding/HomeTab";
 import PageContentTab from "@/components/admin/branding/PageContentTab";
 import LeadershipTab from "@/components/admin/branding/LeadershipTab";
 
@@ -128,9 +125,7 @@ const chorusInfo: Record<ChorusKey, { name: string; color: string; bgColor: stri
 
 // Tab configuration
 const tabs: Tab[] = [
-  { id: "logos", label: "Logos", icon: <ImageIcon className="w-4 h-4" /> },
-  { id: "splash", label: "Splash Page", icon: <Layers className="w-4 h-4" /> },
-  { id: "hero", label: "Hero Slideshow", icon: <Play className="w-4 h-4" /> },
+  { id: "general", label: "General", icon: <Layers className="w-4 h-4" /> },
   { id: "home", label: "Home", icon: <Home className="w-4 h-4" /> },
   { id: "about", label: "About", icon: <Info className="w-4 h-4" /> },
   { id: "leadership", label: "Leadership", icon: <Crown className="w-4 h-4" /> },
@@ -155,7 +150,7 @@ export default function BrandingPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
-  const [activeTab, setActiveTab] = useState("logos");
+  const [activeTab, setActiveTab] = useState("general");
   const [pickerState, setPickerState] = useState<PickerState | null>(null);
 
   useEffect(() => {
@@ -362,25 +357,21 @@ export default function BrandingPage() {
     if (!settings || !pageContent) return null;
 
     switch (activeTab) {
-      case "logos":
+      case "general":
         return (
-          <LogosTab
+          <GeneralTab
             settings={settings}
             onImageSelect={(type, chorus) => openPicker(type, chorus)}
           />
         );
-      case "splash":
+      case "home":
         return (
-          <SplashTab
+          <HomeTab
             settings={settings}
-            onImageSelect={(type, chorus) => openPicker(type, chorus)}
-          />
-        );
-      case "hero":
-        return (
-          <HeroSlideshowTab
-            settings={settings}
-            onImageSelect={(type, chorus) => openPicker(type, chorus)}
+            pageContent={pageContent.home || {}}
+            onImageSelect={(type, chorus, page) => openPicker(type, chorus, page)}
+            onContentSave={handleContentSave}
+            saving={saving}
           />
         );
       case "leadership":

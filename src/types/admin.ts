@@ -180,9 +180,14 @@ export interface LeadershipMember {
 export const PAGE_CONTENT_SCHEMA: Record<PageKey, { fields: Array<{ key: string; label: string; type: "text" | "textarea" }> }> = {
   home: {
     fields: [
-      { key: "heroTitle", label: "Hero Title", type: "text" },
-      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
-      { key: "ctaButtonText", label: "CTA Button Text", type: "text" },
+      // Hero slide descriptions per chorus
+      { key: "heroDescription_harmony", label: "Harmony Hero Description", type: "textarea" },
+      { key: "heroDescription_melody", label: "Melody Hero Description", type: "textarea" },
+      { key: "heroDescription_voices", label: "Voices Hero Description", type: "textarea" },
+      // Our Choruses section card descriptions
+      { key: "chorusCard_harmony", label: "Harmony Card Description", type: "textarea" },
+      { key: "chorusCard_melody", label: "Melody Card Description", type: "textarea" },
+      { key: "chorusCard_voices", label: "Voices Card Description", type: "textarea" },
     ],
   },
   about: {

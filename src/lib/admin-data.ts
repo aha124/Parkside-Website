@@ -522,9 +522,14 @@ export async function seedExistingImages(createdBy?: string): Promise<{ added: n
 // Default page content values
 const DEFAULT_PAGE_CONTENT: AllPageContent = {
   home: {
-    heroTitle: "Welcome to Parkside",
-    heroSubtitle: "Experience the joy of a cappella harmony",
-    ctaButtonText: "Join Us",
+    // Hero slide descriptions per chorus
+    heroDescription_harmony: "A cappella chorus singing in the barbershop style",
+    heroDescription_melody: "Treble-voiced ensemble celebrating harmony",
+    heroDescription_voices: "Two choruses united in song",
+    // Our Choruses section card descriptions
+    chorusCard_harmony: "Parkside Harmony is a vibrant a cappella chorus singing in the barbershop style. Join us for incredible music and lasting friendships.",
+    chorusCard_melody: "Parkside Melody is a treble-voiced ensemble dedicated to musical excellence and community. Discover the joy of four-part harmony.",
+    chorusCard_voices: "Experience the full Parkside sound with both choruses performing together. Unity through harmony.",
   },
   about: {
     heroTitle: "About Parkside",
