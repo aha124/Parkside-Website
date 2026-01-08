@@ -578,8 +578,8 @@ The admin branding page uses a tabbed interface for managing all site content.
 - **General** - Combined tab for logos, splash page backgrounds, and hero slideshow backgrounds (all per-chorus)
 - **Home** - Hero slide banners/descriptions per chorus + "Our Choruses" section (card images and descriptions for Harmony, Melody, Voices)
 - **About** - Page banners + "Our Story" section (per-chorus images and text)
-- **Leadership** - Leadership member management
-- **Page tabs** (Join, Events, Media, etc.) - Banners + editable text content
+- **Leadership** - Leadership member management only (no editable page content)
+- **Banner-only tabs** (Join, Events, Media, Contact, Donate, Gear) - Only banner images per chorus; page content is static in code
 
 **Files:**
 - `src/app/admin/branding/page.tsx` - Main page with tab logic and image picker handling
@@ -587,14 +587,14 @@ The admin branding page uses a tabbed interface for managing all site content.
 - `src/components/admin/branding/GeneralTab.tsx` - Combined logos, splash backgrounds, hero slideshow backgrounds
 - `src/components/admin/branding/HomeTab.tsx` - Home page specific: hero descriptions + chorus card images/descriptions
 - `src/components/admin/branding/AboutTab.tsx` - About page: story images and text per chorus
-- `src/components/admin/branding/PageContentTab.tsx` - Reusable page banner + content editor for other pages
+- `src/components/admin/branding/PageContentTab.tsx` - Reusable page banner editor (content section only shows if schema has fields)
 - `src/components/admin/branding/LeadershipTab.tsx` - Leadership member management
 
 **Adding a new page tab:**
 1. Add to `tabs` array in branding page
 2. Add to `pageInfo` object with name, description, icon
-3. Add to `PAGE_CONTENT_SCHEMA` in types/admin.ts
-4. Add default content in `DEFAULT_PAGE_CONTENT` in admin-data.ts
+3. Add to `PAGE_CONTENT_SCHEMA` in types/admin.ts (empty fields array for banner-only pages)
+4. Add default content in `DEFAULT_PAGE_CONTENT` in admin-data.ts (optional for banner-only pages)
 
 ### 10. About Page "Our Story" Section
 

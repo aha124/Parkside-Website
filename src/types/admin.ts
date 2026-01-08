@@ -210,60 +210,18 @@ export const PAGE_CONTENT_SCHEMA: Record<PageKey, { fields: Array<{ key: string;
       { key: "story_voices", label: "Voices - Our Story", type: "textarea" },
     ],
   },
-  leadership: {
-    fields: [
-      { key: "heroTitle", label: "Hero Title", type: "text" },
-      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
-      { key: "musicLeadershipTitle", label: "Music Leadership Section Title", type: "text" },
-      { key: "boardMembersTitle", label: "Board Members Section Title", type: "text" },
-      { key: "boardAtLargeTitle", label: "Board at Large Section Title", type: "text" },
-      { key: "getInvolvedTitle", label: "Get Involved Section Title", type: "text" },
-      { key: "getInvolvedText", label: "Get Involved Text", type: "textarea" },
-      { key: "getInvolvedButtonText", label: "Get Involved Button Text", type: "text" },
-    ],
-  },
-  join: {
-    fields: [
-      { key: "heroTitle", label: "Hero Title", type: "text" },
-      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
-      { key: "benefitsTitle", label: "Benefits Section Title", type: "text" },
-      { key: "ctaButtonText", label: "CTA Button Text", type: "text" },
-    ],
-  },
-  events: {
-    fields: [
-      { key: "heroTitle", label: "Hero Title", type: "text" },
-      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
-    ],
-  },
-  media: {
-    fields: [
-      { key: "heroTitle", label: "Hero Title", type: "text" },
-      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
-      { key: "videosTitle", label: "Videos Section Title", type: "text" },
-      { key: "photosTitle", label: "Photos Section Title", type: "text" },
-    ],
-  },
-  contact: {
-    fields: [
-      { key: "heroTitle", label: "Hero Title", type: "text" },
-      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
-      { key: "formTitle", label: "Form Title", type: "text" },
-      { key: "formIntro", label: "Form Introduction", type: "textarea" },
-    ],
-  },
-  donate: {
-    fields: [
-      { key: "heroTitle", label: "Hero Title", type: "text" },
-      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
-      { key: "mainMessage", label: "Main Message", type: "textarea" },
-      { key: "ctaButtonText", label: "Donate Button Text", type: "text" },
-    ],
-  },
-  gear: {
-    fields: [
-      { key: "heroTitle", label: "Hero Title", type: "text" },
-      { key: "heroSubtitle", label: "Hero Subtitle", type: "textarea" },
-    ],
-  },
+  // Leadership: Only member management, no editable page content
+  leadership: { fields: [] },
+  // Join: Banner images only, content is static in code
+  join: { fields: [] },
+  // Events: Banner images only, content is dynamic (events list)
+  events: { fields: [] },
+  // Media: Banner images only, content managed separately
+  media: { fields: [] },
+  // Contact: Banner images only, form is static
+  contact: { fields: [] },
+  // Donate: Banner images only, content is static
+  donate: { fields: [] },
+  // Gear: Banner images only, shop content managed separately
+  gear: { fields: [] },
 };
