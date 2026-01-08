@@ -6,7 +6,7 @@ import HeroSection from "@/components/ui/HeroSection";
 import dynamic from "next/dynamic";
 import type { YouTubeProps } from "react-youtube";
 import { useState, useMemo, useEffect } from "react";
-import { useChorus, shouldShowForChorus } from "@/lib/chorus-context";
+import { useChorus } from "@/lib/chorus-context";
 import { usePageBanner } from "@/hooks/usePageBanner";
 
 // Dynamically import YouTube component to avoid SSR issues
@@ -23,206 +23,27 @@ interface VideoData {
   placement?: string;
 }
 
-// Fallback hardcoded videos (used if no admin videos exist)
-const fallbackVideos: VideoData[] = [
-  // Harmony Videos - Most Recent First
-  {
-    id: "tmrUqGZbTm0",
-    title: "2023 BHS International - Louisville, KY",
-    description: "Silver Medal Performance (93.0) - Parkside Harmony's highest achievement to date at the 84th Annual Convention of the Barbershop Harmony Society",
-    year: 2023,
-    chorus: "harmony",
-    competition: "BHS International",
-    placement: "2nd Place"
-  },
-  {
-    id: "vyOippZCn-s",
-    title: "Parkside Harmony - 2023 Mid-Atlantic District",
-    description: "Championship performance at the Mid-Atlantic District Convention",
-    year: 2023,
-    chorus: "harmony",
-    competition: "MAD District",
-    placement: "1st Place"
-  },
-  {
-    id: "r04jAi34S0w",
-    title: "Parkside Harmony - 2022 BHS International",
-    description: "Bronze Medal performance at the 2022 BHS International Contest",
-    year: 2022,
-    chorus: "harmony",
-    competition: "BHS International",
-    placement: "3rd Place"
-  },
-  {
-    id: "9HFIWMH_kfw",
-    title: "Parkside Harmony - 2022 Mid-Atlantic District",
-    description: "Championship performance at the Mid-Atlantic District Convention",
-    year: 2022,
-    chorus: "harmony",
-    competition: "MAD District",
-    placement: "1st Place"
-  },
-  {
-    id: "ppVNYMyy8JM",
-    title: "Parkside Harmony - You're Nobody Till Somebody Loves You",
-    description: "Special performance featuring this classic barbershop arrangement",
-    year: 2022,
-    chorus: "harmony"
-  },
-  {
-    id: "_B1BJC2inVE",
-    title: "Parkside Harmony - 2021 Performance",
-    description: "Special performance featuring classic barbershop arrangements",
-    year: 2021,
-    chorus: "harmony"
-  },
-  {
-    id: "WBNY8UJSfcg",
-    title: "Parkside Harmony - 2020 Holiday Show",
-    description: "Holiday performance featuring seasonal favorites",
-    year: 2020,
-    chorus: "harmony"
-  },
-  {
-    id: "pSGGXVfefgA",
-    title: "Parkside Harmony - If I Loved You",
-    description: "Beautiful rendition of this classic ballad",
-    year: 2020,
-    chorus: "harmony"
-  },
-  {
-    id: "rznggVEUnd0",
-    title: "Parkside Harmony - Sweet Georgia Brown",
-    description: "Energetic performance of this barbershop favorite",
-    year: 2020,
-    chorus: "harmony"
-  },
-  {
-    id: "98nVgsYkBW0",
-    title: "Parkside Harmony - Showcase Performance",
-    description: "Special showcase featuring multiple arrangements",
-    year: 2020,
-    chorus: "harmony"
-  },
-  {
-    id: "LjMS3K7UhFw",
-    title: "Parkside Harmony - Competition Set",
-    description: "Early competition performance showing our growth",
-    year: 2019,
-    chorus: "harmony",
-    competition: "MAD District"
-  },
-  {
-    id: "qdblvDstP1s",
-    title: "Parkside Harmony - Holiday Performance",
-    description: "Special holiday performance with seasonal favorites",
-    year: 2019,
-    chorus: "harmony"
-  },
-  {
-    id: "7U9xsLFKUYM",
-    title: "Parkside Harmony - Spring Show",
-    description: "Spring showcase featuring various arrangements",
-    year: 2019,
-    chorus: "harmony"
-  },
-  // Melody Videos - Most Recent First
-  {
-    id: "cR4x-lDg3Co",
-    title: "Parkside Melody - How Can I Keep From Singing",
-    description: "Performance at the STAR Center in Havre de Grace, MD",
-    year: 2023,
-    chorus: "melody"
-  },
-  {
-    id: "zDLIifqs0nU",
-    title: "Parkside Melody - Shine",
-    description: "Competition Performance",
-    year: 2023,
-    chorus: "melody"
-  },
-  {
-    id: "2DUhWo6sXLE",
-    title: "Parkside Melody - I Will Follow Him",
-    description: "Sister Act Medley Performance",
-    year: 2023,
-    chorus: "melody"
-  },
-  {
-    id: "ligvLfjbcCg",
-    title: "Parkside Melody - Seasons of Love",
-    description: "From the musical RENT",
-    year: 2023,
-    chorus: "melody"
-  },
-  {
-    id: "OXfm7suHUSU",
-    title: "Parkside Melody - The Prayer",
-    description: "Special Performance",
-    year: 2022,
-    chorus: "melody"
-  },
-  {
-    id: "5qaFszF65Yk",
-    title: "Parkside Melody - Defying Gravity",
-    description: "From the musical Wicked",
-    year: 2022,
-    chorus: "melody"
-  },
-  {
-    id: "MasnYtJgq1o",
-    title: "Parkside Melody - This Is Me",
-    description: "From The Greatest Showman",
-    year: 2022,
-    chorus: "melody"
-  },
-  {
-    id: "RYZDu_SNcpw",
-    title: "Parkside Melody - You Will Be Found",
-    description: "From Dear Evan Hansen",
-    year: 2022,
-    chorus: "melody"
-  },
-  {
-    id: "94Honwb8Eqc",
-    title: "Parkside Melody - The Rose",
-    description: "Competition Performance",
-    year: 2022,
-    chorus: "melody"
-  },
-  {
-    id: "gbn7xAvdacM",
-    title: "Parkside Melody - For Good",
-    description: "From the musical Wicked",
-    year: 2022,
-    chorus: "melody"
-  },
-  {
-    id: "QNeKN6ciuPw",
-    title: "Parkside Melody - Bridge Over Troubled Water",
-    description: "Simon & Garfunkel Classic",
-    year: 2022,
-    chorus: "melody"
-  },
-  // Combined Virtual Performance
-  {
-    id: "Bqq699JuNxo",
-    title: "Parkside Virtual Performance - The Way We Were",
-    description: "Special virtual collaboration between Parkside Harmony and Parkside Melody during the pandemic",
-    year: 2020,
-    chorus: "voices"
-  }
-];
-
 type FilterType = "all" | "harmony" | "melody" | "voices" | "competition";
 
 export default function MediaPage() {
-  const [videos, setVideos] = useState<VideoData[]>(fallbackVideos);
-  const [filter, setFilter] = useState<FilterType>("all");
+  const [videos, setVideos] = useState<VideoData[]>([]);
+  const { chorus: selectedChorus } = useChorus();
+  // Pre-select filter based on chorus choice: harmony/melody pre-selects that filter, voices shows all
+  const getInitialFilter = (chorus: string): FilterType => {
+    if (chorus === "harmony") return "harmony";
+    if (chorus === "melody") return "melody";
+    return "all"; // "voices" shows all by default
+  };
+  const [filter, setFilter] = useState<FilterType>(() => getInitialFilter(selectedChorus));
   const [visibleCount, setVisibleCount] = useState(6);
   const [loading, setLoading] = useState(true);
-  const { chorus: selectedChorus } = useChorus();
   const bannerImage = usePageBanner("media");
+
+  // Update filter when chorus selection changes (e.g., user changes via header)
+  useEffect(() => {
+    setFilter(getInitialFilter(selectedChorus));
+    setVisibleCount(6);
+  }, [selectedChorus]);
 
   // Fetch admin-managed videos
   useEffect(() => {
@@ -231,7 +52,7 @@ export default function MediaPage() {
         const response = await fetch("/api/videos");
         if (response.ok) {
           const data = await response.json();
-          if (data.success && data.data && data.data.length > 0) {
+          if (data.success && data.data) {
             // Map admin videos to the expected format
             const adminVideos = data.data.map((v: { id: string; youtubeId: string; title: string; description: string; year: number; chorus: "harmony" | "melody" | "voices" | "both"; competition?: string; placement?: string }) => ({
               ...v,
@@ -244,7 +65,6 @@ export default function MediaPage() {
         }
       } catch (error) {
         console.error("Error fetching videos:", error);
-        // Keep fallback videos on error
       } finally {
         setLoading(false);
       }
@@ -267,13 +87,14 @@ export default function MediaPage() {
     },
   };
 
-  // Filter and sort videos - first by global chorus context, then by UI filter
+  // Filter and sort videos based on user-selected UI filter only
+  // (chorus pre-selects the filter but doesn't permanently hide content)
   const filteredVideos = videos
-    .filter(video => shouldShowForChorus(video.chorus, selectedChorus))
     .filter(video => {
       if (filter === "all") return true;
       if (filter === "competition") return !!video.competition;
       if (filter === "voices") return video.chorus === "voices";
+      // For harmony/melody filters, show that chorus plus any "voices" (combined) videos
       return video.chorus === filter || video.chorus === "voices";
     })
     .sort((a, b) => b.year - a.year);
@@ -291,6 +112,8 @@ export default function MediaPage() {
     setVisibleCount(6);
   };
 
+  const hasVideos = videos.length > 0;
+
   return (
     <PageTransition>
       <div className="bg-white">
@@ -302,32 +125,34 @@ export default function MediaPage() {
           videoId={heroVideo?.id}
         />
 
-        {/* Filter Section */}
-        <section className="py-8 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-wrap justify-center gap-4">
-              {[
-                { label: "All Performances", value: "all" },
-                { label: "Parkside Harmony", value: "harmony" },
-                { label: "Parkside Melody", value: "melody" },
-                { label: "Combined", value: "voices" },
-                { label: "Competition Sets", value: "competition" },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handleFilterChange(option.value as FilterType)}
-                  className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-                    filter === option.value
-                      ? "bg-indigo-600 text-white"
-                      : "bg-white text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
+        {/* Filter Section - only show if there are videos */}
+        {hasVideos && (
+          <section className="py-8 bg-gray-50">
+            <div className="container mx-auto px-4">
+              <div className="flex flex-wrap justify-center gap-4">
+                {[
+                  { label: "All Performances", value: "all" },
+                  { label: "Parkside Harmony", value: "harmony" },
+                  { label: "Parkside Melody", value: "melody" },
+                  { label: "Combined", value: "voices" },
+                  { label: "Competition Sets", value: "competition" },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => handleFilterChange(option.value as FilterType)}
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                      filter === option.value
+                        ? "bg-indigo-600 text-white"
+                        : "bg-white text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Video Grid Section */}
         <section className="py-16">
@@ -341,6 +166,36 @@ export default function MediaPage() {
                 {loading ? (
                   <div className="flex justify-center items-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                  </div>
+                ) : !hasVideos ? (
+                  <div className="text-center py-16">
+                    <div className="max-w-md mx-auto">
+                      <svg
+                        className="w-16 h-16 mx-auto text-gray-400 mb-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        No Videos Yet
+                      </h3>
+                      <p className="text-gray-600">
+                        Check back soon for performance videos from Parkside Harmony, Parkside Melody, and Parkside Voices.
+                      </p>
+                    </div>
+                  </div>
+                ) : visibleVideos.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-gray-600">
+                      No videos match the current filter. Try selecting a different category.
+                    </p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -392,7 +247,7 @@ export default function MediaPage() {
                 )}
 
                 {/* Show More Button */}
-                {hasMore && !loading && (
+                {hasMore && !loading && hasVideos && (
                   <div className="mt-12 text-center">
                     <button
                       onClick={handleShowMore}
