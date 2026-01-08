@@ -159,6 +159,44 @@ News articles are scraped from parksideharmony.org and can be managed via admin.
 3. Once in KV, articles can be edited via admin
 4. Public API merges both sources (admin takes precedence for duplicates)
 
+### 7. Video/Media System
+
+Videos are manually managed through the admin panel (no scraping).
+
+**Files:**
+- `src/app/(site)/media/page.tsx` - Public media gallery page
+- `src/app/admin/videos/page.tsx` - Admin video list
+- `src/app/admin/videos/new/page.tsx` - Add new video form
+- `src/app/admin/videos/[id]/edit/page.tsx` - Edit existing video
+- `src/app/api/videos/route.ts` - Public API for videos
+- `src/app/api/admin/videos/route.ts` - Admin API for CRUD
+- `src/app/api/admin/videos/[id]/route.ts` - Single video operations
+- `src/app/api/admin/youtube-metadata/route.ts` - Fetches title/thumbnail from YouTube
+
+**How it works:**
+1. Admin navigates to `/admin/videos` and clicks "Add Video"
+2. Pastes YouTube URL, clicks "Fetch" to auto-fill title and thumbnail
+3. Admin can edit title, adds description, selects chorus tag (Harmony/Melody/Voices)
+4. Optionally adds competition name and placement
+5. Videos appear on public `/media` page with chorus filtering
+
+**Video data structure:**
+```typescript
+interface VideoItem {
+  id: string;
+  youtubeId: string;
+  title: string;
+  description: string;
+  year: number;
+  chorus: "harmony" | "melody" | "voices";
+  competition?: string;
+  placement?: string;
+  thumbnailUrl?: string;
+}
+```
+
+**Storage:** Vercel KV (key: `admin:videos`)
+
 ## Component Patterns
 
 ### HeroSection
@@ -582,6 +620,48 @@ export const PAGE_CONTENT_SCHEMA = {
 
 This approach keeps the code DRY - no need for separate "banner-only" components.
 
+### 18. Chorus Filtering: Pre-Select vs Hide
+
+When implementing chorus-based content filtering, **pre-select the filter** based on the user's chorus choice rather than **hiding** content from other choruses.
+
+**Wrong approach (hides content):**
+```tsx
+// This permanently hides content from other choruses
+const filteredVideos = videos.filter(video =>
+  shouldShowForChorus(video.chorus, selectedChorus)
+);
+```
+
+**Correct approach (pre-selects filter):**
+```tsx
+// Pre-select filter based on chorus, but let user change it
+const getInitialFilter = (chorus: string) => {
+  if (chorus === "harmony") return "harmony";
+  if (chorus === "melody") return "melody";
+  return "all"; // "voices" shows all by default
+};
+
+const [filter, setFilter] = useState(() => getInitialFilter(selectedChorus));
+
+// Update when chorus changes
+useEffect(() => {
+  setFilter(getInitialFilter(selectedChorus));
+}, [selectedChorus]);
+
+// Filter only by user-selected UI filter
+const filteredVideos = videos.filter(video => {
+  if (filter === "all") return true;
+  return video.chorus === filter || video.chorus === "voices";
+});
+```
+
+**Why this matters:**
+- Users who select "Harmony" expect to see Harmony content first, but should be able to browse Melody content too
+- The chorus selection sets a **default view**, not a **restriction**
+- All content remains accessible via filter buttons
+
+**Applied to:** Media page, Events page, News page (shows all with badges)
+
 ## Admin Access
 
 - URL: `/admin`
@@ -732,6 +812,13 @@ The home page displays three chorus cards (Harmony, Melody, Voices) with editabl
 | News public API | `src/app/api/news/route.ts` |
 | News sync API | `src/app/api/admin/news/sync/route.ts` |
 | News sync button | `src/components/admin/SyncNewsButton.tsx` |
+| Media page (public) | `src/app/(site)/media/page.tsx` |
+| Videos admin list | `src/app/admin/videos/page.tsx` |
+| Add video page | `src/app/admin/videos/new/page.tsx` |
+| Edit video page | `src/app/admin/videos/[id]/edit/page.tsx` |
+| Videos public API | `src/app/api/videos/route.ts` |
+| Videos admin API | `src/app/api/admin/videos/route.ts` |
+| YouTube metadata API | `src/app/api/admin/youtube-metadata/route.ts` |
 | Leadership API (admin) | `src/app/api/admin/leadership/route.ts` |
 | Leadership API (public) | `src/app/api/leadership/route.ts` |
 | Page content API | `src/app/api/admin/page-content/route.ts` |
