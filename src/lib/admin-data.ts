@@ -403,6 +403,10 @@ const DEFAULT_SITE_SETTINGS: SiteSettings = {
     melody: "/images/placeholder-story.jpg",
     voices: "/images/placeholder-story.jpg",
   },
+  gearStoreImages: {
+    etown: "/images/placeholder-hero.jpg",
+    cafepress: "/images/placeholder-hero.jpg",
+  },
 };
 
 export async function getSiteSettings(): Promise<SiteSettings> {
@@ -427,6 +431,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
         heroSlideBackground: settings.heroSlideBackground,
         chorusCardImages: { ...DEFAULT_SITE_SETTINGS.chorusCardImages, ...settings.chorusCardImages },
         aboutStoryImages: { ...DEFAULT_SITE_SETTINGS.aboutStoryImages, ...settings.aboutStoryImages },
+        gearStoreImages: { ...DEFAULT_SITE_SETTINGS.gearStoreImages, ...settings.gearStoreImages },
         updatedAt: settings.updatedAt,
         updatedBy: settings.updatedBy,
       };
@@ -460,6 +465,7 @@ export async function updateSiteSettings(
     heroSlideBackground: { ...current.heroSlideBackground, ...data.heroSlideBackground },
     chorusCardImages: { ...current.chorusCardImages, ...data.chorusCardImages },
     aboutStoryImages: { ...current.aboutStoryImages, ...data.aboutStoryImages },
+    gearStoreImages: { ...current.gearStoreImages, ...data.gearStoreImages },
     updatedAt: new Date().toISOString(),
     updatedBy,
   };

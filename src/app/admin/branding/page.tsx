@@ -22,6 +22,7 @@ import HomeTab from "@/components/admin/branding/HomeTab";
 import AboutTab from "@/components/admin/branding/AboutTab";
 import PageContentTab from "@/components/admin/branding/PageContentTab";
 import LeadershipTab from "@/components/admin/branding/LeadershipTab";
+import GearTab from "@/components/admin/branding/GearTab";
 
 // Utility to process images before upload
 async function processImage(
@@ -140,9 +141,10 @@ const tabs: Tab[] = [
 
 interface PickerState {
   isOpen: boolean;
-  type: "logo" | "banner" | "splash" | "heroSlide" | "chorusCard" | "aboutStory";
+  type: "logo" | "banner" | "splash" | "heroSlide" | "chorusCard" | "aboutStory" | "gearStore";
   chorus: ChorusKey;
   page?: PageKey;
+  storeId?: "etown" | "cafepress";
 }
 
 export default function BrandingPage() {
@@ -182,8 +184,8 @@ export default function BrandingPage() {
     }
   };
 
-  const openPicker = (type: PickerState["type"], chorus: ChorusKey, page?: PageKey) => {
-    setPickerState({ isOpen: true, type, chorus, page });
+  const openPicker = (type: PickerState["type"], chorus: ChorusKey, page?: PageKey, storeId?: "etown" | "cafepress") => {
+    setPickerState({ isOpen: true, type, chorus, page, storeId });
   };
 
   const closePicker = () => {
@@ -193,7 +195,7 @@ export default function BrandingPage() {
   const handleImageSelect = async (imageUrl: string) => {
     if (!pickerState || !settings) return;
 
-    const { type, chorus, page } = pickerState;
+    const { type, chorus, page, storeId } = pickerState;
     setSaving(true);
     setMessage(null);
 
@@ -223,6 +225,11 @@ export default function BrandingPage() {
         newSettings = {
           ...settings,
           aboutStoryImages: { ...settings.aboutStoryImages, [chorus]: imageUrl },
+        };
+      } else if (type === "gearStore" && storeId) {
+        newSettings = {
+          ...settings,
+          gearStoreImages: { ...settings.gearStoreImages, [storeId]: imageUrl },
         };
       } else {
         newSettings = {
@@ -293,31 +300,39 @@ export default function BrandingPage() {
 
   const getUploadConfig = () => {
     if (!pickerState) return undefined;
-    const { type, chorus, page } = pickerState;
+    const { type, chorus, page, storeId } = pickerState;
 
-    const nameMap = {
+    const storeNames: Record<string, string> = {
+      etown: "eTown Sporting Goods",
+      cafepress: "CafePress",
+    };
+
+    const nameMap: Record<string, string> = {
       logo: `${chorus}-logo`,
       splash: `${chorus}-splash-bg`,
       heroSlide: `${chorus}-hero-slide-bg`,
       chorusCard: `${chorus}-chorus-card`,
       aboutStory: `${chorus}-about-story`,
+      gearStore: storeId ? `gear-${storeId}-merchandise` : "gear-store",
       banner: `${page}-${chorus}-banner`,
     };
-    const altMap = {
+    const altMap: Record<string, string> = {
       logo: `${chorusInfo[chorus].name} logo`,
       splash: `${chorusInfo[chorus].name} splash background`,
       heroSlide: `${chorusInfo[chorus].name} hero slideshow background`,
       chorusCard: `${chorusInfo[chorus].name} chorus card image`,
       aboutStory: `${chorusInfo[chorus].name} story image`,
+      gearStore: storeId ? `${storeNames[storeId]} merchandise` : "Store merchandise",
       banner: page ? `${pageInfo[page].name} banner for ${chorusInfo[chorus].name}` : "",
     };
-    const categoryMap = {
-      logo: "other" as const,
-      splash: "banner" as const,
-      heroSlide: "slideshow" as const,
-      chorusCard: "other" as const,
-      aboutStory: "other" as const,
-      banner: "banner" as const,
+    const categoryMap: Record<string, "other" | "banner" | "slideshow"> = {
+      logo: "other",
+      splash: "banner",
+      heroSlide: "slideshow",
+      chorusCard: "other",
+      aboutStory: "other",
+      gearStore: "other",
+      banner: "banner",
     };
 
     return {
@@ -335,7 +350,7 @@ export default function BrandingPage() {
 
   const getCurrentImage = () => {
     if (!pickerState || !settings) return undefined;
-    const { type, chorus, page } = pickerState;
+    const { type, chorus, page, storeId } = pickerState;
 
     switch (type) {
       case "logo":
@@ -348,6 +363,8 @@ export default function BrandingPage() {
         return settings.chorusCardImages?.[chorus];
       case "aboutStory":
         return settings.aboutStoryImages?.[chorus];
+      case "gearStore":
+        return storeId ? settings.gearStoreImages?.[storeId] : undefined;
       case "banner":
         return settings.pageBanners?.[page!]?.[chorus];
       default:
@@ -357,8 +374,13 @@ export default function BrandingPage() {
 
   const getPickerTitle = () => {
     if (!pickerState) return "Select Image";
-    const { type, chorus, page } = pickerState;
+    const { type, chorus, page, storeId } = pickerState;
     const chorusName = chorusInfo[chorus].name;
+
+    const storeNames: Record<string, string> = {
+      etown: "eTown Sporting Goods",
+      cafepress: "CafePress",
+    };
 
     switch (type) {
       case "logo":
@@ -371,6 +393,8 @@ export default function BrandingPage() {
         return `Select ${chorusName} Card Image`;
       case "aboutStory":
         return `Select ${chorusName} Story Image`;
+      case "gearStore":
+        return storeId ? `Select ${storeNames[storeId]} Image` : "Select Store Image";
       case "banner":
         return `Select ${pageInfo[page!].name} Banner for ${chorusName}`;
       default:
@@ -409,6 +433,13 @@ export default function BrandingPage() {
             onImageSelect={(type, chorus, page) => openPicker(type, chorus, page)}
             onContentSave={handleContentSave}
             saving={saving}
+          />
+        );
+      case "gear":
+        return (
+          <GearTab
+            settings={settings}
+            onImageSelect={(type, chorus, page, storeId) => openPicker(type, chorus, page, storeId)}
           />
         );
       default:
