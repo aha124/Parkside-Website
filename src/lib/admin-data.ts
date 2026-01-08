@@ -602,7 +602,7 @@ export async function getPageContentByPage(pageKey: PageKey): Promise<PageConten
 export async function updatePageContent(
   pageKey: PageKey,
   content: Partial<PageContent>,
-  updatedBy?: string
+  _updatedBy?: string
 ): Promise<PageContent> {
   const allContent = await getPageContent();
   const updated: AllPageContent = {
@@ -618,7 +618,7 @@ export async function updatePageContent(
 
 export async function updateAllPageContent(
   content: Partial<AllPageContent>,
-  updatedBy?: string
+  _updatedBy?: string
 ): Promise<AllPageContent> {
   const current = await getPageContent();
   const updated: AllPageContent = { ...current };
