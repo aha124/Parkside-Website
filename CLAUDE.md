@@ -4,9 +4,10 @@ This document provides context for AI assistants and developers working on this 
 
 ## Project Overview
 
-This is a Next.js 14+ website for **Parkside Barbershop** - a barbershop organization with two choruses:
+This is a Next.js 14+ website for **Parkside Barbershop** - a barbershop organization with three chorus identities:
 - **Parkside Harmony** - A cappella chorus (TTBB)
 - **Parkside Melody** - Treble-voiced ensemble (SSAA)
+- **Parkside Voices** - Combined identity representing both choruses together
 
 The site dynamically changes content based on which chorus the visitor selects.
 
@@ -450,6 +451,50 @@ const [imagePickerOpen, setImagePickerOpen] = useState(false);
 />
 ```
 
+### 14. Adding New Image Types to Branding Page
+
+When adding a new type of image to the admin branding system (e.g., `chorusCardImages`), you must update **multiple locations** in `src/app/admin/branding/page.tsx`:
+
+1. **`PickerState` interface** - Add the new type to the `type` union:
+   ```typescript
+   interface PickerState {
+     type: "logo" | "banner" | "splash" | "heroSlide" | "chorusCard"; // Add here
+     // ...
+   }
+   ```
+
+2. **`handleImageSelect()`** - Add a case for saving the new image type:
+   ```typescript
+   } else if (type === "chorusCard") {
+     newSettings = {
+       ...settings,
+       chorusCardImages: { ...settings.chorusCardImages, [chorus]: imageUrl },
+     };
+   }
+   ```
+
+3. **`getCurrentImage()`** - Add a case to retrieve the current image:
+   ```typescript
+   case "chorusCard":
+     return settings.chorusCardImages?.[chorus];
+   ```
+
+4. **`getPickerTitle()`** - Add a case for the modal title:
+   ```typescript
+   case "chorusCard":
+     return `Select ${chorusName} Card Image`;
+   ```
+
+5. **`getUploadConfig()`** - Add entries to all three maps (`nameMap`, `altMap`, `categoryMap`):
+   ```typescript
+   const nameMap = {
+     // ...existing entries
+     chorusCard: `${chorus}-chorus-card`,
+   };
+   ```
+
+**Also update `src/types/admin.ts`** and **`src/lib/admin-data.ts`** per gotcha #10.
+
 ## Admin Access
 
 - URL: `/admin`
@@ -503,18 +548,16 @@ Editable text content for all pages (hero titles, subtitles, section titles, etc
 The admin branding page uses a tabbed interface for managing all site content.
 
 **Tabs:**
-- **Logos** - Chorus logos (Harmony, Melody, Voices)
-- **Splash Page** - Background images for landing carousel
-- **Hero Slideshow** - First slide backgrounds per chorus
-- **Page tabs** (Home, About, Leadership, Join, etc.) - Banners + editable text content
+- **General** - Combined tab for logos, splash page backgrounds, and hero slideshow backgrounds (all per-chorus)
+- **Home** - Hero slide banners/descriptions per chorus + "Our Choruses" section (card images and descriptions for Harmony, Melody, Voices)
+- **Page tabs** (About, Leadership, Join, etc.) - Banners + editable text content
 
 **Files:**
-- `src/app/admin/branding/page.tsx` - Main page with tab logic
+- `src/app/admin/branding/page.tsx` - Main page with tab logic and image picker handling
 - `src/components/admin/branding/AdminTabs.tsx` - Tab navigation component
-- `src/components/admin/branding/LogosTab.tsx` - Logos management
-- `src/components/admin/branding/SplashTab.tsx` - Splash backgrounds
-- `src/components/admin/branding/HeroSlideshowTab.tsx` - Hero backgrounds
-- `src/components/admin/branding/PageContentTab.tsx` - Reusable page banner + content editor
+- `src/components/admin/branding/GeneralTab.tsx` - Combined logos, splash backgrounds, hero slideshow backgrounds
+- `src/components/admin/branding/HomeTab.tsx` - Home page specific: hero descriptions + chorus card images/descriptions
+- `src/components/admin/branding/PageContentTab.tsx` - Reusable page banner + content editor for other pages
 - `src/components/admin/branding/LeadershipTab.tsx` - Leadership member management
 
 **Adding a new page tab:**
@@ -522,6 +565,24 @@ The admin branding page uses a tabbed interface for managing all site content.
 2. Add to `pageInfo` object with name, description, icon
 3. Add to `PAGE_CONTENT_SCHEMA` in types/admin.ts
 4. Add default content in `DEFAULT_PAGE_CONTENT` in admin-data.ts
+
+### 10. Home Page "Our Choruses" Section
+
+The home page displays three chorus cards (Harmony, Melody, Voices) with editable images and descriptions.
+
+**Files:**
+- `src/components/home/ChorusesSection.tsx` - Client component that fetches and displays chorus cards
+- `src/components/admin/branding/HomeTab.tsx` - Admin UI for editing card images and descriptions
+
+**Data sources:**
+- Card images: Stored in `SiteSettings.chorusCardImages` (fetched from `/api/admin/site-settings`)
+- Card descriptions: Stored in `PageContent.home` with keys `chorusCard_harmony`, `chorusCard_melody`, `chorusCard_voices`
+
+**How it works:**
+1. `ChorusesSection` fetches both page content and site settings on mount
+2. Images fall back to defaults (`/images/harmony-bg.jpg`, etc.) if not set
+3. Descriptions fall back to hardcoded defaults in the component
+4. Admin edits images via ImagePickerModal, descriptions via textarea
 
 ## Key Files Quick Reference
 
@@ -534,11 +595,17 @@ The admin branding page uses a tabbed interface for managing all site content.
 | Site settings API | `src/app/api/admin/site-settings/route.ts` |
 | Header/Logo | `src/components/layout/Header.tsx` |
 | Branding admin | `src/app/admin/branding/page.tsx` |
+| Admin tabs component | `src/components/admin/branding/AdminTabs.tsx` |
+| General tab (logos/splash/hero) | `src/components/admin/branding/GeneralTab.tsx` |
+| Home tab (chorus cards) | `src/components/admin/branding/HomeTab.tsx` |
+| Page content tab | `src/components/admin/branding/PageContentTab.tsx` |
+| Leadership tab | `src/components/admin/branding/LeadershipTab.tsx` |
 | Image picker modal | `src/components/admin/ImagePickerModal.tsx` |
 | Image edit page | `src/app/admin/images/[id]/edit/page.tsx` |
 | Images API | `src/app/api/admin/images/route.ts` |
 | Splash page (mobile carousel) | `src/components/splash/SplitScreen.tsx` |
 | Hero slideshow | `src/components/home/HeroSlideshow.tsx` |
+| Our Choruses section | `src/components/home/ChorusesSection.tsx` |
 | Events list component | `src/components/events/EventsList.tsx` |
 | Events public API | `src/app/api/events/route.ts` |
 | Events sync API | `src/app/api/admin/events/sync/route.ts` |
@@ -549,10 +616,7 @@ The admin branding page uses a tabbed interface for managing all site content.
 | News sync button | `src/components/admin/SyncNewsButton.tsx` |
 | Leadership API (admin) | `src/app/api/admin/leadership/route.ts` |
 | Leadership API (public) | `src/app/api/leadership/route.ts` |
-| Leadership tab component | `src/components/admin/branding/LeadershipTab.tsx` |
 | Page content API | `src/app/api/admin/page-content/route.ts` |
-| Admin tabs component | `src/components/admin/branding/AdminTabs.tsx` |
-| Page content tab | `src/components/admin/branding/PageContentTab.tsx` |
 
 ## Development Commands
 
