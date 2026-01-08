@@ -6,7 +6,7 @@ import HeroSection from "@/components/ui/HeroSection";
 import dynamic from "next/dynamic";
 import type { YouTubeProps } from "react-youtube";
 import { useState, useMemo, useEffect } from "react";
-import { useChorus, shouldShowForChorus } from "@/lib/chorus-context";
+import { useChorus } from "@/lib/chorus-context";
 import { usePageBanner } from "@/hooks/usePageBanner";
 
 // Dynamically import YouTube component to avoid SSR issues
@@ -27,11 +27,23 @@ type FilterType = "all" | "harmony" | "melody" | "voices" | "competition";
 
 export default function MediaPage() {
   const [videos, setVideos] = useState<VideoData[]>([]);
-  const [filter, setFilter] = useState<FilterType>("all");
+  const { chorus: selectedChorus } = useChorus();
+  // Pre-select filter based on chorus choice: harmony/melody pre-selects that filter, voices shows all
+  const getInitialFilter = (chorus: string): FilterType => {
+    if (chorus === "harmony") return "harmony";
+    if (chorus === "melody") return "melody";
+    return "all"; // "voices" shows all by default
+  };
+  const [filter, setFilter] = useState<FilterType>(() => getInitialFilter(selectedChorus));
   const [visibleCount, setVisibleCount] = useState(6);
   const [loading, setLoading] = useState(true);
-  const { chorus: selectedChorus } = useChorus();
   const bannerImage = usePageBanner("media");
+
+  // Update filter when chorus selection changes (e.g., user changes via header)
+  useEffect(() => {
+    setFilter(getInitialFilter(selectedChorus));
+    setVisibleCount(6);
+  }, [selectedChorus]);
 
   // Fetch admin-managed videos
   useEffect(() => {
@@ -75,13 +87,14 @@ export default function MediaPage() {
     },
   };
 
-  // Filter and sort videos - first by global chorus context, then by UI filter
+  // Filter and sort videos based on user-selected UI filter only
+  // (chorus pre-selects the filter but doesn't permanently hide content)
   const filteredVideos = videos
-    .filter(video => shouldShowForChorus(video.chorus, selectedChorus))
     .filter(video => {
       if (filter === "all") return true;
       if (filter === "competition") return !!video.competition;
       if (filter === "voices") return video.chorus === "voices";
+      // For harmony/melody filters, show that chorus plus any "voices" (combined) videos
       return video.chorus === filter || video.chorus === "voices";
     })
     .sort((a, b) => b.year - a.year);
