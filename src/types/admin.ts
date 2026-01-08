@@ -204,13 +204,10 @@ export const PAGE_CONTENT_SCHEMA: Record<PageKey, { fields: Array<{ key: string;
   },
   about: {
     fields: [
-      // Per-chorus "Our Story" content
-      { key: "storyIntro_harmony", label: "Harmony - Our Story Intro", type: "textarea" },
-      { key: "storyDetail_harmony", label: "Harmony - Our Story Detail", type: "textarea" },
-      { key: "storyIntro_melody", label: "Melody - Our Story Intro", type: "textarea" },
-      { key: "storyDetail_melody", label: "Melody - Our Story Detail", type: "textarea" },
-      { key: "storyIntro_voices", label: "Voices - Our Story Intro", type: "textarea" },
-      { key: "storyDetail_voices", label: "Voices - Our Story Detail", type: "textarea" },
+      // Per-chorus "Our Story" content (single text block each)
+      { key: "story_harmony", label: "Harmony - Our Story", type: "textarea" },
+      { key: "story_melody", label: "Melody - Our Story", type: "textarea" },
+      { key: "story_voices", label: "Voices - Our Story", type: "textarea" },
     ],
   },
   leadership: {

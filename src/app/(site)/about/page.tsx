@@ -15,24 +15,21 @@ const defaultChorusContent = {
   harmony: {
     name: "Parkside Harmony",
     tagline: "Celebrating barbershop excellence in Hershey since 2015",
-    storyIntro: "Parkside Harmony has grown from a small group of passionate singers into one of the premier barbershop choruses in the Mid-Atlantic region.",
-    storyDetail: "Since our founding in 2015, we have achieved multiple district championships and international recognition, including a Silver Medal at the 2023 BHS International Competition in Louisville, Kentucky.",
+    story: "Parkside Harmony has grown from a small group of passionate singers into one of the premier barbershop choruses in the Mid-Atlantic region.\n\nSince our founding in 2015, we have achieved multiple district championships and international recognition, including a Silver Medal at the 2023 BHS International Competition in Louisville, Kentucky.",
     joinTitle: "Join our Harmony",
     joinCTA: "Experience the thrill of barbershop at its finest.",
   },
   melody: {
     name: "Parkside Melody",
     tagline: "Celebrating barbershop harmony since 2018",
-    storyIntro: "Parkside Melody was born from a shared love of harmony singing and a desire to create a welcoming space for singers to experience the joy of barbershop.",
-    storyDetail: "Founded in 2018, we have quickly grown into a dynamic chorus that combines competitive excellence with community outreach and musical education.",
+    story: "Parkside Melody was born from a shared love of harmony singing and a desire to create a welcoming space for singers to experience the joy of barbershop.\n\nFounded in 2018, we have quickly grown into a dynamic chorus that combines competitive excellence with community outreach and musical education.",
     joinTitle: "Join our Melody",
     joinCTA: "Discover the power of voices in harmony.",
   },
   voices: {
     name: "Parkside",
     tagline: "Celebrating barbershop excellence in Hershey since 2015",
-    storyIntro: "Founded in 2015, Parkside has grown from a small group of passionate singers into two vibrant choruses that represent the very best of barbershop harmony in the mid-atlantic region.",
-    storyDetail: "Our journey began with a vision to create a space where singers could pursue musical excellence while fostering meaningful connections within our community. Today, that vision has blossomed into a thriving organization that continues to push the boundaries of a cappella performance.",
+    story: "Founded in 2015, Parkside has grown from a small group of passionate singers into two vibrant choruses that represent the very best of barbershop harmony in the mid-atlantic region.\n\nOur journey began with a vision to create a space where singers could pursue musical excellence while fostering meaningful connections within our community. Today, that vision has blossomed into a thriving organization that continues to push the boundaries of a cappella performance.",
     joinTitle: "Join our Voices",
     joinCTA: "Be part of something extraordinary.",
   },
@@ -71,8 +68,7 @@ export default function AboutPage() {
   const defaultContent = defaultChorusContent[chorus];
 
   // Get story content from API or fallback to defaults
-  const storyIntro = pageContent?.[`storyIntro_${chorus}`] || defaultContent.storyIntro;
-  const storyDetail = pageContent?.[`storyDetail_${chorus}`] || defaultContent.storyDetail;
+  const storyText = pageContent?.[`story_${chorus}`] || defaultContent.story;
   const storyImage = siteSettings?.aboutStoryImages?.[chorus] || "/images/placeholder-story.jpg";
 
   return (
@@ -105,8 +101,9 @@ export default function AboutPage() {
                   Our Story
                 </h2>
                 <div className="prose prose-sm sm:prose-base md:prose-lg">
-                  <p>{storyIntro}</p>
-                  <p>{storyDetail}</p>
+                  {storyText.split('\n\n').map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
                 </div>
               </div>
             </ScrollAnimation>

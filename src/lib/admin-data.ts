@@ -546,15 +546,10 @@ const DEFAULT_PAGE_CONTENT: AllPageContent = {
     chorusCard_voices: "Experience the full Parkside sound with both choruses performing together. Unity through harmony.",
   },
   about: {
-    // Harmony "Our Story" content
-    storyIntro_harmony: "Parkside Harmony has grown from a small group of passionate singers into one of the premier barbershop choruses in the Mid-Atlantic region.",
-    storyDetail_harmony: "Since our founding in 2015, we have achieved multiple district championships and international recognition, including a Silver Medal at the 2023 BHS International Competition in Louisville, Kentucky.",
-    // Melody "Our Story" content
-    storyIntro_melody: "Parkside Melody was born from a shared love of harmony singing and a desire to create a welcoming space for singers to experience the joy of barbershop.",
-    storyDetail_melody: "Founded in 2018, we have quickly grown into a dynamic chorus that combines competitive excellence with community outreach and musical education.",
-    // Voices "Our Story" content
-    storyIntro_voices: "Founded in 2015, Parkside has grown from a small group of passionate singers into two vibrant choruses that represent the very best of barbershop harmony in the mid-atlantic region.",
-    storyDetail_voices: "Our journey began with a vision to create a space where singers could pursue musical excellence while fostering meaningful connections within our community. Today, that vision has blossomed into a thriving organization that continues to push the boundaries of a cappella performance.",
+    // Per-chorus "Our Story" content (single text block each)
+    story_harmony: "Parkside Harmony has grown from a small group of passionate singers into one of the premier barbershop choruses in the Mid-Atlantic region.\n\nSince our founding in 2015, we have achieved multiple district championships and international recognition, including a Silver Medal at the 2023 BHS International Competition in Louisville, Kentucky.",
+    story_melody: "Parkside Melody was born from a shared love of harmony singing and a desire to create a welcoming space for singers to experience the joy of barbershop.\n\nFounded in 2018, we have quickly grown into a dynamic chorus that combines competitive excellence with community outreach and musical education.",
+    story_voices: "Founded in 2015, Parkside has grown from a small group of passionate singers into two vibrant choruses that represent the very best of barbershop harmony in the mid-atlantic region.\n\nOur journey began with a vision to create a space where singers could pursue musical excellence while fostering meaningful connections within our community. Today, that vision has blossomed into a thriving organization that continues to push the boundaries of a cappella performance.",
   },
   leadership: {
     heroTitle: "Our Leadership",

@@ -164,31 +164,17 @@ export default function AboutTab({
                   </button>
                 </div>
                 {/* Story text content */}
-                <div className="flex-grow space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Story Introduction
-                    </label>
-                    <textarea
-                      value={localContent[`storyIntro_${chorus}`] || ""}
-                      onChange={(e) => handleFieldChange(`storyIntro_${chorus}`, e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white"
-                      rows={2}
-                      placeholder={`Introduction paragraph for ${chorusInfo[chorus].name}'s story...`}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Story Detail
-                    </label>
-                    <textarea
-                      value={localContent[`storyDetail_${chorus}`] || ""}
-                      onChange={(e) => handleFieldChange(`storyDetail_${chorus}`, e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white"
-                      rows={3}
-                      placeholder={`Additional detail for ${chorusInfo[chorus].name}'s story...`}
-                    />
-                  </div>
+                <div className="flex-grow">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Our Story Text
+                  </label>
+                  <textarea
+                    value={localContent[`story_${chorus}`] || ""}
+                    onChange={(e) => handleFieldChange(`story_${chorus}`, e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white"
+                    rows={5}
+                    placeholder={`Story text for ${chorusInfo[chorus].name}. Use blank lines to separate paragraphs.`}
+                  />
                 </div>
               </div>
             </div>
