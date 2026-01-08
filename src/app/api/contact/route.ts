@@ -5,7 +5,8 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Destination email for all contact form submissions
-const DESTINATION_EMAIL = "info@parksideharmony.org";
+// TODO: Change to info@parksideharmony.org once domain is verified in Resend
+const DESTINATION_EMAIL = "anthony.arbaiza124@gmail.com";
 
 export async function POST(request: Request) {
   try {
