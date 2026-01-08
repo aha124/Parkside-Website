@@ -522,6 +522,66 @@ When creating admin editing fields, match the visual structure of the public pag
 {text.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}
 ```
 
+### 16. ImagePickerModal Requires uploadConfig for Upload Tab
+
+The `ImagePickerModal` component only shows the "Upload New" tab when the `uploadConfig` prop is provided. Without it, users can only select from existing images in the library.
+
+**Without uploadConfig (library only):**
+```tsx
+<ImagePickerModal
+  isOpen={isOpen}
+  onClose={onClose}
+  onSelect={onSelect}
+  title="Select Image"
+  currentImage={currentImage}
+/>
+// Only shows "Image Library" tab
+```
+
+**With uploadConfig (library + upload):**
+```tsx
+<ImagePickerModal
+  isOpen={isOpen}
+  onClose={onClose}
+  onSelect={onSelect}
+  title="Select Image"
+  currentImage={currentImage}
+  uploadConfig={{
+    name: "image-name",           // Used for uploaded file naming
+    category: "other",            // Image category for organization
+    alt: "Image description",     // Alt text for accessibility
+    chorus: "voices",             // Chorus association
+    processImage: async (file) => file,  // Optional image processor
+  }}
+/>
+// Shows both "Image Library" and "Upload New" tabs
+```
+
+**When to include uploadConfig:**
+- Any image picker where users should be able to upload new images
+- Leadership member photos, event images, news article images
+- All branding page image pickers already include this
+
+### 17. Banner-Only Admin Tabs
+
+For pages where only the banner image needs to be editable (not page text content), set an empty `fields` array in `PAGE_CONTENT_SCHEMA`. The `PageContentTab` component automatically hides the "Page Content" section when there are no fields.
+
+```typescript
+// In src/types/admin.ts
+export const PAGE_CONTENT_SCHEMA = {
+  // Pages with editable content
+  home: { fields: [...] },
+  about: { fields: [...] },
+
+  // Banner-only pages (empty fields = no content section)
+  events: { fields: [] },
+  media: { fields: [] },
+  contact: { fields: [] },
+};
+```
+
+This approach keeps the code DRY - no need for separate "banner-only" components.
+
 ## Admin Access
 
 - URL: `/admin`
