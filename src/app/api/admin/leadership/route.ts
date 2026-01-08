@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 
     // Handle seeding default data
     if (body.action === "seed") {
-      const result = await seedLeadership(session.user.email);
+      const result = await seedLeadership(session.user.email ?? undefined);
       return NextResponse.json({ success: true, data: result });
     }
 
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
       category,
       chorusAffiliation,
       order: order ?? 0,
-      createdBy: session.user.email,
+      createdBy: session.user.email ?? undefined,
     });
 
     return NextResponse.json({ success: true, data: newMember });

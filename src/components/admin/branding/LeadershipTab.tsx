@@ -6,7 +6,6 @@ import {
   Plus,
   Edit2,
   Trash2,
-  GripVertical,
   X,
   Save,
   ChevronDown,
@@ -18,8 +17,6 @@ import type {
   LeadershipCategory,
   ChorusAffiliation,
   PageContent,
-  SiteSettings,
-  ChorusKey,
 } from "@/types/admin";
 import { PAGE_CONTENT_SCHEMA } from "@/types/admin";
 import ImagePickerModal from "@/components/admin/ImagePickerModal";
@@ -51,9 +48,7 @@ const chorusAffiliationOptions: { value: ChorusAffiliation | ""; label: string }
 
 interface LeadershipTabProps {
   pageContent: PageContent;
-  settings: SiteSettings | null;
   onContentSave: (pageKey: "leadership", content: PageContent) => Promise<void>;
-  onBannerSelect: (type: "banner", chorus: ChorusKey, page: "leadership") => void;
   saving: boolean;
 }
 
@@ -77,9 +72,7 @@ const defaultFormData: MemberFormData = {
 
 export default function LeadershipTab({
   pageContent,
-  settings,
   onContentSave,
-  onBannerSelect,
   saving,
 }: LeadershipTabProps) {
   const [members, setMembers] = useState<LeadershipMember[]>([]);

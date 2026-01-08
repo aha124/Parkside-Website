@@ -6,7 +6,6 @@ import {
   RefreshCw,
   Home,
   Info,
-  Users,
   UserPlus,
   Calendar,
   Film,
@@ -388,9 +387,7 @@ export default function BrandingPage() {
         return (
           <LeadershipTab
             pageContent={pageContent.leadership}
-            settings={settings}
             onContentSave={handleContentSave}
-            onBannerSelect={(type, chorus, page) => openPicker(type, chorus, page)}
             saving={saving}
           />
         );
