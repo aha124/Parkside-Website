@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
-import { useChorus, shouldShowForChorus } from "@/lib/chorus-context";
+import { useChorus } from "@/lib/chorus-context";
 
 // Define the Event type
 export interface Event {
@@ -47,9 +47,15 @@ export default function EventsList({
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = useState<string>("All");
-  const [timePeriod, setTimePeriod] = useState<"upcoming" | "past">("upcoming");
   const { chorus: selectedChorus } = useChorus();
+  // Pre-select filter based on chorus choice: harmony/melody pre-selects that filter, voices shows all
+  const getInitialFilter = (chorus: string): string => {
+    if (chorus === "harmony") return "harmony";
+    if (chorus === "melody") return "melody";
+    return "All"; // "voices" shows all by default
+  };
+  const [activeFilter, setActiveFilter] = useState<string>(() => getInitialFilter(selectedChorus));
+  const [timePeriod, setTimePeriod] = useState<"upcoming" | "past">("upcoming");
 
   // Helper function to parse event date string to Date object
   const parseEventDate = (dateStr: string): Date => {
@@ -124,18 +130,14 @@ export default function EventsList({
     return formatted.split('\n').slice(0, 2).join(', ').replace(/\s+/g, ' ').trim();
   };
 
-  // Apply filters to events - filter by time period, selected chorus from context, then by UI filter
+  // Apply filters to events - filter by time period, then by user-selected UI filter
+  // (chorus pre-selects the filter but doesn't permanently hide content)
   const applyFilters = (allEvents: Event[], filter: string, period: "upcoming" | "past") => {
     // First, filter by time period
     let filtered = allEvents.filter(event => {
       const isPast = isEventPast(event);
       return period === "past" ? isPast : !isPast;
     });
-
-    // Then filter by the selected chorus from context
-    filtered = filtered.filter(event =>
-      shouldShowForChorus(event.chorus, selectedChorus)
-    );
 
     // Then apply UI filter if not "All"
     if (filter !== "All") {
@@ -165,6 +167,11 @@ export default function EventsList({
 
     return filtered;
   };
+
+  // Update filter when chorus selection changes (e.g., user changes via header)
+  useEffect(() => {
+    setActiveFilter(getInitialFilter(selectedChorus));
+  }, [selectedChorus]);
 
   useEffect(() => {
     const fetchEvents = async () => {

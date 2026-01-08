@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
-import { useChorus, shouldShowForChorus } from "@/lib/chorus-context";
+import { useChorus } from "@/lib/chorus-context";
 
 // Define the News type
 export interface NewsItem {
@@ -34,7 +34,8 @@ export default function NewsList({
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { chorus: selectedChorus } = useChorus();
+  // Note: We show all news regardless of chorus selection - badges indicate which chorus each article is for
+  useChorus(); // Keep for potential future use
 
   // Static fallback news in case the fetch fails
   const staticNews: NewsItem[] = [
@@ -144,13 +145,10 @@ export default function NewsList({
     fetchNews();
   }, []);
 
-  // Filter news by selected chorus
+  // Show all news - badges indicate which chorus each article is for
   useEffect(() => {
-    const filtered = allNews
-      .filter(item => shouldShowForChorus(item.chorus, selectedChorus))
-      .slice(0, maxItems);
-    setNewsItems(filtered);
-  }, [allNews, selectedChorus, maxItems]);
+    setNewsItems(allNews.slice(0, maxItems));
+  }, [allNews, maxItems]);
 
   return (
     <section className="py-16">
