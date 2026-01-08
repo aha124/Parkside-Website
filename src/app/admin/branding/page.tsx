@@ -400,13 +400,7 @@ export default function BrandingPage() {
           />
         );
       case "leadership":
-        return (
-          <LeadershipTab
-            pageContent={pageContent.leadership}
-            onContentSave={handleContentSave}
-            saving={saving}
-          />
-        );
+        return <LeadershipTab />;
       case "about":
         return (
           <AboutTab
