@@ -456,6 +456,73 @@ const [imagePickerOpen, setImagePickerOpen] = useState(false);
 - Password: Check `src/app/api/admin/login/route.ts` for current password
 - Session: Stored in cookie (`admin_session`)
 
+### 7. Leadership Management System
+
+Leadership data is stored in Vercel KV and editable via the admin panel.
+
+**Types:**
+- `LeadershipMember` - Individual leader with name, title, bio, photo, category, chorusAffiliation
+- `LeadershipCategory` - "musicLeadership" | "boardMember" | "boardAtLarge"
+
+**Files:**
+- `src/types/admin.ts` - Type definitions
+- `src/lib/admin-data.ts` - CRUD functions: `getLeadership()`, `createLeadershipMember()`, `updateLeadershipMember()`, `deleteLeadershipMember()`, `reorderLeadership()`
+- `src/app/api/admin/leadership/route.ts` - Admin API for CRUD operations
+- `src/app/api/leadership/route.ts` - Public API for reading leadership data
+- `src/components/admin/branding/LeadershipTab.tsx` - Admin UI component
+
+**Usage:**
+```tsx
+// Fetch leadership from API
+const response = await fetch("/api/leadership");
+const { data } = await response.json();
+// data.musicLeadership, data.boardMembers, data.boardAtLarge
+```
+
+### 8. Page Content System
+
+Editable text content for all pages (hero titles, subtitles, section titles, etc.).
+
+**Types:**
+- `PageContent` - Key-value pairs of editable text for a page
+- `AllPageContent` - Record of all page content keyed by PageKey
+- `PAGE_CONTENT_SCHEMA` - Defines editable fields for each page
+
+**Files:**
+- `src/types/admin.ts` - Type definitions and schema
+- `src/lib/admin-data.ts` - `getPageContent()`, `updatePageContent()`
+- `src/app/api/admin/page-content/route.ts` - API for managing content
+
+**Adding new editable fields:**
+1. Add field to `PAGE_CONTENT_SCHEMA[pageKey].fields` in `src/types/admin.ts`
+2. Add default value in `DEFAULT_PAGE_CONTENT` in `src/lib/admin-data.ts`
+3. Use in page component: `pageContent.fieldKey`
+
+### 9. Admin Branding & Content Page (Tabbed Interface)
+
+The admin branding page uses a tabbed interface for managing all site content.
+
+**Tabs:**
+- **Logos** - Chorus logos (Harmony, Melody, Voices)
+- **Splash Page** - Background images for landing carousel
+- **Hero Slideshow** - First slide backgrounds per chorus
+- **Page tabs** (Home, About, Leadership, Join, etc.) - Banners + editable text content
+
+**Files:**
+- `src/app/admin/branding/page.tsx` - Main page with tab logic
+- `src/components/admin/branding/AdminTabs.tsx` - Tab navigation component
+- `src/components/admin/branding/LogosTab.tsx` - Logos management
+- `src/components/admin/branding/SplashTab.tsx` - Splash backgrounds
+- `src/components/admin/branding/HeroSlideshowTab.tsx` - Hero backgrounds
+- `src/components/admin/branding/PageContentTab.tsx` - Reusable page banner + content editor
+- `src/components/admin/branding/LeadershipTab.tsx` - Leadership member management
+
+**Adding a new page tab:**
+1. Add to `tabs` array in branding page
+2. Add to `pageInfo` object with name, description, icon
+3. Add to `PAGE_CONTENT_SCHEMA` in types/admin.ts
+4. Add default content in `DEFAULT_PAGE_CONTENT` in admin-data.ts
+
 ## Key Files Quick Reference
 
 | Purpose | File |
@@ -480,6 +547,12 @@ const [imagePickerOpen, setImagePickerOpen] = useState(false);
 | News public API | `src/app/api/news/route.ts` |
 | News sync API | `src/app/api/admin/news/sync/route.ts` |
 | News sync button | `src/components/admin/SyncNewsButton.tsx` |
+| Leadership API (admin) | `src/app/api/admin/leadership/route.ts` |
+| Leadership API (public) | `src/app/api/leadership/route.ts` |
+| Leadership tab component | `src/components/admin/branding/LeadershipTab.tsx` |
+| Page content API | `src/app/api/admin/page-content/route.ts` |
+| Admin tabs component | `src/components/admin/branding/AdminTabs.tsx` |
+| Page content tab | `src/components/admin/branding/PageContentTab.tsx` |
 
 ## Development Commands
 
