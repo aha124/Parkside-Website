@@ -10,6 +10,7 @@ import ScrollAnimation from "@/components/ui/ScrollAnimation";
 export default function ContactPage() {
   const { chorus } = useChorus();
   const bannerImage = usePageBanner("contact");
+  const joinBannerImage = usePageBanner("join");
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -79,12 +80,15 @@ export default function ContactPage() {
   const chorusInfo = {
     harmony: {
       name: "Parkside Harmony",
+      joinTitle: "Experience the Joy of Harmony",
     },
     melody: {
       name: "Parkside Melody",
+      joinTitle: "Experience the Joy of Melody",
     },
     voices: {
       name: "Parkside",
+      joinTitle: "Come and Join Our Voices",
     },
   };
 
@@ -291,11 +295,11 @@ export default function ContactPage() {
                         <br />
                         Camp Hill, PA 17011
                       </p>
-                      <p className="mt-2 text-gray-600">
-                        Visitors and prospective members are always welcome!
-                      </p>
                       <p className="mt-1 text-sm text-gray-500 italic">
                         *Unless otherwise noted in the rehearsal event
+                      </p>
+                      <p className="mt-3 text-gray-600">
+                        Visitors and prospective members are always welcome!
                       </p>
                     </div>
                   </div>
@@ -353,7 +357,7 @@ export default function ContactPage() {
             <ScrollAnimation delay={0.1}>
               <div className="relative h-[200px] sm:h-[250px] md:h-[300px] rounded-lg overflow-hidden shadow-xl">
                 <Image
-                  src="/images/harmony-bg.jpg"
+                  src={joinBannerImage}
                   alt={`Join ${currentInfo.name}`}
                   fill
                   className="object-cover"
@@ -364,7 +368,7 @@ export default function ContactPage() {
             <ScrollAnimation delay={0.2}>
               <div>
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
-                  Experience the Joy of Harmony
+                  {currentInfo.joinTitle}
                 </h3>
                 <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6">
                   Whether you&apos;re an experienced singer or just love to sing
