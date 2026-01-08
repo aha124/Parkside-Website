@@ -1,65 +1,82 @@
 'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Loader2, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
 
-export default function NewVideoPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(false);
-  const [error, setError] = useState("");
-  const [youtubeUrl, setYoutubeUrl] = useState("");
+interface VideoData {
+  id: string;
+  youtubeId: string;
+  title: string;
+  description: string;
+  year: number;
+  chorus: "harmony" | "melody" | "voices";
+  competition?: string;
+  placement?: string;
+  thumbnailUrl?: string;
+}
 
-  const [formData, setFormData] = useState({
+export default function EditVideoPage() {
+  const router = useRouter();
+  const params = useParams();
+  const videoId = params.id as string;
+
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+  const [error, setError] = useState("");
+
+  const [formData, setFormData] = useState<VideoData>({
+    id: "",
     youtubeId: "",
     title: "",
     description: "",
     year: new Date().getFullYear(),
-    chorus: "voices" as "harmony" | "melody" | "voices",
+    chorus: "voices",
     competition: "",
     placement: "",
     thumbnailUrl: "",
   });
 
-  const fetchYouTubeMetadata = async () => {
-    if (!youtubeUrl) return;
+  // Fetch existing video data
+  useEffect(() => {
+    async function fetchVideo() {
+      try {
+        const response = await fetch(`/api/admin/videos/${videoId}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            setError("Video not found");
+          } else {
+            setError("Failed to load video");
+          }
+          return;
+        }
 
-    setFetching(true);
-    setError("");
-
-    try {
-      const response = await fetch("/api/admin/youtube-metadata", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: youtubeUrl }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch video metadata");
+        const data = await response.json();
+        if (data.success && data.data) {
+          setFormData({
+            id: data.data.id,
+            youtubeId: data.data.youtubeId,
+            title: data.data.title,
+            description: data.data.description,
+            year: data.data.year,
+            chorus: data.data.chorus,
+            competition: data.data.competition || "",
+            placement: data.data.placement || "",
+            thumbnailUrl: data.data.thumbnailUrl || "",
+          });
+        }
+      } catch {
+        setError("Failed to load video");
+      } finally {
+        setFetching(false);
       }
-
-      const data = await response.json();
-
-      if (data.success && data.data) {
-        // Only auto-populate the YouTube ID and thumbnail - title should be entered manually
-        setFormData((prev) => ({
-          ...prev,
-          youtubeId: data.data.id,
-          thumbnailUrl: data.data.thumbnailUrl,
-        }));
-      }
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to fetch video information"
-      );
-    } finally {
-      setFetching(false);
     }
-  };
+
+    if (videoId) {
+      fetchVideo();
+    }
+  }, [videoId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,15 +84,24 @@ export default function NewVideoPage() {
     setError("");
 
     try {
-      const response = await fetch("/api/admin/videos", {
-        method: "POST",
+      const response = await fetch(`/api/admin/videos/${videoId}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          youtubeId: formData.youtubeId,
+          title: formData.title,
+          description: formData.description,
+          year: formData.year,
+          chorus: formData.chorus,
+          competition: formData.competition || undefined,
+          placement: formData.placement || undefined,
+          thumbnailUrl: formData.thumbnailUrl || undefined,
+        }),
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || "Failed to create video");
+        throw new Error(data.error || "Failed to update video");
       }
 
       router.push("/admin/videos");
@@ -87,6 +113,33 @@ export default function NewVideoPage() {
     }
   };
 
+  if (fetching) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  if (error && !formData.id) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Link
+            href="/admin/videos"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">Edit Video</h1>
+        </div>
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -97,9 +150,9 @@ export default function NewVideoPage() {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Add Video</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Edit Video</h1>
           <p className="text-gray-600 mt-1">
-            Add a YouTube video to the media gallery
+            Update video details
           </p>
         </div>
       </div>
@@ -111,37 +164,42 @@ export default function NewVideoPage() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* YouTube URL Fetcher */}
+        {/* Video Preview */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Fetch Video Info
+            Video Preview
           </h2>
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={youtubeUrl}
-              onChange={(e) => setYoutubeUrl(e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="Paste YouTube URL or video ID"
-            />
-            <button
-              type="button"
-              onClick={fetchYouTubeMetadata}
-              disabled={fetching || !youtubeUrl}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
-            >
-              {fetching ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Search className="w-5 h-5" />
-              )}
-              <span>Fetch</span>
-            </button>
+          <div className="flex gap-6">
+            {formData.thumbnailUrl ? (
+              <img
+                src={formData.thumbnailUrl}
+                alt="Video thumbnail"
+                className="w-48 h-auto rounded-lg border border-gray-200"
+              />
+            ) : formData.youtubeId ? (
+              <img
+                src={`https://img.youtube.com/vi/${formData.youtubeId}/hqdefault.jpg`}
+                alt="Video thumbnail"
+                className="w-48 h-auto rounded-lg border border-gray-200"
+              />
+            ) : (
+              <div className="w-48 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
+                <span className="text-gray-400 text-sm">No thumbnail</span>
+              </div>
+            )}
+            <div className="flex-1">
+              <p className="text-sm text-gray-500 mb-1">YouTube ID</p>
+              <p className="font-mono text-gray-900">{formData.youtubeId}</p>
+              <a
+                href={`https://www.youtube.com/watch?v=${formData.youtubeId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-indigo-600 hover:text-indigo-800 mt-2 inline-block"
+              >
+                View on YouTube
+              </a>
+            </div>
           </div>
-          <p className="mt-2 text-sm text-gray-500">
-            Enter a YouTube URL and click Fetch to auto-fill the video ID and
-            thumbnail
-          </p>
         </div>
 
         {/* Video Details */}
@@ -295,19 +353,6 @@ export default function NewVideoPage() {
               />
             </div>
           </div>
-
-          {formData.thumbnailUrl && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Thumbnail Preview
-              </label>
-              <img
-                src={formData.thumbnailUrl}
-                alt="Video thumbnail"
-                className="w-48 h-auto rounded-lg border border-gray-200"
-              />
-            </div>
-          )}
         </div>
 
         <div className="flex items-center justify-end gap-4">
@@ -327,7 +372,7 @@ export default function NewVideoPage() {
             ) : (
               <Save className="w-5 h-5" />
             )}
-            <span>{loading ? "Adding..." : "Add Video"}</span>
+            <span>{loading ? "Saving..." : "Save Changes"}</span>
           </button>
         </div>
       </form>
