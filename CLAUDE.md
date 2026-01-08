@@ -377,8 +377,25 @@ Client components can't export `metadata`. Either:
 - Use a separate `metadata.ts` file
 - Accept that the page won't have custom metadata
 
-### 6. Form Submissions
-Contact form posts to `/api/contact` which currently logs submissions. To enable actual email sending, integrate a service like SendGrid, Resend, or Nodemailer.
+### 6. Form Submissions & Email (Resend)
+Contact form posts to `/api/contact` which sends emails via **Resend**.
+
+**Current setup:**
+- Emails sent FROM `onboarding@resend.dev` (Resend's default sender)
+- Emails sent TO the configured `DESTINATION_EMAIL` in the route
+- Reply-to is set to the form submitter's email
+- Nicely formatted HTML email with all form details
+
+**Environment variable required:**
+- `RESEND_API_KEY` - Get from [resend.com](https://resend.com) dashboard
+
+**To change destination email:**
+Edit `DESTINATION_EMAIL` in `src/app/api/contact/route.ts`
+
+**To send FROM your own domain:**
+1. Go to Resend dashboard → Domains → Add Domain
+2. Add DNS records (TXT for SPF/DKIM) at your domain registrar
+3. Once verified, update the `from` field in the API route
 
 ### 7. Image Upload 413 Errors
 Vercel serverless functions have a ~4.5MB payload limit. Large image uploads will fail with "413 Request Entity Too Large".
@@ -722,6 +739,24 @@ When implementing 3D flip card animations:
 
 **Mobile handling:** Use `onTouchStart` to toggle flip state on tap (hover doesn't work on touch devices).
 
+### 21. Resend Free Tier Email Restriction
+
+When using Resend's free tier with the default sender (`onboarding@resend.dev`), you can **only send emails to the email address you signed up with**. Attempting to send to any other address will return a 403 error:
+
+```
+validation_error: You can only send testing emails to your own email address
+```
+
+**Solutions:**
+1. **For testing:** Set `DESTINATION_EMAIL` to your Resend signup email
+2. **For production:** Verify your domain in Resend:
+   - Go to Resend dashboard → Domains → Add Domain
+   - Add the DNS records Resend provides (SPF, DKIM)
+   - Once verified, you can send to any email address
+   - You can also change the `from` address to use your domain
+
+**Note:** Domain verification requires access to the domain's DNS settings at the registrar.
+
 ## Admin Access
 
 - URL: `/admin`
@@ -936,6 +971,8 @@ Neither Chipply nor CafePress offer public APIs for embedding store content. The
 | Page content API | `src/app/api/admin/page-content/route.ts` |
 | Gear page (public) | `src/app/(site)/gear/page.tsx` |
 | Gear tab (admin) | `src/components/admin/branding/GearTab.tsx` |
+| Contact page (public) | `src/app/(site)/contact/page.tsx` |
+| Contact form API (Resend) | `src/app/api/contact/route.ts` |
 
 ## Development Commands
 
@@ -958,7 +995,8 @@ If starting fresh, the admin panel will create these files with defaults.
 
 ## Future Considerations
 
-1. **Email Integration**: Contact form needs email service integration
-2. **Database**: Could migrate from JSON files to a proper database for scale
-3. **Authentication**: Current admin auth is basic; could upgrade to NextAuth.js
-4. **Image CDN**: Consider using a dedicated image CDN for better performance
+1. **Resend Domain Verification**: Verify `parksideharmony.org` in Resend to send emails FROM the domain and TO any address (currently limited to Resend signup email)
+2. **FAQ & Privacy Policy Pages**: Links exist in footer but pages not yet created
+3. **Database**: Could migrate from JSON files to a proper database for scale
+4. **Authentication**: Current admin auth is basic; could upgrade to NextAuth.js
+5. **Image CDN**: Consider using a dedicated image CDN for better performance
