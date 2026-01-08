@@ -139,7 +139,7 @@ const tabs: Tab[] = [
 
 interface PickerState {
   isOpen: boolean;
-  type: "logo" | "banner" | "splash" | "heroSlide";
+  type: "logo" | "banner" | "splash" | "heroSlide" | "chorusCard";
   chorus: ChorusKey;
   page?: PageKey;
 }
@@ -212,6 +212,11 @@ export default function BrandingPage() {
         newSettings = {
           ...settings,
           heroSlideBackground: { ...settings.heroSlideBackground, [chorus]: imageUrl },
+        };
+      } else if (type === "chorusCard") {
+        newSettings = {
+          ...settings,
+          chorusCardImages: { ...settings.chorusCardImages, [chorus]: imageUrl },
         };
       } else {
         newSettings = {
@@ -288,18 +293,21 @@ export default function BrandingPage() {
       logo: `${chorus}-logo`,
       splash: `${chorus}-splash-bg`,
       heroSlide: `${chorus}-hero-slide-bg`,
+      chorusCard: `${chorus}-chorus-card`,
       banner: `${page}-${chorus}-banner`,
     };
     const altMap = {
       logo: `${chorusInfo[chorus].name} logo`,
       splash: `${chorusInfo[chorus].name} splash background`,
       heroSlide: `${chorusInfo[chorus].name} hero slideshow background`,
+      chorusCard: `${chorusInfo[chorus].name} chorus card image`,
       banner: page ? `${pageInfo[page].name} banner for ${chorusInfo[chorus].name}` : "",
     };
     const categoryMap = {
       logo: "other" as const,
       splash: "banner" as const,
       heroSlide: "slideshow" as const,
+      chorusCard: "other" as const,
       banner: "banner" as const,
     };
 
@@ -327,6 +335,8 @@ export default function BrandingPage() {
         return settings.splashBackgrounds?.[chorus];
       case "heroSlide":
         return settings.heroSlideBackground?.[chorus];
+      case "chorusCard":
+        return settings.chorusCardImages?.[chorus];
       case "banner":
         return settings.pageBanners?.[page!]?.[chorus];
       default:
@@ -346,6 +356,8 @@ export default function BrandingPage() {
         return `Select ${chorusName} Splash Background`;
       case "heroSlide":
         return `Select ${chorusName} Hero Slideshow Background`;
+      case "chorusCard":
+        return `Select ${chorusName} Card Image`;
       case "banner":
         return `Select ${pageInfo[page!].name} Banner for ${chorusName}`;
       default:

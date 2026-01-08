@@ -4,15 +4,24 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
-import type { PageContent } from "@/types/admin";
+import type { PageContent, SiteSettings, ChorusKey } from "@/types/admin";
 
-const chorusData = [
+const chorusData: Array<{
+  key: ChorusKey;
+  name: string;
+  defaultDescription: string;
+  defaultImage: string;
+  link: string;
+  linkParams: string;
+  color: string;
+  hoverColor: string;
+}> = [
   {
     key: "harmony",
     name: "Parkside Harmony",
     defaultDescription:
       "Our competitive a cappella chorus that performs traditional and contemporary music in the barbershop style. Founded in 2010, Parkside Harmony has competed at the district and international levels.",
-    image: "/images/harmony-bg.jpg",
+    defaultImage: "/images/harmony-bg.jpg",
     link: "/about",
     linkParams: "?chorus=harmony",
     color: "text-indigo-600",
@@ -23,7 +32,7 @@ const chorusData = [
     name: "Parkside Melody",
     defaultDescription:
       "Our community-focused treble-voiced ensemble that welcomes singers of all experience levels. Parkside Melody performs at local events and focuses on bringing barbershop harmony to the Hershey community.",
-    image: "/images/melody-bg.jpg",
+    defaultImage: "/images/melody-bg.jpg",
     link: "/about",
     linkParams: "?chorus=melody",
     color: "text-amber-600",
@@ -34,7 +43,7 @@ const chorusData = [
     name: "All Voices",
     defaultDescription:
       "Experience the full Parkside sound with both choruses united in harmony. Our combined performances showcase the best of both ensembles creating a truly unique musical experience.",
-    image: "/images/voices-bg.jpg",
+    defaultImage: "/images/voices-bg.jpg",
     link: "/about",
     linkParams: "?chorus=voices",
     color: "text-purple-600",
@@ -44,13 +53,20 @@ const chorusData = [
 
 export default function ChorusesSection() {
   const [content, setContent] = useState<PageContent>({});
+  const [cardImages, setCardImages] = useState<SiteSettings["chorusCardImages"]>({});
 
   useEffect(() => {
-    fetch("/api/admin/page-content")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.data?.home) {
-          setContent(data.data.home);
+    // Fetch page content and site settings in parallel
+    Promise.all([
+      fetch("/api/admin/page-content").then((res) => res.json()),
+      fetch("/api/admin/site-settings").then((res) => res.json()),
+    ])
+      .then(([contentData, settingsData]) => {
+        if (contentData.success && contentData.data?.home) {
+          setContent(contentData.data.home);
+        }
+        if (settingsData.success && settingsData.data?.chorusCardImages) {
+          setCardImages(settingsData.data.chorusCardImages);
         }
       })
       .catch(console.error);
@@ -75,7 +91,7 @@ export default function ChorusesSection() {
               <div className="bg-white p-6 rounded-lg shadow-md h-full flex flex-col">
                 <div className="relative h-48 mb-4 rounded-lg overflow-hidden">
                   <Image
-                    src={chorus.image}
+                    src={cardImages?.[chorus.key] || chorus.defaultImage}
                     alt={chorus.name}
                     fill
                     className="object-cover"

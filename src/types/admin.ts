@@ -131,6 +131,12 @@ export interface SiteSettings {
     melody?: string;
     voices?: string;
   };
+  // "Our Choruses" section card images on home page
+  chorusCardImages?: {
+    harmony?: string;
+    melody?: string;
+    voices?: string;
+  };
   updatedAt?: string;
   updatedBy?: string;
 }
