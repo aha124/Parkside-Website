@@ -16,9 +16,7 @@ import type {
   LeadershipMember,
   LeadershipCategory,
   ChorusAffiliation,
-  PageContent,
 } from "@/types/admin";
-import { PAGE_CONTENT_SCHEMA } from "@/types/admin";
 import ImagePickerModal from "@/components/admin/ImagePickerModal";
 
 const categoryInfo: Record<
@@ -46,11 +44,7 @@ const chorusAffiliationOptions: { value: ChorusAffiliation | ""; label: string }
   { value: "both", label: "Both Choruses" },
 ];
 
-interface LeadershipTabProps {
-  pageContent: PageContent;
-  onContentSave: (pageKey: "leadership", content: PageContent) => Promise<void>;
-  saving: boolean;
-}
+// No props needed - leadership tab only manages members, not page content
 
 interface MemberFormData {
   name: string;
@@ -70,11 +64,7 @@ const defaultFormData: MemberFormData = {
   chorusAffiliation: undefined,
 };
 
-export default function LeadershipTab({
-  pageContent,
-  onContentSave,
-  saving,
-}: LeadershipTabProps) {
+export default function LeadershipTab() {
   const [members, setMembers] = useState<LeadershipMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedCategories, setExpandedCategories] = useState<Record<LeadershipCategory, boolean>>({
@@ -93,19 +83,9 @@ export default function LeadershipTab({
   // Image picker state
   const [imagePickerOpen, setImagePickerOpen] = useState(false);
 
-  // Page content editing
-  const [localContent, setLocalContent] = useState<PageContent>(pageContent);
-  const [hasContentChanges, setHasContentChanges] = useState(false);
-  const schema = PAGE_CONTENT_SCHEMA.leadership;
-
   useEffect(() => {
     fetchMembers();
   }, []);
-
-  useEffect(() => {
-    setLocalContent(pageContent);
-    setHasContentChanges(false);
-  }, [pageContent]);
 
   const fetchMembers = async () => {
     try {
@@ -208,16 +188,6 @@ export default function LeadershipTab({
     }
   };
 
-  const handleContentFieldChange = (key: string, value: string) => {
-    setLocalContent((prev) => ({ ...prev, [key]: value }));
-    setHasContentChanges(true);
-  };
-
-  const handleContentSave = async () => {
-    await onContentSave("leadership", localContent);
-    setHasContentChanges(false);
-  };
-
   const getMembersByCategory = (category: LeadershipCategory) =>
     members.filter((m) => m.category === category).sort((a, b) => a.order - b.order);
 
@@ -230,54 +200,13 @@ export default function LeadershipTab({
   }
 
   return (
-    <div className="space-y-8">
-      {/* Page Header with Content Save */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">Leadership Page</h2>
-          <p className="text-sm text-gray-500">
-            Manage leadership members and page content
-          </p>
-        </div>
-        {hasContentChanges && (
-          <button
-            onClick={handleContentSave}
-            className="px-4 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 flex items-center gap-2 disabled:opacity-50"
-            disabled={saving}
-          >
-            <Save className="w-4 h-4" />
-            {saving ? "Saving..." : "Save Content Changes"}
-          </button>
-        )}
-      </div>
-
-      {/* Page Content Fields */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-md font-medium text-gray-900 mb-4">Page Content</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {schema.fields.map((field) => (
-            <div key={field.key} className={field.type === "textarea" ? "md:col-span-2" : ""}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {field.label}
-              </label>
-              {field.type === "textarea" ? (
-                <textarea
-                  value={localContent[field.key] || ""}
-                  onChange={(e) => handleContentFieldChange(field.key, e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-                  rows={2}
-                />
-              ) : (
-                <input
-                  type="text"
-                  value={localContent[field.key] || ""}
-                  onChange={(e) => handleContentFieldChange(field.key, e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-                />
-              )}
-            </div>
-          ))}
-        </div>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900">Leadership</h2>
+        <p className="text-sm text-gray-500">
+          Manage music leadership and board members
+        </p>
       </div>
 
       {/* Leadership Members by Category */}
