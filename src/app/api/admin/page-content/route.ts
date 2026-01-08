@@ -33,13 +33,13 @@ export async function PUT(request: Request) {
 
     // If updating all pages at once
     if (allContent) {
-      const updated = await updateAllPageContent(allContent, session.user.email);
+      const updated = await updateAllPageContent(allContent, session.user.email ?? undefined);
       return NextResponse.json({ success: true, data: updated });
     }
 
     // If updating a single page
     if (pageKey && content) {
-      const updated = await updatePageContent(pageKey as PageKey, content, session.user.email);
+      const updated = await updatePageContent(pageKey as PageKey, content, session.user.email ?? undefined);
       return NextResponse.json({ success: true, data: updated });
     }
 
