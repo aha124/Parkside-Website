@@ -72,6 +72,11 @@ const SplitScreen = () => {
     return slide?.defaultImage || "/images/hero-bg.jpg";
   };
 
+  // Get the Voices logo from settings, or fall back to default
+  const getVoicesLogo = () => {
+    return siteSettings?.logos?.voices || "/images/parkside-logo.png";
+  };
+
   // Detect mobile/tablet
   useEffect(() => {
     const checkMobile = () => {
@@ -164,8 +169,8 @@ const SplitScreen = () => {
             >
               <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white/95 rounded-full shadow-2xl flex items-center justify-center backdrop-blur-sm">
                 <Image
-                  src="/images/parkside-logo copy.png"
-                  alt="Parkside"
+                  src={getVoicesLogo()}
+                  alt="Parkside Voices"
                   width={80}
                   height={80}
                   className="object-contain w-[85%] h-[85%]"
@@ -407,7 +412,7 @@ const SplitScreen = () => {
         >
           <div className="bg-white rounded-full shadow-lg flex items-center justify-center w-32 h-32 md:w-48 md:h-48 lg:w-60 lg:h-60">
             <Image
-              src="/images/parkside-logo copy.png"
+              src={getVoicesLogo()}
               alt="Parkside Voices"
               width={230}
               height={230}
