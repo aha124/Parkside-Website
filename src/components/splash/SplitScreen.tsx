@@ -72,9 +72,14 @@ const SplitScreen = () => {
     return slide?.defaultImage || "/images/hero-bg.jpg";
   };
 
-  // Get the Voices logo from settings, or fall back to default
-  const getVoicesLogo = () => {
-    return siteSettings?.logos?.voices || "/images/parkside-logo.png";
+  // Get logos from settings, with fallbacks
+  const getLogo = (chorus: "harmony" | "melody" | "voices") => {
+    const defaults: Record<string, string> = {
+      harmony: "/images/parkside-logo.png",
+      melody: "/images/parkside-logo.png",
+      voices: "/images/parkside-logo.png",
+    };
+    return siteSettings?.logos?.[chorus] || defaults[chorus];
   };
 
   // Detect mobile/tablet
@@ -161,22 +166,26 @@ const SplitScreen = () => {
         >
           {/* Top section - Logo */}
           <div className="flex-shrink-0 pt-8 pb-4 flex justify-center relative z-10">
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="relative"
-            >
-              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white/95 rounded-full shadow-2xl flex items-center justify-center backdrop-blur-sm">
-                <Image
-                  src={getVoicesLogo()}
-                  alt="Parkside Voices"
-                  width={80}
-                  height={80}
-                  className="object-contain w-[85%] h-[85%]"
-                />
-              </div>
-            </motion.div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={slide.id + "-logo"}
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -10, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="relative"
+              >
+                <div className="bg-white/95 rounded-2xl shadow-2xl flex items-center justify-center backdrop-blur-sm px-4 py-3">
+                  <Image
+                    src={getLogo(slide.chorus)}
+                    alt={slide.title}
+                    width={120}
+                    height={80}
+                    className="object-contain h-16 sm:h-20 w-auto"
+                  />
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* Main content - Animated */}
@@ -385,7 +394,16 @@ const SplitScreen = () => {
           }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">Parkside Harmony</h2>
+          {/* Harmony Logo */}
+          <div className="bg-white/95 rounded-xl shadow-lg inline-flex items-center justify-center px-4 py-3 mb-4 md:mb-6">
+            <Image
+              src={getLogo("harmony")}
+              alt="Parkside Harmony Logo"
+              width={180}
+              height={100}
+              className="object-contain h-12 md:h-16 lg:h-20 w-auto"
+            />
+          </div>
           <p className="text-base md:text-lg lg:text-xl max-w-md mx-auto">Award-winning a cappella chorus performing in the barbershop tradition.</p>
           <button
             onClick={() => handleChorusSelect("harmony")}
@@ -410,13 +428,13 @@ const SplitScreen = () => {
           onClick={() => handleChorusSelect("voices")}
           className="flex flex-col items-center cursor-pointer"
         >
-          <div className="bg-white rounded-full shadow-lg flex items-center justify-center w-32 h-32 md:w-48 md:h-48 lg:w-60 lg:h-60">
+          <div className="bg-white rounded-2xl shadow-lg flex items-center justify-center px-6 py-4 md:px-8 md:py-5 lg:px-10 lg:py-6">
             <Image
-              src={getVoicesLogo()}
+              src={getLogo("voices")}
               alt="Parkside Voices"
               width={230}
-              height={230}
-              className="object-contain w-[90%] h-[90%]"
+              height={160}
+              className="object-contain h-20 md:h-28 lg:h-36 w-auto"
             />
           </div>
           <div className="text-white text-center mt-3 md:mt-4 bg-black/50 px-4 md:px-6 py-2 md:py-3 rounded-md">
@@ -468,7 +486,16 @@ const SplitScreen = () => {
           }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4">Parkside Melody</h2>
+          {/* Melody Logo */}
+          <div className="bg-white/95 rounded-xl shadow-lg inline-flex items-center justify-center px-4 py-3 mb-4 md:mb-6">
+            <Image
+              src={getLogo("melody")}
+              alt="Parkside Melody Logo"
+              width={180}
+              height={100}
+              className="object-contain h-12 md:h-16 lg:h-20 w-auto"
+            />
+          </div>
           <p className="text-base md:text-lg lg:text-xl max-w-md mx-auto">Exceptional treble-voiced ensemble bringing vibrant a cappella performances to the Hershey area.</p>
           <button
             onClick={() => handleChorusSelect("melody")}
