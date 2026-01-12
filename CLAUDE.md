@@ -999,5 +999,25 @@ If starting fresh, the admin panel will create these files with defaults.
 1. **Resend Domain Verification**: Verify `parksideharmony.org` in Resend to send emails FROM the domain and TO any address (currently limited to Resend signup email)
 2. **FAQ & Privacy Policy Pages**: Links exist in footer but pages not yet created
 3. **Database**: Could migrate from JSON files to a proper database for scale
-4. **Authentication**: Current admin auth is basic; could upgrade to NextAuth.js
-5. **Image CDN**: Consider using a dedicated image CDN for better performance
+4. **Image CDN**: Consider using a dedicated image CDN for better performance
+
+## Security Notes
+
+### Authentication Architecture
+- Uses NextAuth.js v5 with Google/GitHub OAuth
+- Admin access controlled by email allowlist stored in Vercel KV (`admin:emails`)
+- Middleware protects `/admin/*` and `/api/admin/*` routes
+- Each API route also checks `session?.user?.isAdmin` for defense-in-depth
+
+### Intentionally Public Endpoints
+- `GET /api/site-settings` - Returns non-sensitive config (banners, images) for frontend use
+- `GET /api/page-content` - Returns page content for public display
+- `GET /api/leadership` - Public leadership API for the leadership page
+
+### Security Review History
+- January 2026: Pre-launch security audit completed
+  - Dependencies audited and vulnerabilities fixed
+  - Secrets/environment variables verified
+  - Authentication flow reviewed
+  - API route authorization verified
+  - See GitHub issues tagged `security` for planned improvements
