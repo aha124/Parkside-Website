@@ -3,12 +3,23 @@ import { NextResponse } from "next/server";
 
 export default auth((req) => {
   const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
+  const isAdminApiRoute = req.nextUrl.pathname.startsWith("/api/admin");
   const isLoginPage = req.nextUrl.pathname === "/admin/login";
   const isApiAuthRoute = req.nextUrl.pathname.startsWith("/api/auth");
 
   // Allow auth API routes
   if (isApiAuthRoute) {
     return NextResponse.next();
+  }
+
+  // For admin API routes, require authentication (defense-in-depth, routes also check auth)
+  if (isAdminApiRoute) {
+    if (!req.auth) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (!req.auth.user?.isAdmin) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
   }
 
   // For admin routes (except login), require authentication
@@ -34,5 +45,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/auth/:path*"],
+  matcher: ["/admin/:path*", "/api/auth/:path*", "/api/admin/:path*"],
 };

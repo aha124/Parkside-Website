@@ -34,7 +34,7 @@ export default function HeroSlideshow({ interval = 5000 }: HeroSlideshowProps) {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const response = await fetch("/api/admin/site-settings");
+        const response = await fetch("/api/site-settings");
         const data = await response.json();
         if (data.success) {
           setSiteSettings(data.data);

@@ -58,8 +58,8 @@ export default function ChorusesSection() {
   useEffect(() => {
     // Fetch page content and site settings in parallel
     Promise.all([
-      fetch("/api/admin/page-content").then((res) => res.json()),
-      fetch("/api/admin/site-settings").then((res) => res.json()),
+      fetch("/api/page-content").then((res) => res.json()),
+      fetch("/api/site-settings").then((res) => res.json()),
     ])
       .then(([contentData, settingsData]) => {
         if (contentData.success && contentData.data?.home) {

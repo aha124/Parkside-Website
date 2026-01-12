@@ -116,7 +116,7 @@ export default function GearPage() {
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const response = await fetch("/api/admin/site-settings");
+        const response = await fetch("/api/site-settings");
         const data = await response.json();
         if (data.success && data.data) {
           const settings = data.data as SiteSettings;

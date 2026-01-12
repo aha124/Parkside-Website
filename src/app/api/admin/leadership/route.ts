@@ -8,7 +8,9 @@ import {
 import { auth } from "@/lib/auth";
 import type { LeadershipCategory } from "@/types/admin";
 
-// GET - Fetch all leadership members
+// GET - Fetch all leadership members (admin authenticated via middleware)
+// NOTE: This admin route is protected by middleware. The public /api/leadership route
+// provides unauthenticated access for the public leadership page display.
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
