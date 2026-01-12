@@ -208,8 +208,9 @@ export async function POST() {
 
   } catch (error) {
     console.error("Error syncing events:", error);
+    // Don't expose internal error details to client
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to sync events" },
+      { error: "Failed to sync events. Please try again later." },
       { status: 500 }
     );
   }
