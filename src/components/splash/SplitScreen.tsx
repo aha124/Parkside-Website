@@ -162,13 +162,13 @@ const SplitScreen = () => {
               transition={{ delay: 0.2, duration: 0.5 }}
               className="relative"
             >
-              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white/95 rounded-full shadow-2xl flex items-center justify-center backdrop-blur-sm">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 bg-white/95 rounded-full shadow-2xl flex items-center justify-center backdrop-blur-sm p-2">
                 <Image
-                  src="/images/parkside-logo copy.png"
-                  alt="Parkside"
-                  width={80}
-                  height={80}
-                  className="object-contain w-[85%] h-[85%]"
+                  src="https://yialzu9rhi3ktlet.public.blob.vercel-storage.com/other/1767798036921-voices-logo-removebg.png"
+                  alt="Parkside Voices"
+                  width={100}
+                  height={100}
+                  className="object-contain w-full h-full"
                 />
               </div>
             </motion.div>
@@ -405,13 +405,13 @@ const SplitScreen = () => {
           onClick={() => handleChorusSelect("voices")}
           className="flex flex-col items-center cursor-pointer"
         >
-          <div className="bg-white rounded-full shadow-lg flex items-center justify-center w-32 h-32 md:w-48 md:h-48 lg:w-60 lg:h-60">
+          <div className="bg-white rounded-full shadow-lg flex items-center justify-center w-36 h-36 md:w-52 md:h-52 lg:w-64 lg:h-64 p-3 md:p-4">
             <Image
-              src="/images/parkside-logo copy.png"
+              src="https://yialzu9rhi3ktlet.public.blob.vercel-storage.com/other/1767798036921-voices-logo-removebg.png"
               alt="Parkside Voices"
-              width={230}
-              height={230}
-              className="object-contain w-[90%] h-[90%]"
+              width={250}
+              height={250}
+              className="object-contain w-full h-full"
             />
           </div>
           <div className="text-white text-center mt-3 md:mt-4 bg-black/50 px-4 md:px-6 py-2 md:py-3 rounded-md">
