@@ -382,15 +382,16 @@ Contact form posts to `/api/contact` which sends emails via **Resend**.
 
 **Current setup:**
 - Emails sent FROM `onboarding@resend.dev` (Resend's default sender)
-- Emails sent TO the configured `DESTINATION_EMAIL` in the route
+- Emails sent TO the address configured in `CONTACT_FORM_EMAIL` env var
 - Reply-to is set to the form submitter's email
 - Nicely formatted HTML email with all form details
 
-**Environment variable required:**
+**Environment variables:**
 - `RESEND_API_KEY` - Get from [resend.com](https://resend.com) dashboard
+- `CONTACT_FORM_EMAIL` - Destination email for form submissions (default: `info@parksideharmony.org`)
 
 **To change destination email:**
-Edit `DESTINATION_EMAIL` in `src/app/api/contact/route.ts`
+Set the `CONTACT_FORM_EMAIL` environment variable in Vercel or your `.env.local` file.
 
 **To send FROM your own domain:**
 1. Go to Resend dashboard → Domains → Add Domain
