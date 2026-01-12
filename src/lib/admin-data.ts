@@ -917,3 +917,265 @@ export async function seedLeadership(createdBy?: string): Promise<{ seeded: bool
   await kv.set(KEYS.LEADERSHIP, seededMembers);
   return { seeded: true };
 }
+
+// ============ IMAGE USAGE TRACKING ============
+
+export interface ImageUsageLocation {
+  type: "siteSettings" | "news" | "event" | "leadership";
+  label: string;
+  details: string;
+}
+
+export interface ImageUsageResult {
+  isInUse: boolean;
+  locations: ImageUsageLocation[];
+}
+
+export async function getImageUsage(imageUrl: string): Promise<ImageUsageResult> {
+  const locations: ImageUsageLocation[] = [];
+
+  // Check Site Settings
+  const settings = await getSiteSettings();
+
+  // Check logos
+  for (const [chorus, url] of Object.entries(settings.logos || {})) {
+    if (url === imageUrl) {
+      locations.push({
+        type: "siteSettings",
+        label: "Logo",
+        details: `${chorus.charAt(0).toUpperCase() + chorus.slice(1)} Logo`,
+      });
+    }
+  }
+
+  // Check page banners
+  for (const [page, banners] of Object.entries(settings.pageBanners || {})) {
+    for (const [chorus, url] of Object.entries(banners || {})) {
+      if (url === imageUrl) {
+        locations.push({
+          type: "siteSettings",
+          label: "Page Banner",
+          details: `${page.charAt(0).toUpperCase() + page.slice(1)} page - ${chorus} banner`,
+        });
+      }
+    }
+  }
+
+  // Check splash backgrounds
+  for (const [chorus, url] of Object.entries(settings.splashBackgrounds || {})) {
+    if (url === imageUrl) {
+      locations.push({
+        type: "siteSettings",
+        label: "Splash Background",
+        details: `${chorus.charAt(0).toUpperCase() + chorus.slice(1)} splash background`,
+      });
+    }
+  }
+
+  // Check hero slide backgrounds
+  for (const [chorus, url] of Object.entries(settings.heroSlideBackground || {})) {
+    if (url === imageUrl) {
+      locations.push({
+        type: "siteSettings",
+        label: "Hero Slideshow",
+        details: `${chorus.charAt(0).toUpperCase() + chorus.slice(1)} hero slideshow background`,
+      });
+    }
+  }
+
+  // Check chorus card images
+  for (const [chorus, url] of Object.entries(settings.chorusCardImages || {})) {
+    if (url === imageUrl) {
+      locations.push({
+        type: "siteSettings",
+        label: "Chorus Card",
+        details: `${chorus.charAt(0).toUpperCase() + chorus.slice(1)} chorus card image`,
+      });
+    }
+  }
+
+  // Check about story images
+  for (const [chorus, url] of Object.entries(settings.aboutStoryImages || {})) {
+    if (url === imageUrl) {
+      locations.push({
+        type: "siteSettings",
+        label: "About Page",
+        details: `${chorus.charAt(0).toUpperCase() + chorus.slice(1)} story image`,
+      });
+    }
+  }
+
+  // Check gear store images
+  for (const [store, url] of Object.entries(settings.gearStoreImages || {})) {
+    if (url === imageUrl) {
+      locations.push({
+        type: "siteSettings",
+        label: "Gear Page",
+        details: `${store === "etown" ? "eTown Sporting Goods" : "CafePress"} store image`,
+      });
+    }
+  }
+
+  // Check News items
+  const news = await getNews();
+  for (const item of news) {
+    if (item.imageUrl === imageUrl) {
+      locations.push({
+        type: "news",
+        label: "News Article",
+        details: item.title,
+      });
+    }
+  }
+
+  // Check Event overrides
+  const events = await getEventOverrides();
+  for (const event of events) {
+    if (event.imageUrl === imageUrl) {
+      locations.push({
+        type: "event",
+        label: "Event",
+        details: event.title || "Untitled Event",
+      });
+    }
+  }
+
+  // Check Leadership members
+  const leadership = await getLeadership();
+  for (const member of leadership) {
+    if (member.photoUrl === imageUrl) {
+      locations.push({
+        type: "leadership",
+        label: "Leadership",
+        details: member.name,
+      });
+    }
+  }
+
+  return {
+    isInUse: locations.length > 0,
+    locations,
+  };
+}
+
+// Get usage for all images at once (more efficient for the images list page)
+export async function getAllImagesUsage(): Promise<Map<string, ImageUsageResult>> {
+  const usageMap = new Map<string, ImageUsageResult>();
+
+  // Gather all URLs from all sources
+  const settings = await getSiteSettings();
+  const news = await getNews();
+  const events = await getEventOverrides();
+  const leadership = await getLeadership();
+
+  // Helper to add usage
+  const addUsage = (url: string, location: ImageUsageLocation) => {
+    if (!url) return;
+    const existing = usageMap.get(url);
+    if (existing) {
+      existing.locations.push(location);
+    } else {
+      usageMap.set(url, { isInUse: true, locations: [location] });
+    }
+  };
+
+  // Check logos
+  for (const [chorus, url] of Object.entries(settings.logos || {})) {
+    addUsage(url, {
+      type: "siteSettings",
+      label: "Logo",
+      details: `${chorus.charAt(0).toUpperCase() + chorus.slice(1)} Logo`,
+    });
+  }
+
+  // Check page banners
+  for (const [page, banners] of Object.entries(settings.pageBanners || {})) {
+    for (const [chorus, url] of Object.entries(banners || {})) {
+      addUsage(url, {
+        type: "siteSettings",
+        label: "Page Banner",
+        details: `${page.charAt(0).toUpperCase() + page.slice(1)} page - ${chorus} banner`,
+      });
+    }
+  }
+
+  // Check splash backgrounds
+  for (const [chorus, url] of Object.entries(settings.splashBackgrounds || {})) {
+    addUsage(url, {
+      type: "siteSettings",
+      label: "Splash Background",
+      details: `${chorus.charAt(0).toUpperCase() + chorus.slice(1)} splash background`,
+    });
+  }
+
+  // Check hero slide backgrounds
+  for (const [chorus, url] of Object.entries(settings.heroSlideBackground || {})) {
+    addUsage(url, {
+      type: "siteSettings",
+      label: "Hero Slideshow",
+      details: `${chorus.charAt(0).toUpperCase() + chorus.slice(1)} hero slideshow background`,
+    });
+  }
+
+  // Check chorus card images
+  for (const [chorus, url] of Object.entries(settings.chorusCardImages || {})) {
+    addUsage(url, {
+      type: "siteSettings",
+      label: "Chorus Card",
+      details: `${chorus.charAt(0).toUpperCase() + chorus.slice(1)} chorus card image`,
+    });
+  }
+
+  // Check about story images
+  for (const [chorus, url] of Object.entries(settings.aboutStoryImages || {})) {
+    addUsage(url, {
+      type: "siteSettings",
+      label: "About Page",
+      details: `${chorus.charAt(0).toUpperCase() + chorus.slice(1)} story image`,
+    });
+  }
+
+  // Check gear store images
+  for (const [store, url] of Object.entries(settings.gearStoreImages || {})) {
+    addUsage(url, {
+      type: "siteSettings",
+      label: "Gear Page",
+      details: `${store === "etown" ? "eTown Sporting Goods" : "CafePress"} store image`,
+    });
+  }
+
+  // Check News items
+  for (const item of news) {
+    if (item.imageUrl) {
+      addUsage(item.imageUrl, {
+        type: "news",
+        label: "News Article",
+        details: item.title,
+      });
+    }
+  }
+
+  // Check Event overrides
+  for (const event of events) {
+    if (event.imageUrl) {
+      addUsage(event.imageUrl, {
+        type: "event",
+        label: "Event",
+        details: event.title || "Untitled Event",
+      });
+    }
+  }
+
+  // Check Leadership members
+  for (const member of leadership) {
+    if (member.photoUrl) {
+      addUsage(member.photoUrl, {
+        type: "leadership",
+        label: "Leadership",
+        details: member.name,
+      });
+    }
+  }
+
+  return usageMap;
+}
