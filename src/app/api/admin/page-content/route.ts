@@ -3,9 +3,17 @@ import { getPageContent, updatePageContent, updateAllPageContent } from "@/lib/a
 import { auth } from "@/lib/auth";
 import type { PageKey } from "@/types/admin";
 
-// GET - Fetch all page content
+// GET - Fetch all page content (admin only)
 export async function GET() {
   try {
+    const session = await auth();
+    if (!session?.user?.isAdmin) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const content = await getPageContent();
     return NextResponse.json({ success: true, data: content });
   } catch (error) {

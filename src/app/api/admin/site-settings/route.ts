@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getSiteSettings, updateSiteSettings } from "@/lib/admin-data";
 
+// GET - Fetch site settings (admin authenticated via middleware)
+// NOTE: This admin route is protected by middleware. The public /api/site-settings route
+// provides unauthenticated access for the frontend (logos, banners, etc.).
 export async function GET() {
   try {
-    // Site settings can be public for the frontend to use
     const settings = await getSiteSettings();
     return NextResponse.json({ success: true, data: settings });
   } catch (error) {

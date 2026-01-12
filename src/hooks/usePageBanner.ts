@@ -29,7 +29,7 @@ export function usePageBanner(page: PageKey): string {
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const response = await fetch("/api/admin/site-settings");
+        const response = await fetch("/api/site-settings");
         const data = await response.json();
         if (data.success) {
           setSettings(data.data);
@@ -67,7 +67,7 @@ export function usePageBanner(page: PageKey): string {
 // For server components or when you need all banners
 export async function getPageBanners(): Promise<SiteSettings | null> {
   try {
-    const response = await fetch("/api/admin/site-settings", {
+    const response = await fetch("/api/site-settings", {
       cache: "no-store",
     });
     const data = await response.json();

@@ -45,8 +45,8 @@ export default function AboutPage() {
     const fetchContent = async () => {
       try {
         const [contentRes, settingsRes] = await Promise.all([
-          fetch("/api/admin/page-content?page=about"),
-          fetch("/api/admin/site-settings"),
+          fetch("/api/page-content"),
+          fetch("/api/site-settings"),
         ]);
 
         const contentData = await contentRes.json();

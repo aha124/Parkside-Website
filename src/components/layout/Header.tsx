@@ -58,7 +58,7 @@ export default function Header() {
   useEffect(() => {
     async function fetchLogos() {
       try {
-        const response = await fetch("/api/admin/site-settings");
+        const response = await fetch("/api/site-settings");
         const data = await response.json();
         if (data.success && data.data?.logos) {
           setLogos({
