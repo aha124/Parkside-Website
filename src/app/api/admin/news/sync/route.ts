@@ -76,8 +76,9 @@ export async function POST() {
     });
   } catch (error) {
     console.error("Error syncing news:", error);
+    // Don't expose internal error details to client
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to sync news" },
+      { error: "Failed to sync news. Please try again later." },
       { status: 500 }
     );
   }

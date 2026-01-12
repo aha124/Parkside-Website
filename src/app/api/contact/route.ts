@@ -4,6 +4,27 @@ import { Resend } from "resend";
 // Initialize Resend with API key
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Input length limits
+const MAX_LENGTHS = {
+  firstName: 100,
+  lastName: 100,
+  email: 254, // RFC 5321 max
+  subject: 100,
+  message: 5000,
+};
+
+// Escape HTML to prevent XSS in email
+function escapeHtml(text: string): string {
+  const htmlEscapes: Record<string, string> = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  };
+  return text.replace(/[&<>"']/g, (char) => htmlEscapes[char]);
+}
+
 // Destination email for all contact form submissions
 // Set via CONTACT_FORM_EMAIL environment variable
 // Default: info@parksideharmony.org (requires domain verification in Resend)
@@ -18,6 +39,34 @@ export async function POST(request: Request) {
     if (!firstName || !lastName || !email || !subject || !message) {
       return NextResponse.json(
         { error: "All fields are required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate types
+    if (
+      typeof firstName !== "string" ||
+      typeof lastName !== "string" ||
+      typeof email !== "string" ||
+      typeof subject !== "string" ||
+      typeof message !== "string"
+    ) {
+      return NextResponse.json(
+        { error: "Invalid field types" },
+        { status: 400 }
+      );
+    }
+
+    // Validate lengths
+    if (
+      firstName.length > MAX_LENGTHS.firstName ||
+      lastName.length > MAX_LENGTHS.lastName ||
+      email.length > MAX_LENGTHS.email ||
+      subject.length > MAX_LENGTHS.subject ||
+      message.length > MAX_LENGTHS.message
+    ) {
+      return NextResponse.json(
+        { error: "One or more fields exceed maximum length" },
         { status: 400 }
       );
     }
@@ -48,7 +97,14 @@ export async function POST(request: Request) {
     };
     const chorusName = chorusNames[chorus] || "Not specified";
 
-    // Build the email HTML
+    // Escape user input for safe HTML embedding
+    const safeFirstName = escapeHtml(firstName);
+    const safeLastName = escapeHtml(lastName);
+    const safeEmail = escapeHtml(email);
+    const safeMessage = escapeHtml(message);
+    const safeSubjectDisplay = escapeHtml(subjectLabels[subject] || subject);
+
+    // Build the email HTML with escaped values
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #4F46E5; border-bottom: 2px solid #4F46E5; padding-bottom: 10px;">
@@ -58,17 +114,17 @@ export async function POST(request: Request) {
         <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
           <tr>
             <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold; width: 140px;">Name:</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eee;">${firstName} ${lastName}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">${safeFirstName} ${safeLastName}</td>
           </tr>
           <tr>
             <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Email:</td>
             <td style="padding: 10px; border-bottom: 1px solid #eee;">
-              <a href="mailto:${email}">${email}</a>
+              <a href="mailto:${safeEmail}">${safeEmail}</a>
             </td>
           </tr>
           <tr>
             <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Subject:</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eee;">${subjectLabels[subject] || subject}</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eee;">${safeSubjectDisplay}</td>
           </tr>
           <tr>
             <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">Chorus Interest:</td>
@@ -78,13 +134,13 @@ export async function POST(request: Request) {
 
         <div style="margin-top: 20px;">
           <h3 style="color: #374151; margin-bottom: 10px;">Message:</h3>
-          <div style="background-color: #F9FAFB; padding: 15px; border-radius: 8px; white-space: pre-wrap;">${message}</div>
+          <div style="background-color: #F9FAFB; padding: 15px; border-radius: 8px; white-space: pre-wrap;">${safeMessage}</div>
         </div>
 
         <p style="margin-top: 30px; font-size: 12px; color: #9CA3AF;">
           This message was sent from the Parkside website contact form.
           <br />
-          Reply directly to this email to respond to ${firstName}.
+          Reply directly to this email to respond to ${safeFirstName}.
         </p>
       </div>
     `;
