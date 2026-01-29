@@ -2,21 +2,23 @@ name: Update Events from Website
 
 # This workflow automatically fetches the latest events from the Parkside Harmony website
 # It runs daily at midnight, when the script is modified, or when manually triggered
-# Note: News is now managed through the admin dashboard, not scraped
+# Events are scraped from parksideharmony.org/events and replace the existing events.json
+# Manual events are stored separately in Vercel KV and merged at runtime
 
 on:
   schedule:
     - cron: '0 0 * * *'  # Run daily at midnight
   push:
     paths:
-      - 'scripts/scrapeEventsPage.js'
+      - 'scripts/syncEvents.js'
+      - '.github/workflows/update-events.yml'
   workflow_dispatch:  # Allow manual triggering
 
 permissions:
   contents: write  # Needed to commit and push changes
 
 jobs:
-  update-content:
+  sync-events:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,14 +28,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-          cache: 'npm'  # Cache npm dependencies
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install puppeteer cheerio uuid
+        run: npm install cheerio
 
-      - name: Scrape events from website
-        run: node scripts/scrapeEventsPage.js
-        continue-on-error: true  # Continue even if this step fails
+      - name: Sync events from source
+        run: node scripts/syncEvents.js
 
       - name: Commit and push if there are changes
         run: |
@@ -45,6 +46,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Update events from website scraping"
+            git commit -m "Sync events from parksideharmony.org"
             git push
           fi

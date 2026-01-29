@@ -1,32 +1,22 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import fs from "fs";
-import path from "path";
-import * as cheerio from "cheerio";
+/**
+ * Sync events from parksideharmony.org
+ * This script is used by GitHub Actions to automatically update events
+ */
+
+const fs = require('fs');
+const path = require('path');
+const cheerio = require('cheerio');
 
 const EVENTS_URL = 'https://parksideharmony.org/events';
 
-const DEFAULT_IMAGES: Record<string, string> = {
+const DEFAULT_IMAGES = {
   'Harmony': '/images/harmony-performance.jpg',
   'Melody': '/images/melody-performance.jpg',
   'Both': '/images/hero-bg.jpg',
   'default': '/images/hero-bg.jpg'
 };
 
-interface ScrapedEvent {
-  id: string;
-  title: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  description: string;
-  location: string;
-  imageUrl: string;
-  chorus: string;
-  url: string;
-}
-
-function determineChorus(text: string): string {
+function determineChorus(text) {
   text = text.toLowerCase();
   if (text.includes('harmony') && !text.includes('melody')) return 'Harmony';
   if (text.includes('melody') && !text.includes('harmony')) return 'Melody';
@@ -35,7 +25,7 @@ function determineChorus(text: string): string {
   return 'Both';
 }
 
-function parseDateTime(dateTimeStr: string): { formattedDate: string; startTime: string; endTime: string } {
+function parseDateTime(dateTimeStr) {
   try {
     const parts = dateTimeStr.match(/([A-Za-z]+)\s+(\d+)\s+(\d+)\s+-\s+(\d+:\d+[ap]m)\s+to\s+(\d+:\d+[ap]m)/i);
     if (!parts) {
@@ -55,13 +45,12 @@ function parseDateTime(dateTimeStr: string): { formattedDate: string; startTime:
   }
 }
 
-function generateEventId(title: string, date: string): string {
-  // Create a deterministic ID based on title and date for delta checking
+function generateEventId(title, date) {
   const normalized = `${title.toLowerCase().replace(/\s+/g, '-')}-${date.replace(/[^a-zA-Z0-9]/g, '')}`;
   return normalized;
 }
 
-async function fetchEventsPage(): Promise<string> {
+async function fetchEventsPage() {
   const response = await fetch(EVENTS_URL, {
     headers: {
       'User-Agent': 'Mozilla/5.0 (compatible; ParksideWebsiteBot/1.0)'
@@ -73,9 +62,9 @@ async function fetchEventsPage(): Promise<string> {
   return response.text();
 }
 
-function parseEventsFromHtml(html: string): ScrapedEvent[] {
+function parseEventsFromHtml(html) {
   const $ = cheerio.load(html);
-  const events: ScrapedEvent[] = [];
+  const events = [];
   const rows = $('table.views-table tbody tr');
 
   rows.each((_, row) => {
@@ -115,34 +104,13 @@ function parseEventsFromHtml(html: string): ScrapedEvent[] {
   return events;
 }
 
-function getExistingEvents(): ScrapedEvent[] {
-  try {
-    const filePath = path.join(process.cwd(), 'public', 'data', 'events.json');
-    const data = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
-
-function saveEvents(events: ScrapedEvent[]): void {
-  const filePath = path.join(process.cwd(), 'public', 'data', 'events.json');
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  fs.writeFileSync(filePath, JSON.stringify(events, null, 2));
-}
-
-function parseEventDate(dateStr: string): Date {
-  // Handle various date formats like "Jan 15, 2025", "January 15, 2025", "Mar 5-7, 2025"
-  // For date ranges, use the first date
+function parseEventDate(dateStr) {
   const cleanDate = dateStr.split('-')[0].trim().replace(/,\s*$/, '');
   const parsed = new Date(cleanDate.replace(/(\w{3,})\s+(\d+),?\s+(\d{4})/, "$1 $2 $3"));
   return isNaN(parsed.getTime()) ? new Date(dateStr) : parsed;
 }
 
-function filterOldEvents(events: ScrapedEvent[], maxAgeDays: number = 180): { filtered: ScrapedEvent[], removedCount: number } {
+function filterOldEvents(events, maxAgeDays = 180) {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
   cutoffDate.setHours(0, 0, 0, 0);
@@ -158,58 +126,38 @@ function filterOldEvents(events: ScrapedEvent[], maxAgeDays: number = 180): { fi
   };
 }
 
-export async function POST() {
-  const session = await auth();
-  if (!session?.user?.isAdmin) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+async function main() {
   try {
-    // Get existing events before sync (for comparison)
-    const existingEvents = getExistingEvents();
-
-    // Fetch and parse new events from source
+    console.log('Fetching events from', EVENTS_URL);
     const html = await fetchEventsPage();
-    const newScrapedEvents = parseEventsFromHtml(html);
+    
+    console.log('Parsing events...');
+    const events = parseEventsFromHtml(html);
+    console.log(`Found ${events.length} events on source`);
 
-    // Clean up events older than 180 days
-    const { filtered: cleanedEvents, removedCount } = filterOldEvents(newScrapedEvents, 180);
+    console.log('Filtering old events (180+ days)...');
+    const { filtered: cleanedEvents, removedCount } = filterOldEvents(events, 180);
+    if (removedCount > 0) {
+      console.log(`Removed ${removedCount} old events`);
+    }
 
     // Sort by date
     cleanedEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // Replace the entire file with current source data
-    // (Manual events are stored separately in KV and merged at runtime)
-    saveEvents(cleanedEvents);
+    // Save to file
+    const filePath = path.join(process.cwd(), 'public', 'data', 'events.json');
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(filePath, JSON.stringify(cleanedEvents, null, 2));
 
-    // Calculate what changed
-    const addedCount = cleanedEvents.filter(
-      e => !existingEvents.some(existing => generateEventId(existing.title, existing.date) === generateEventId(e.title, e.date))
-    ).length;
-
-    const deletedCount = existingEvents.filter(
-      e => !cleanedEvents.some(current => generateEventId(current.title, current.date) === generateEventId(e.title, e.date))
-    ).length;
-
-    return NextResponse.json({
-      success: true,
-      message: `Sync complete. Source has ${cleanedEvents.length} events. Added ${addedCount}, removed ${deletedCount + removedCount} (${deletedCount} deleted + ${removedCount} aged out).`,
-      stats: {
-        sourceCount: cleanedEvents.length,
-        existingCount: existingEvents.length,
-        addedCount,
-        deletedCount,
-        agedOutCount: removedCount,
-        totalCount: cleanedEvents.length
-      }
-    });
-
+    console.log(`✓ Successfully synced ${cleanedEvents.length} events to ${filePath}`);
+    process.exit(0);
   } catch (error) {
-    console.error("Error syncing events:", error);
-    // Don't expose internal error details to client
-    return NextResponse.json(
-      { error: "Failed to sync events. Please try again later." },
-      { status: 500 }
-    );
+    console.error('Error syncing events:', error);
+    process.exit(1);
   }
 }
+
+main();
