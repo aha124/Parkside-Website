@@ -2,17 +2,30 @@
 
 This directory contains utility scripts for the Parkside Website.
 
-## Events and News Syncing
+## Active Scripts
 
-**Events and news syncing is now handled through the admin panel.** Use the "Sync Events" and "Sync News" buttons in the admin dashboard instead of running scripts manually.
+### syncEvents.js
+**Primary event sync script** - Syncs events from parksideharmony.org/events (Groupanizer).
 
-The admin sync functionality:
-- Uses `fetch()` + cheerio (lightweight, no browser automation needed)
-- Performs delta checking to only add new items
-- Automatically cleans up old events (180+ days)
-- Provides feedback in the admin UI
+**Usage:**
+```bash
+node scripts/syncEvents.js
+```
 
-## Remaining Scripts
+**What it does:**
+- Fetches current events from https://parksideharmony.org/events
+- Parses event data (title, date, time, location, chorus)
+- **Replaces** `public/data/events.json` with current source data
+- Filters out events older than 180 days
+- Handles event deletions automatically (source is truth)
+
+**Automated:**
+- Runs daily at midnight UTC via GitHub Actions
+- Can be triggered manually from admin panel or GitHub Actions tab
+
+**Note:** Manual events created in the admin panel are stored separately in Vercel KV and are not affected by this sync.
+
+## Utility Scripts
 
 ### parseEventsHtml.js
 Parses HTML content from the events page. Used as a utility for testing.
@@ -26,9 +39,21 @@ Legacy script for fetching events from ChoirGenius API (deprecated).
 ### generate-news-images.js / generate-placeholder-images.js
 Utility scripts for generating placeholder images.
 
+## Content Management Architecture
+
+### Events
+- **Scraped events**: Automated via `syncEvents.js` → `public/data/events.json`
+- **Manual events**: Admin panel → Vercel KV database
+- **Display**: Merged at runtime via `/api/events`
+
+### News
+- **All news is managed through the admin dashboard** at `/admin/news`
+- Stored in Vercel KV database
+- No automated scraping
+
 ## Removed Scripts
 
-The following scripts were removed as they are superseded by admin panel functionality:
-- `scrapeEventsPage.js` - Used puppeteer (replaced by admin sync)
-- `scrapeNewsPage.js` - Used puppeteer (replaced by admin sync)
-- `fetch-news.js` - Used jsdom (replaced by admin sync)
+The following scripts were removed:
+- `scrapeEventsPage.js` - Used puppeteer (replaced by syncEvents.js + admin sync)
+- `scrapeNewsPage.js` - Used puppeteer (replaced by admin panel)
+- `fetch-news.js` - Used jsdom (replaced by admin panel)

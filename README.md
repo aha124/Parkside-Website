@@ -62,34 +62,55 @@ npm run dev
 ## Project Structure
 
 - `src/app`: Next.js app router pages
+  - `(site)`: Public-facing pages
+  - `admin`: Admin dashboard for content management
+  - `api`: API routes for data and admin operations
 - `src/components`: Reusable React components
   - `layout`: Layout components (Header, Footer)
   - `splash`: Components for the splash page
   - `ui`: UI components from Shadcn UI
-- `public`: Static assets like images
+  - `events`: Event display components
+- `src/lib`: Utility functions and data management
+  - `admin-data.ts`: Admin content operations (Vercel KV)
+- `public`: Static assets like images and scraped data
 - `scripts`: Utility scripts for content updates
-  - `fetch-news.js`: Script to fetch news from the Parkside Harmony website
-  - `scrapeEventsPage.js`: Script to fetch events from the Parkside Harmony website
+  - `syncEvents.js`: Sync events from Parkside Harmony website
 - `.github/workflows`: GitHub Actions workflow configurations
 
-## Automated Content Updates
+## Content Management
 
-The website uses GitHub Actions to automatically fetch and update content from the Parkside Harmony website:
+The website uses a **dual-storage architecture** for events:
 
-### News Updates
-- News articles are fetched from https://parksideharmony.org/news
-- The script extracts titles, dates, summaries, images, and URLs
-- Updates are saved to `public/data/news.json`
+### Scraped Events (Automated)
+- **Source**: https://parksideharmony.org/events (Groupanizer)
+- **Storage**: `public/data/events.json`
+- **Sync**: Automatically synced daily at midnight via GitHub Actions
+- **Script**: `scripts/syncEvents.js`
+- Events are completely replaced on each sync to reflect source changes (additions AND deletions)
+- Old events (180+ days) are automatically filtered out
 
-### Event Updates
-- Events are fetched from https://parksideharmony.org/events
-- The script extracts event details, dates, locations, and images
-- Updates are saved to `public/data/events.json`
+### Manual Events (Admin-Created)
+- **Source**: Admin dashboard at `/admin/events`
+- **Storage**: Vercel KV database (`admin:event-overrides`)
+- **Management**: Create, edit, and delete via admin panel
+- These events persist independently of the automated sync
 
-### Update Schedule
-- Updates run automatically every day at midnight
-- Updates also run when the scripts are modified
-- Manual updates can be triggered from the GitHub Actions tab
+### Event Display
+Events are merged at runtime via `/api/events`:
+1. Scraped events are loaded from `events.json`
+2. Manual events are fetched from Vercel KV
+3. Manual events can override scraped events by matching `originalId`
+4. Combined list is sorted by date and displayed
+
+### News Management
+- **All news is managed through the admin dashboard** at `/admin/news`
+- Stored in Vercel KV database
+- No automated scraping (deprecated)
+
+### Sync Schedule
+- **Automated**: Daily at midnight UTC via GitHub Actions
+- **Manual**: Trigger sync from admin dashboard or GitHub Actions tab
+- **On-Demand**: Run `node scripts/syncEvents.js` locally
 
 ## License
 
