@@ -1,29 +1,5 @@
 [
   {
-    "id": "parkside-harmony-rehearsal-Mar22026",
-    "title": "Parkside Harmony Rehearsal",
-    "date": "Mar 2, 2026",
-    "startTime": "7:00pm",
-    "endTime": "10:00pm",
-    "description": "Parkside Harmony Rehearsal from 7:00pm to 10:00pm. Contact parksideharmony@parksideharmony.org for more information.",
-    "location": "Christ Presbyterian Church, 421 Deerfield Road, Camp Hill, PA 17011",
-    "imageUrl": "/images/harmony-performance.jpg",
-    "chorus": "Harmony",
-    "url": "https://parksideharmony.org/PHMarch22026"
-  },
-  {
-    "id": "parkside-melody-guest-night-Mar22026",
-    "title": "Parkside Melody Guest Night",
-    "date": "Mar 2, 2026",
-    "startTime": "7:00pm",
-    "endTime": "10:00pm",
-    "description": "Parkside Melody Guest Night from 7:00pm to 10:00pm. Contact parksideharmony@parksideharmony.org for more information.",
-    "location": "Christ Presbyterian Church, 421 Deerfield Road, Camp Hill, PA 17011",
-    "imageUrl": "/images/melody-performance.jpg",
-    "chorus": "Melody",
-    "url": "https://parksideharmony.org/node/6220"
-  },
-  {
     "id": "parkside-harmony-rehearsal-Mar162026",
     "title": "Parkside Harmony Rehearsal",
     "date": "Mar 16, 2026",
