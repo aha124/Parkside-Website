@@ -44,7 +44,7 @@ export default function FeaturedEventBanner() {
                 src="/images/events/forum-interior.png"
                 alt="The Forum Auditorium interior"
                 fill
-                className="object-cover opacity-40 group-hover:opacity-50 transition-opacity duration-500 scale-105 group-hover:scale-100"
+                className="object-cover opacity-70 group-hover:opacity-80 transition-opacity duration-500 scale-105 group-hover:scale-100"
                 sizes="(max-width: 768px) 100vw, 1200px"
               />
             </div>
@@ -54,7 +54,7 @@ export default function FeaturedEventBanner() {
               className="absolute inset-0"
               style={{
                 background:
-                  "linear-gradient(135deg, rgba(12,12,24,0.9) 0%, rgba(12,12,24,0.6) 50%, rgba(12,12,24,0.85) 100%)",
+                  "linear-gradient(to right, rgba(12,12,24,0.7) 0%, rgba(12,12,24,0.45) 50%, rgba(12,12,24,0.3) 100%)",
               }}
             />
 

@@ -95,7 +95,7 @@ export default function ParksideAtTheForumPage() {
     <PageTransition>
       <div style={{ backgroundColor: colors.bg }}>
         {/* ── HERO ─────────────────────────────────────────────────────────── */}
-        <section className="relative min-h-screen flex flex-col justify-end overflow-hidden">
+        <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
           {/* Background image with slow zoom */}
           <div className="absolute inset-0 animate-subtle-zoom">
             <Image
@@ -117,20 +117,20 @@ export default function ParksideAtTheForumPage() {
             }}
           />
 
-          {/* Hero content — anchored to bottom */}
-          <div className="relative z-10 flex flex-col items-center text-center px-4 pb-20 pt-40">
+          {/* Hero content — centered with offset toward lower half */}
+          <div className="relative z-10 flex flex-col items-center text-center px-4 pt-32 sm:pt-40 pb-24 sm:pb-32 mt-16 sm:mt-24">
             {/* Parkside Voices logo */}
             <Image
               src="/images/events/parkside-voices-logo-gold.png"
               alt="Parkside Voices"
               width={180}
               height={120}
-              className="h-[80px] sm:h-[100px] md:h-[120px] w-auto mb-4"
+              className="h-[100px] sm:h-[120px] md:h-[145px] w-auto mb-4"
             />
 
             {/* "Presents" */}
             <p
-              className="font-['Montserrat',sans-serif] text-xs sm:text-sm tracking-[0.3em] uppercase mb-4"
+              className="font-['Montserrat',sans-serif] text-sm sm:text-base tracking-[0.3em] uppercase mb-4"
               style={{ color: colors.gold }}
             >
               Presents
@@ -146,16 +146,16 @@ export default function ParksideAtTheForumPage() {
                 textShadow: "0 2px 20px rgba(0,0,0,0.5)",
               }}
             >
-              <span className="block text-3xl sm:text-4xl md:text-5xl italic font-light">
+              <span className="block text-4xl sm:text-5xl md:text-6xl italic font-light">
                 An Afternoon
               </span>
               <span
-                className="block text-lg sm:text-xl md:text-2xl font-light mt-1"
+                className="block text-xl sm:text-2xl md:text-3xl font-light mt-1"
                 style={{ color: colors.goldMuted, opacity: 0.7 }}
               >
                 at
               </span>
-              <span className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-medium mt-1">
+              <span className="block text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-medium mt-1">
                 The Forum
               </span>
             </h1>
@@ -164,7 +164,7 @@ export default function ParksideAtTheForumPage() {
 
             {/* Date & time */}
             <p
-              className="font-['Montserrat',sans-serif] text-sm sm:text-base font-semibold tracking-[0.25em] uppercase"
+              className="font-['Montserrat',sans-serif] text-base sm:text-lg font-semibold tracking-[0.25em] uppercase"
               style={{ color: colors.gold }}
             >
               June 13, 2026
