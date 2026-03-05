@@ -1,11 +1,33 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
+// Vanity URL mapping: /parksideharmony → sets chorus to "harmony" and redirects to /home
+const VANITY_CHORUS_MAP: Record<string, string> = {
+  "/parksideharmony": "harmony",
+  "/parksidemelody": "melody",
+  "/parksidevoices": "voices",
+};
+
 export default auth((req) => {
-  const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
-  const isAdminApiRoute = req.nextUrl.pathname.startsWith("/api/admin");
-  const isLoginPage = req.nextUrl.pathname === "/admin/login";
-  const isApiAuthRoute = req.nextUrl.pathname.startsWith("/api/auth");
+  const pathname = req.nextUrl.pathname;
+
+  // Handle vanity chorus URLs (case-insensitive)
+  const chorusValue = VANITY_CHORUS_MAP[pathname.toLowerCase()];
+  if (chorusValue) {
+    const response = NextResponse.redirect(new URL("/home", req.url), 302);
+    const expires = new Date();
+    expires.setDate(expires.getDate() + 30);
+    response.cookies.set("parkside_chorus", chorusValue, {
+      expires,
+      path: "/",
+    });
+    return response;
+  }
+
+  const isAdminRoute = pathname.startsWith("/admin");
+  const isAdminApiRoute = pathname.startsWith("/api/admin");
+  const isLoginPage = pathname === "/admin/login";
+  const isApiAuthRoute = pathname.startsWith("/api/auth");
 
   // Allow auth API routes
   if (isApiAuthRoute) {
@@ -45,5 +67,21 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/auth/:path*", "/api/admin/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/api/auth/:path*",
+    "/api/admin/:path*",
+    // Vanity chorus URLs — listed in common case variants since
+    // Next.js matchers don't support case-insensitive matching.
+    // The middleware normalizes to lowercase, so any matched variant works.
+    "/parksideharmony",
+    "/parksidemelody",
+    "/parksidevoices",
+    "/ParksideHarmony",
+    "/ParksideMelody",
+    "/ParksideVoices",
+    "/PARKSIDEHARMONY",
+    "/PARKSIDEMELODY",
+    "/PARKSIDEVOICES",
+  ],
 };
