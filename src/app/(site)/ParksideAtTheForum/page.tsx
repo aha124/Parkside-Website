@@ -151,7 +151,7 @@ export default function ParksideAtTheForumPage() {
               </span>
               <span
                 className="block text-xl sm:text-2xl md:text-3xl font-light mt-1"
-                style={{ color: colors.goldMuted, opacity: 0.7 }}
+                style={{ color: colors.cream, opacity: 0.75 }}
               >
                 at
               </span>
