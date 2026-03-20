@@ -344,13 +344,14 @@ export default function ParksideAtTheForumPage() {
                   className="font-['Montserrat',sans-serif] text-base sm:text-lg leading-relaxed mb-10"
                   style={{ color: colors.body }}
                 >
-                  Ticket information coming soon. Check back for details on
-                  pricing and availability.
+                  Tickets are now available through Eventbrite.
                 </p>
 
                 {/* CTA button — gold outline */}
                 <a
-                  href="#tickets"
+                  href="https://www.eventbrite.com/e/parkside-voices-presents-an-afternoon-at-the-forum-tickets-1984418569360?aff=oddtdtcreator"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-block font-['Montserrat',sans-serif] text-sm sm:text-base font-semibold tracking-[0.15em] uppercase px-10 py-4 rounded-full border-2 transition-all duration-300 hover:shadow-lg"
                   style={{
                     color: colors.gold,
