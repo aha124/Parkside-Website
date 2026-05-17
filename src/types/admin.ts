@@ -73,6 +73,37 @@ export interface AdminUser {
   addedBy?: string;
 }
 
+// ============ AD CAMPAIGN TYPES ============
+
+export interface AdCampaignPricingTier {
+  id: string;          // uuid, for stable React keys when editing
+  name: string;        // e.g. "Full Page"
+  spec: string;        // e.g. "8.5×11, full color"
+  price: number;       // stored as number, displayed as currency
+  description?: string;
+  paypalButtonId?: string; // PayPal hosted button ID for this tier
+}
+
+export interface AdCampaign {
+  id: string;
+  slug: string;                  // URL-safe, e.g. "forum-2026"
+  title: string;                 // e.g. "Advertise in the program for An Afternoon at The Forum"
+  eventContext?: string;         // short blurb: "June 13, 2026 · The Forum Auditorium · Harrisburg, PA"
+  heroImageUrl: string;
+  pitch: string;                 // single textarea, paragraphs separated by blank lines
+  pricingTiers: AdCampaignPricingTier[];
+  orderFormUrl?: string;         // Google Form link
+  pastProgramUrl?: string;       // FlipHTML5 link to last year's program
+  deadline?: string;             // human-readable, e.g. "May 15, 2026"
+  contactName?: string;
+  contactEmail?: string;
+  isActive: boolean;             // controls public URL rendering
+  isFeaturedOnHomepage: boolean; // optional homepage link
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: string;
+}
+
 // API response types
 export interface ApiResponse<T = unknown> {
   success: boolean;

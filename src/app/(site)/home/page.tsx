@@ -5,6 +5,7 @@ import NewsList from "@/components/news/NewsList";
 import HeroSlideshow from "@/components/home/HeroSlideshow";
 import ChorusesSection from "@/components/home/ChorusesSection";
 import FeaturedEventBanner from "@/components/home/FeaturedEventBanner";
+import FeaturedAdCampaignBanner from "@/components/home/FeaturedAdCampaignBanner";
 
 export const metadata: Metadata = {
   title: "Parkside - Hershey Chapter of the Barbershop Harmony Society",
@@ -19,6 +20,9 @@ export default function HomePage() {
 
       {/* Featured Event: An Afternoon at The Forum */}
       <FeaturedEventBanner />
+
+      {/* Featured Ad Campaign (renders only when one is active + featured) */}
+      <FeaturedAdCampaignBanner />
 
       {/* Events Section */}
       <EventsList

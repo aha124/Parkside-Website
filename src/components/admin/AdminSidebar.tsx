@@ -12,6 +12,7 @@ import {
   Settings,
   Home,
   Palette,
+  Megaphone,
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/admin/news", label: "News", icon: Newspaper },
   { href: "/admin/events", label: "Events", icon: Calendar },
   { href: "/admin/videos", label: "Videos", icon: Video },
+  { href: "/admin/ad-campaigns", label: "Ad Campaigns", icon: Megaphone },
   { href: "/admin/images", label: "Images", icon: Image },
   { href: "/admin/branding", label: "Branding & Content", icon: Palette },
   { href: "/admin/users", label: "Admin Users", icon: Users },
