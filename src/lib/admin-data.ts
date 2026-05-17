@@ -12,6 +12,7 @@ import type {
   PageKey,
   LeadershipMember,
   LeadershipCategory,
+  AdCampaign,
 } from "@/types/admin";
 
 // KV Keys
@@ -24,6 +25,7 @@ const KEYS = {
   SITE_SETTINGS: "admin:site-settings",
   PAGE_CONTENT: "admin:page-content",
   LEADERSHIP: "admin:leadership",
+  AD_CAMPAIGNS: "admin:ad-campaigns",
 } as const;
 
 // ============ NEWS MANAGEMENT ============
@@ -916,6 +918,78 @@ export async function seedLeadership(createdBy?: string): Promise<{ seeded: bool
 
   await kv.set(KEYS.LEADERSHIP, seededMembers);
   return { seeded: true };
+}
+
+// ============ AD CAMPAIGN MANAGEMENT ============
+
+export async function getAdCampaigns(): Promise<AdCampaign[]> {
+  try {
+    const campaigns = await kv.get<AdCampaign[]>(KEYS.AD_CAMPAIGNS);
+    return campaigns || [];
+  } catch (error) {
+    console.error("Error fetching ad campaigns:", error);
+    return [];
+  }
+}
+
+export async function getAdCampaignBySlug(slug: string): Promise<AdCampaign | null> {
+  const campaigns = await getAdCampaigns();
+  return campaigns.find(c => c.slug === slug) ?? null;
+}
+
+export async function getAdCampaignById(id: string): Promise<AdCampaign | null> {
+  const campaigns = await getAdCampaigns();
+  return campaigns.find(c => c.id === id) ?? null;
+}
+
+export async function createAdCampaign(
+  data: Omit<AdCampaign, "id" | "createdAt" | "updatedAt">
+): Promise<AdCampaign> {
+  const campaigns = await getAdCampaigns();
+
+  if (campaigns.some(c => c.slug === data.slug)) {
+    throw new Error(`A campaign with slug "${data.slug}" already exists`);
+  }
+
+  const newItem: AdCampaign = {
+    ...data,
+    id: uuidv4(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  await kv.set(KEYS.AD_CAMPAIGNS, [newItem, ...campaigns]);
+  return newItem;
+}
+
+export async function updateAdCampaign(
+  id: string,
+  data: Partial<AdCampaign>
+): Promise<AdCampaign | null> {
+  const campaigns = await getAdCampaigns();
+  const index = campaigns.findIndex(c => c.id === id);
+  if (index === -1) return null;
+
+  if (data.slug && data.slug !== campaigns[index].slug) {
+    if (campaigns.some((c, i) => i !== index && c.slug === data.slug)) {
+      throw new Error(`A campaign with slug "${data.slug}" already exists`);
+    }
+  }
+
+  campaigns[index] = {
+    ...campaigns[index],
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+  await kv.set(KEYS.AD_CAMPAIGNS, campaigns);
+  return campaigns[index];
+}
+
+export async function deleteAdCampaign(id: string): Promise<boolean> {
+  const campaigns = await getAdCampaigns();
+  const filtered = campaigns.filter(c => c.id !== id);
+  if (filtered.length === campaigns.length) return false;
+  await kv.set(KEYS.AD_CAMPAIGNS, filtered);
+  return true;
 }
 
 // ============ IMAGE USAGE TRACKING ============
