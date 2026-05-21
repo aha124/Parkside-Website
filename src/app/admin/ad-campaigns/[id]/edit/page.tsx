@@ -29,6 +29,8 @@ export default function EditAdCampaignPage() {
           heroImageUrl: data.heroImageUrl ?? "",
           pitch: data.pitch ?? "",
           pricingTiers: data.pricingTiers ?? [],
+          paypalDropdownButtonId: data.paypalDropdownButtonId ?? "",
+          paypalDropdownOptionName: data.paypalDropdownOptionName ?? "",
           orderFormUrl: data.orderFormUrl ?? "",
           pastProgramUrl: data.pastProgramUrl ?? "",
           deadline: data.deadline ?? "",

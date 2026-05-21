@@ -9,6 +9,7 @@ const PAYPAL_BUTTON_ID_REGEX = /^[A-Z0-9]+$/;
 const MAX_PITCH_LENGTH = 5000;
 const MAX_TIER_DESCRIPTION_LENGTH = 500;
 const MAX_PAYPAL_BUTTON_ID_LENGTH = 20;
+const MAX_PAYPAL_OPTION_NAME_LENGTH = 100;
 
 function isValidHttpsUrl(value: string): boolean {
   try {
@@ -44,6 +45,8 @@ export async function POST(request: Request) {
       heroImageUrl,
       pitch,
       pricingTiers,
+      paypalDropdownButtonId,
+      paypalDropdownOptionName,
       orderFormUrl,
       pastProgramUrl,
       deadline,
@@ -85,6 +88,34 @@ export async function POST(request: Request) {
       );
     }
 
+    const dropdownButtonId =
+      typeof paypalDropdownButtonId === "string" ? paypalDropdownButtonId.trim() : "";
+    const dropdownOptionName =
+      typeof paypalDropdownOptionName === "string" ? paypalDropdownOptionName.trim() : "";
+    if (dropdownButtonId) {
+      if (
+        dropdownButtonId.length > MAX_PAYPAL_BUTTON_ID_LENGTH ||
+        !PAYPAL_BUTTON_ID_REGEX.test(dropdownButtonId)
+      ) {
+        return NextResponse.json(
+          { error: "PayPal dropdown button ID must be uppercase letters and numbers only" },
+          { status: 400 }
+        );
+      }
+    }
+    if (dropdownOptionName.length > MAX_PAYPAL_OPTION_NAME_LENGTH) {
+      return NextResponse.json(
+        { error: `PayPal option name must be ${MAX_PAYPAL_OPTION_NAME_LENGTH} characters or less` },
+        { status: 400 }
+      );
+    }
+    if (Boolean(dropdownButtonId) !== Boolean(dropdownOptionName)) {
+      return NextResponse.json(
+        { error: "Both the PayPal dropdown button ID and option name are required for dropdown mode." },
+        { status: 400 }
+      );
+    }
+
     const tiers: AdCampaignPricingTier[] = Array.isArray(pricingTiers)
       ? pricingTiers.map((tier) => {
           const description = typeof tier.description === "string" ? tier.description : "";
@@ -115,6 +146,8 @@ export async function POST(request: Request) {
       heroImageUrl: typeof heroImageUrl === "string" ? heroImageUrl : "",
       pitch: typeof pitch === "string" ? pitch : "",
       pricingTiers: tiers,
+      paypalDropdownButtonId: dropdownButtonId || undefined,
+      paypalDropdownOptionName: dropdownOptionName || undefined,
       orderFormUrl: orderFormUrl ? String(orderFormUrl) : undefined,
       pastProgramUrl: pastProgramUrl ? String(pastProgramUrl) : undefined,
       deadline: typeof deadline === "string" ? deadline.trim() || undefined : undefined,

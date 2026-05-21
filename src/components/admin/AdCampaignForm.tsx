@@ -97,6 +97,20 @@ export default function AdCampaignForm({
         return `PayPal button ID for "${tier.name || "tier"}" must be uppercase letters and numbers only`;
       }
     }
+    const dropdownButtonId = (formData.paypalDropdownButtonId ?? "").trim();
+    const dropdownOptionName = (formData.paypalDropdownOptionName ?? "").trim();
+    if (dropdownButtonId && !PAYPAL_BUTTON_ID_REGEX.test(dropdownButtonId)) {
+      return "PayPal dropdown button ID must be uppercase letters and numbers only";
+    }
+    if (dropdownButtonId.length > 20) {
+      return "PayPal dropdown button ID must be 20 characters or less";
+    }
+    if (dropdownOptionName.length > 100) {
+      return "PayPal dropdown option name must be 100 characters or less";
+    }
+    if (Boolean(dropdownButtonId) !== Boolean(dropdownOptionName)) {
+      return "Both the button ID and option name are required for dropdown mode.";
+    }
     return null;
   };
 
@@ -362,6 +376,78 @@ export default function AdCampaignForm({
               ))}
             </div>
           )}
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">PayPal Payment Options</h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Choose how sponsors pay. You can either set a PayPal button ID for each pricing
+              tier above (one button per tier), OR use a single button with a dropdown of options
+              (recommended if you already have a PayPal hosted button with options configured).
+              Leave both blank to skip PayPal entirely — sponsors will use the order form URL only.
+            </p>
+          </div>
+
+          <div className="border border-gray-200 rounded-lg p-4 space-y-3">
+            <h3 className="text-sm font-semibold text-gray-800">
+              Single Button with Dropdown (Recommended)
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label
+                  htmlFor="paypalDropdownButtonId"
+                  className="block text-xs font-medium text-gray-600 mb-1"
+                >
+                  PayPal hosted button ID
+                </label>
+                <input
+                  type="text"
+                  id="paypalDropdownButtonId"
+                  value={formData.paypalDropdownButtonId ?? ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      paypalDropdownButtonId: e.target.value.toUpperCase(),
+                    })
+                  }
+                  maxLength={20}
+                  className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm font-mono"
+                  placeholder="T3LQ7NH45J2AW"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="paypalDropdownOptionName"
+                  className="block text-xs font-medium text-gray-600 mb-1"
+                >
+                  Option set name
+                </label>
+                <input
+                  type="text"
+                  id="paypalDropdownOptionName"
+                  value={formData.paypalDropdownOptionName ?? ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, paypalDropdownOptionName: e.target.value })
+                  }
+                  maxLength={100}
+                  className="w-full px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                  placeholder="2026 Program Ad"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  This must match exactly what&apos;s configured in your PayPal hosted button settings.
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">
+              Note: prices shown to sponsors come from the pricing tiers above. Make sure these
+              match what&apos;s configured for your PayPal button options.
+            </p>
+          </div>
+
+          <p className="text-xs text-gray-500">
+            If you fill in the dropdown button above, it takes precedence over per-tier buttons.
+          </p>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">

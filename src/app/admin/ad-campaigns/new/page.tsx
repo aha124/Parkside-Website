@@ -11,6 +11,8 @@ const INITIAL: AdCampaignFormValues = {
   heroImageUrl: "",
   pitch: "",
   pricingTiers: [],
+  paypalDropdownButtonId: "",
+  paypalDropdownOptionName: "",
   orderFormUrl: "",
   pastProgramUrl: "",
   deadline: "",

@@ -61,6 +61,10 @@ export default async function AdCampaignPage({
     .map((p) => p.trim())
     .filter(Boolean);
 
+  const dropdownMode = Boolean(
+    campaign.paypalDropdownButtonId && campaign.paypalDropdownOptionName
+  );
+
   return (
     <PageTransition>
       <link rel="stylesheet" href={FONT_URL} />
@@ -204,7 +208,7 @@ export default async function AdCampaignPage({
                       </p>
                     )}
 
-                    {tier.paypalButtonId && (
+                    {!dropdownMode && tier.paypalButtonId && (
                       <form
                         action="https://www.paypal.com/cgi-bin/webscr"
                         method="post"
@@ -233,6 +237,83 @@ export default async function AdCampaignPage({
                   </div>
                 ))}
               </div>
+
+              {dropdownMode && (
+                <div className="max-w-xl mx-auto mt-12 sm:mt-16">
+                  <h3
+                    className="font-['Cormorant_Garamond',serif] text-2xl sm:text-3xl md:text-4xl font-medium text-center mb-6"
+                    style={{
+                      color: colors.cream,
+                      textShadow: "0 2px 20px rgba(0,0,0,0.5)",
+                    }}
+                  >
+                    Pay with PayPal
+                  </h3>
+
+                  <GoldDivider className="mb-8" />
+
+                  <form
+                    action="https://www.paypal.com/cgi-bin/webscr"
+                    method="post"
+                    target="_top"
+                    className="flex flex-col gap-5"
+                  >
+                    <input type="hidden" name="cmd" value="_s-xclick" />
+                    <input
+                      type="hidden"
+                      name="hosted_button_id"
+                      value={campaign.paypalDropdownButtonId}
+                    />
+                    <input
+                      type="hidden"
+                      name="on0"
+                      value={campaign.paypalDropdownOptionName}
+                    />
+                    <input type="hidden" name="currency_code" value="USD" />
+
+                    <label
+                      htmlFor="os0"
+                      className="font-['Montserrat',sans-serif] text-xs tracking-[0.2em] uppercase text-center"
+                      style={{ color: colors.gold }}
+                    >
+                      {campaign.paypalDropdownOptionName}
+                    </label>
+                    <select
+                      id="os0"
+                      name="os0"
+                      defaultValue={campaign.pricingTiers[0]?.name}
+                      className="font-['Montserrat',sans-serif] text-sm sm:text-base px-5 py-3 rounded-lg border-2 focus:outline-none focus:ring-2 transition-colors"
+                      style={{
+                        backgroundColor: colors.bg,
+                        color: colors.cream,
+                        borderColor: "rgba(201,168,98,0.4)",
+                      }}
+                    >
+                      {campaign.pricingTiers.map((tier) => (
+                        <option
+                          key={tier.id}
+                          value={tier.name}
+                          style={{ backgroundColor: colors.bg, color: colors.cream }}
+                        >
+                          {tier.name} — {formatPrice(tier.price)} USD
+                        </option>
+                      ))}
+                    </select>
+
+                    <button
+                      type="submit"
+                      className="font-['Montserrat',sans-serif] text-sm sm:text-base font-semibold tracking-[0.15em] uppercase px-10 py-4 rounded-full border-2 transition-all duration-300 hover:shadow-lg"
+                      style={{
+                        color: colors.gold,
+                        borderColor: colors.gold,
+                        backgroundColor: "transparent",
+                      }}
+                    >
+                      Reserve via PayPal
+                    </button>
+                  </form>
+                </div>
+              )}
             </div>
           </section>
         )}
@@ -276,12 +357,13 @@ export default async function AdCampaignPage({
                     >
                       Submit Order Form
                     </a>
-                    {campaign.pricingTiers.some((t) => t.paypalButtonId) && (
+                    {(dropdownMode ||
+                      campaign.pricingTiers.some((t) => t.paypalButtonId)) && (
                       <p
                         className="font-['Montserrat',sans-serif] text-xs mt-4"
                         style={{ color: colors.muted }}
                       >
-                        Or pay directly using the buttons above
+                        Or pay directly using PayPal above
                       </p>
                     )}
                   </>
