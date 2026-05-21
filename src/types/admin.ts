@@ -92,6 +92,8 @@ export interface AdCampaign {
   heroImageUrl: string;
   pitch: string;                 // single textarea, paragraphs separated by blank lines
   pricingTiers: AdCampaignPricingTier[];
+  paypalDropdownButtonId?: string;   // PayPal hosted button ID for single-button-with-dropdown mode
+  paypalDropdownOptionName?: string; // PayPal "option name" (the on0 value), e.g. "2026 Program Ad"
   orderFormUrl?: string;         // Google Form link
   pastProgramUrl?: string;       // FlipHTML5 link to last year's program
   deadline?: string;             // human-readable, e.g. "May 15, 2026"
