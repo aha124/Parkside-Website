@@ -1,41 +1,5 @@
 [
   {
-    "id": "parkside-harmony-performance-at-\"music-by-the-river\"-concert-series-May312026",
-    "title": "Parkside Harmony Performance at \"Music by the River\" Concert Series",
-    "date": "May 31, 2026",
-    "startTime": "3:00pm",
-    "endTime": "4:00pm",
-    "description": "Parkside Harmony Performance at \"Music by the River\" Concert Series from 3:00pm to 4:00pm. Contact parksideharmony@parksideharmony.org for more information.",
-    "location": "Christ Presbyterian Church, 421 Deerfield Road, Camp Hill, PA 17011",
-    "imageUrl": "/images/harmony-performance.jpg",
-    "chorus": "Harmony",
-    "url": "https://parksideharmony.org/PHMusicByTheRiver2026"
-  },
-  {
-    "id": "parkside-harmony-rehearsal-May312026",
-    "title": "Parkside Harmony Rehearsal",
-    "date": "May 31, 2026",
-    "startTime": "5:30pm",
-    "endTime": "9:00pm",
-    "description": "Parkside Harmony Rehearsal from 5:30pm to 9:00pm. Contact parksideharmony@parksideharmony.org for more information.",
-    "location": "Christ Presbyterian Church, 421 Deerfield Road, Camp Hill, PA 17011",
-    "imageUrl": "/images/harmony-performance.jpg",
-    "chorus": "Harmony",
-    "url": "https://parksideharmony.org/PHMay312026"
-  },
-  {
-    "id": "parkside-melody-rehearsal-May312026",
-    "title": "Parkside Melody Rehearsal",
-    "date": "May 31, 2026",
-    "startTime": "5:30pm",
-    "endTime": "9:00pm",
-    "description": "Parkside Melody Rehearsal from 5:30pm to 9:00pm. Contact parksideharmony@parksideharmony.org for more information.",
-    "location": "Christ Presbyterian Church, 421 Deerfield Road, Camp Hill, PA 17011",
-    "imageUrl": "/images/melody-performance.jpg",
-    "chorus": "Melody",
-    "url": "https://parksideharmony.org/node/6226"
-  },
-  {
     "id": "parkside-harmony-rehearsal-Jun82026",
     "title": "Parkside Harmony Rehearsal",
     "date": "Jun 8, 2026",
