@@ -1,8 +1,11 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { shouldShowForChorus, type ChorusType } from "./chorus";
 
-export type ChorusType = "harmony" | "melody" | "voices";
+// Re-exported for existing call sites that import from "@/lib/chorus-context".
+export { shouldShowForChorus };
+export type { ChorusType };
 
 interface ChorusContextType {
   chorus: ChorusType;
@@ -79,25 +82,4 @@ export function useChorus() {
     throw new Error("useChorus must be used within a ChorusProvider");
   }
   return context;
-}
-
-// Helper to check if content should be shown for current chorus
-export function shouldShowForChorus(
-  contentChorus: ChorusType | string | undefined,
-  selectedChorus: ChorusType
-): boolean {
-  // If no chorus specified on content, show it for all
-  if (!contentChorus) return true;
-
-  // If user selected "voices", show everything
-  if (selectedChorus === "voices") return true;
-
-  // Normalize contentChorus to lowercase for comparison
-  const normalizedChorus = contentChorus.toLowerCase();
-
-  // If content is tagged "voices" or "both", show it for all chorus selections
-  if (normalizedChorus === "voices" || normalizedChorus === "both") return true;
-
-  // Otherwise, only show if it matches the selected chorus (case-insensitive)
-  return normalizedChorus === selectedChorus;
 }
