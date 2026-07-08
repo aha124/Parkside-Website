@@ -126,14 +126,39 @@ function filterOldEvents(events, maxAgeDays = 180) {
   };
 }
 
+function readExistingEvents(filePath) {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  } catch {
+    return [];
+  }
+}
+
 async function main() {
   try {
+    const filePath = path.join(process.cwd(), 'public', 'data', 'events.json');
+    const existingEvents = readExistingEvents(filePath);
+
     console.log('Fetching events from', EVENTS_URL);
     const html = await fetchEventsPage();
-    
+
     console.log('Parsing events...');
     const events = parseEventsFromHtml(html);
     console.log(`Found ${events.length} events on source`);
+
+    // Guard against a silent wipe: parsing 0 events while the current file has
+    // some almost always means the upstream HTML/selectors changed rather than
+    // that every event was genuinely removed. Preserve the existing file and
+    // fail loudly so the sync surfaces the breakage instead of blanking events.
+    if (events.length === 0 && existingEvents.length > 0) {
+      console.error(
+        `✗ Scrape returned 0 events but ${existingEvents.length} exist in ${filePath}. ` +
+        `The source page structure has likely changed (check the ` +
+        `"table.views-table" selector in parseEventsFromHtml). ` +
+        `Leaving events.json untouched.`
+      );
+      process.exit(1);
+    }
 
     console.log('Filtering old events (180+ days)...');
     const { filtered: cleanedEvents, removedCount } = filterOldEvents(events, 180);
@@ -145,7 +170,6 @@ async function main() {
     cleanedEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     // Save to file
-    const filePath = path.join(process.cwd(), 'public', 'data', 'events.json');
     const dir = path.dirname(filePath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
