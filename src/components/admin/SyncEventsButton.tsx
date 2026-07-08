@@ -5,15 +5,9 @@ import { RefreshCw, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface SyncResult {
   success: boolean;
+  triggered?: boolean;
   message?: string;
   error?: string;
-  stats?: {
-    sourceCount: number;
-    existingCount: number;
-    addedCount: number;
-    removedCount: number;
-    totalCount: number;
-  };
 }
 
 export default function SyncEventsButton() {
@@ -34,11 +28,9 @@ export default function SyncEventsButton() {
       if (!response.ok) {
         setResult({ success: false, error: data.error || 'Sync failed' });
       } else {
+        // The sync now runs asynchronously via a GitHub Action, so there are no
+        // immediate changes to reload for — just surface the confirmation.
         setResult(data);
-        // Refresh the page after a short delay to show new events
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
       }
     } catch (error) {
       setResult({
@@ -57,14 +49,7 @@ export default function SyncEventsButton() {
           {result.success ? (
             <>
               <CheckCircle className="w-4 h-4" />
-              <span>
-                {result.stats?.addedCount === 0 && result.stats?.removedCount === 0
-                  ? 'No changes'
-                  : [
-                      result.stats?.addedCount ? `Added ${result.stats.addedCount} new` : '',
-                      result.stats?.removedCount ? `Removed ${result.stats.removedCount} old` : ''
-                    ].filter(Boolean).join(', ') || 'Sync complete'}
-              </span>
+              <span>{result.message || 'Sync triggered'}</span>
             </>
           ) : (
             <>

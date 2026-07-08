@@ -18,6 +18,7 @@ export default function ContactPage() {
     email: "",
     subject: "",
     message: "",
+    website: "", // Honeypot: hidden from real users; bots that fill it are dropped
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState<{
@@ -59,6 +60,7 @@ export default function ContactPage() {
           email: "",
           subject: "",
           message: "",
+          website: "",
         });
       } else {
         setSubmitResult({
@@ -145,6 +147,21 @@ export default function ContactPage() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Honeypot field — hidden from users, ignored by real submissions,
+                      but bots tend to fill every field. Kept out of the tab order and
+                      the accessibility tree. */}
+                  <div className="hidden" aria-hidden="true">
+                    <label htmlFor="website">Website</label>
+                    <input
+                      type="text"
+                      id="website"
+                      name="website"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={formData.website}
+                      onChange={handleChange}
+                    />
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label

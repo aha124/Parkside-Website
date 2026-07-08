@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 // Initialize Resend with API key
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Per-IP submission limits (defaults: 5 submissions / hour). See .env.example.
+const RATE_LIMIT = Number(process.env.CONTACT_RATE_LIMIT) || 5;
+const RATE_WINDOW_SECONDS = Number(process.env.CONTACT_RATE_WINDOW_SECONDS) || 3600;
 
 // Input length limits
 const MAX_LENGTHS = {
@@ -33,7 +38,31 @@ const DESTINATION_EMAIL = process.env.CONTACT_FORM_EMAIL || "info@parksideharmon
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { firstName, lastName, email, subject, message, chorus } = body;
+    const { firstName, lastName, email, subject, message, chorus, website } = body;
+
+    // Honeypot: `website` is a hidden field real users never see or fill.
+    // If it has a value, treat the submission as a bot and drop it silently
+    // (return a success-shaped response so we don't reveal the trap).
+    if (typeof website === "string" && website.trim() !== "") {
+      return NextResponse.json({
+        success: true,
+        message: "Thank you for your message! We'll get back to you soon.",
+      });
+    }
+
+    // Rate limit per client IP before doing any work or sending email.
+    const ip = getClientIp(request);
+    const { allowed } = await checkRateLimit(
+      `ratelimit:contact:${ip}`,
+      RATE_LIMIT,
+      RATE_WINDOW_SECONDS
+    );
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Too many submissions. Please try again later." },
+        { status: 429 }
+      );
+    }
 
     // Validate required fields
     if (!firstName || !lastName || !email || !subject || !message) {
@@ -145,8 +174,12 @@ export async function POST(request: Request) {
       </div>
     `;
 
-    // Send the email using Resend
-    const { data, error } = await resend.emails.send({
+    // Send the email using Resend.
+    // TODO(domain-verify): `onboarding@resend.dev` is Resend's shared sandbox
+    // sender — on the free tier it can only deliver to the Resend account owner's
+    // address. Once parksideharmony.org is verified in Resend, switch `from` to a
+    // sender on that domain (e.g. "Parkside Website <noreply@parksideharmony.org>").
+    const { error } = await resend.emails.send({
       from: "Parkside Website <onboarding@resend.dev>",
       to: DESTINATION_EMAIL,
       replyTo: email,
@@ -161,8 +194,6 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
-
-    console.log("Email sent successfully:", data?.id);
 
     return NextResponse.json({
       success: true,
