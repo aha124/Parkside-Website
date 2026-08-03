@@ -638,6 +638,23 @@ export const PAGE_CONTENT_SCHEMA = {
 
 This approach keeps the code DRY - no need for separate "banner-only" components.
 
+### 17a. Grouping Admin Content Fields into Sections
+
+Pages with many editable fields (like Join, with ~28) become an unreadable wall of inputs in a flat list. Add an optional `section` to each field in `PAGE_CONTENT_SCHEMA` and `PageContentTab` renders one card per section, in the order the sections first appear:
+
+```typescript
+join: {
+  fields: [
+    { key: "heroTitle_harmony", label: "Harmony - Hero Title", type: "text", section: "Hero" },
+    { key: "auditionTitle", label: "Section Heading", type: "text", section: "Audition Process" },
+  ],
+},
+```
+
+Fields without a `section` fall into a single "Page Content" group, so existing pages are unaffected. Fields also accept an optional `help` string rendered as hint text below the input.
+
+**Prefer this over writing a custom tab component.** Only build a dedicated tab (like `AboutTab`/`HomeTab`) when the page needs image pickers interleaved with text fields.
+
 ### 18. Chorus Filtering: Pre-Select vs Hide
 
 When implementing chorus-based content filtering, **pre-select the filter** based on the user's chorus choice rather than **hiding** content from other choruses.
@@ -815,7 +832,8 @@ The admin branding page uses a tabbed interface for managing all site content.
 - **Home** - Hero slide banners/descriptions per chorus + "Our Choruses" section (card images and descriptions for Harmony, Melody, Voices)
 - **About** - Page banners + "Our Story" section (per-chorus images and text)
 - **Leadership** - Leadership member management only (no editable page content)
-- **Banner-only tabs** (Join, Events, Media, Contact, Donate, Gear) - Only banner images per chorus; page content is static in code
+- **Join** - Page banners + all Join page text (hero, audition steps, rehearsal times, contact info) grouped into sections
+- **Banner-only tabs** (Events, Media, Contact, Donate, Gear) - Only banner images per chorus; page content is static in code
 
 **Files:**
 - `src/app/admin/branding/page.tsx` - Main page with tab logic and image picker handling
@@ -952,6 +970,7 @@ Neither Chipply nor CafePress offer public APIs for embedding store content. The
 | Hero slideshow | `src/components/home/HeroSlideshow.tsx` |
 | Our Choruses section | `src/components/home/ChorusesSection.tsx` |
 | About page | `src/app/(site)/about/page.tsx` |
+| Join page | `src/app/(site)/join/page.tsx` |
 | Events list component | `src/components/events/EventsList.tsx` |
 | Events public API | `src/app/api/events/route.ts` |
 | Events sync API | `src/app/api/admin/events/sync/route.ts` |
