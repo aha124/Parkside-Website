@@ -227,7 +227,7 @@ export interface LeadershipMember {
 }
 
 // Default content for each page (used as fallback and for admin UI labels)
-export const PAGE_CONTENT_SCHEMA: Record<PageKey, { fields: Array<{ key: string; label: string; type: "text" | "textarea" }> }> = {
+export const PAGE_CONTENT_SCHEMA: Record<PageKey, { fields: Array<{ key: string; label: string; type: "text" | "textarea"; section?: string; help?: string }> }> = {
   home: {
     fields: [
       // Hero slide descriptions per chorus
@@ -250,8 +250,61 @@ export const PAGE_CONTENT_SCHEMA: Record<PageKey, { fields: Array<{ key: string;
   },
   // Leadership: Only member management, no editable page content
   leadership: { fields: [] },
-  // Join: Banner images only, content is static in code
-  join: { fields: [] },
+  join: {
+    fields: [
+      // Hero — per chorus
+      { key: "heroTitle_harmony", label: "Harmony - Hero Title", type: "text", section: "Hero" },
+      { key: "heroSubtitle_harmony", label: "Harmony - Hero Subtitle", type: "textarea", section: "Hero" },
+      { key: "heroTitle_melody", label: "Melody - Hero Title", type: "text", section: "Hero" },
+      { key: "heroSubtitle_melody", label: "Melody - Hero Subtitle", type: "textarea", section: "Hero" },
+      { key: "heroTitle_voices", label: "Voices - Hero Title", type: "text", section: "Hero" },
+      { key: "heroSubtitle_voices", label: "Voices - Hero Subtitle", type: "textarea", section: "Hero" },
+      // Audition process
+      { key: "auditionTitle", label: "Section Heading", type: "text", section: "Audition Process" },
+      { key: "auditionIntro_harmony", label: "Harmony - Intro Text", type: "textarea", section: "Audition Process" },
+      { key: "auditionIntro_melody", label: "Melody - Intro Text", type: "textarea", section: "Audition Process" },
+      { key: "auditionIntro_voices", label: "Voices - Intro Text", type: "textarea", section: "Audition Process" },
+      { key: "step1Title", label: "Step 1 - Title", type: "text", section: "Audition Process" },
+      { key: "step1Text", label: "Step 1 - Description", type: "textarea", section: "Audition Process" },
+      { key: "step2Title", label: "Step 2 - Title", type: "text", section: "Audition Process" },
+      { key: "step2Text", label: "Step 2 - Description", type: "textarea", section: "Audition Process" },
+      { key: "step3Title", label: "Step 3 - Title", type: "text", section: "Audition Process" },
+      { key: "step3Text", label: "Step 3 - Description", type: "textarea", section: "Audition Process" },
+      // Rehearsal / voice part details (only shown for Harmony and Melody)
+      {
+        key: "voiceType_harmony",
+        label: "Harmony - Voice Parts",
+        type: "text",
+        section: "Rehearsals & Voice Parts",
+      },
+      {
+        key: "rehearsal_harmony",
+        label: "Harmony - Rehearsal Times",
+        type: "text",
+        section: "Rehearsals & Voice Parts",
+      },
+      {
+        key: "voiceType_melody",
+        label: "Melody - Voice Parts",
+        type: "text",
+        section: "Rehearsals & Voice Parts",
+      },
+      {
+        key: "rehearsal_melody",
+        label: "Melody - Rehearsal Times",
+        type: "text",
+        section: "Rehearsals & Voice Parts",
+      },
+      // Contact / call to action
+      { key: "ctaTitle", label: "Section Heading", type: "text", section: "Ready to Take the Next Step" },
+      { key: "ctaText_harmony", label: "Harmony - Contact Text", type: "textarea", section: "Ready to Take the Next Step" },
+      { key: "ctaText_melody", label: "Melody - Contact Text", type: "textarea", section: "Ready to Take the Next Step" },
+      { key: "ctaText_voices", label: "Voices - Contact Text", type: "textarea", section: "Ready to Take the Next Step" },
+      { key: "contactEmail", label: "Audition Email Address", type: "text", section: "Ready to Take the Next Step" },
+      { key: "eventsButtonText", label: "Events Button Label", type: "text", section: "Ready to Take the Next Step" },
+      { key: "eventsButtonSubtext", label: "Events Button Caption", type: "text", section: "Ready to Take the Next Step" },
+    ],
+  },
   // Events: Banner images only, content is dynamic (events list)
   events: { fields: [] },
   // Media: Banner images only, content managed separately

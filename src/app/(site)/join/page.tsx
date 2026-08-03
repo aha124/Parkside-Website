@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import PageTransition from "@/components/ui/PageTransition";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import HeroSection from "@/components/ui/HeroSection";
@@ -7,46 +8,95 @@ import Link from "next/link";
 import Image from "next/image";
 import { useChorus } from "@/lib/chorus-context";
 import { usePageBanner } from "@/hooks/usePageBanner";
+import type { PageContent } from "@/types/admin";
+
+// Fallback content used before the API responds or if it fails
+const defaultContent: PageContent = {
+  heroTitle_harmony: "Join Parkside Harmony!",
+  heroSubtitle_harmony:
+    "Join our award-winning a cappella barbershop chorus and experience the thrill of four-part harmony.",
+  heroTitle_melody: "Join Parkside Melody!",
+  heroSubtitle_melody:
+    "Join our vibrant treble-voiced barbershop ensemble and discover the joy of singing in harmony.",
+  heroTitle_voices: "Join Parkside!",
+  heroSubtitle_voices:
+    "We are proud to have both Parkside Harmony (TTBB) and Parkside Melody (SSAA) ensembles as part of our Parkside Chorus Family.",
+  auditionTitle: "Audition Process",
+  auditionIntro_harmony:
+    "To become a performing member of Parkside Harmony, we invite you to go through our audition process:",
+  auditionIntro_melody:
+    "To become a performing member of Parkside Melody, we invite you to go through our audition process:",
+  auditionIntro_voices:
+    "To become a performing member of one of our groups, we invite you to go through our audition process:",
+  step1Title: "Performance Skills",
+  step1Text: "Learn and demonstrate basic performance staging/choreography",
+  step2Title: "Quartet Performance",
+  step2Text: "Learn and perform your part in a quartet setting",
+  step3Title: "Interview",
+  step3Text: "Personal interview with Music Leadership",
+  voiceType_harmony: "TTBB (Tenor, Lead, Baritone, Bass)",
+  rehearsal_harmony: "Tuesdays, 7:00 PM - 9:30 PM",
+  voiceType_melody: "SSAA (Soprano, Alto)",
+  rehearsal_melody: "Thursdays, 7:00 PM - 9:00 PM",
+  ctaTitle: "Ready to Take the Next Step?",
+  ctaText_harmony:
+    "If you'd like more information on our audition process for Parkside Harmony, contact us:",
+  ctaText_melody:
+    "If you'd like more information on our audition process for Parkside Melody, contact us:",
+  ctaText_voices:
+    "If you'd like more information on our audition process for either group, contact us:",
+  contactEmail: "audition@parksideharmony.org",
+  eventsButtonText: "Check Our Events Calendar",
+  eventsButtonSubtext: "Find our next rehearsal and plan your visit",
+};
+
+const chorusNames = {
+  harmony: "Parkside Harmony",
+  melody: "Parkside Melody",
+  voices: "Parkside",
+};
 
 export default function JoinPage() {
   const { chorus } = useChorus();
   const bannerImage = usePageBanner("join");
+  const [pageContent, setPageContent] = useState<PageContent | null>(null);
 
-  // Chorus-specific content
-  const chorusInfo = {
-    harmony: {
-      name: "Parkside Harmony",
-      subtitle:
-        "Join our award-winning a cappella barbershop chorus and experience the thrill of four-part harmony.",
-      voiceType: "TTBB (Tenor, Lead, Baritone, Bass)",
-      rehearsal: "Tuesdays, 7:00 PM - 9:30 PM",
-    },
-    melody: {
-      name: "Parkside Melody",
-      subtitle:
-        "Join our vibrant treble-voiced barbershop ensemble and discover the joy of singing in harmony.",
-      voiceType: "SSAA (Soprano, Alto)",
-      rehearsal: "Thursdays, 7:00 PM - 9:00 PM",
-    },
-    voices: {
-      name: "Parkside",
-      subtitle:
-        "We are proud to have both Parkside Harmony (TTBB) and Parkside Melody (SSAA) ensembles as part of our Parkside Chorus Family.",
-      voiceType: "TTBB and SSAA",
-      rehearsal: "Tuesdays & Thursdays evenings",
-    },
-  };
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await fetch("/api/page-content");
+        const data = await response.json();
+        if (data.success) {
+          setPageContent(data.data.join);
+        }
+      } catch (error) {
+        console.error("Error fetching join page content:", error);
+      }
+    };
+    fetchContent();
+  }, []);
 
-  const info = chorusInfo[chorus];
+  // Admin content wins, falling back to the defaults above
+  const text = (key: string) => pageContent?.[key] || defaultContent[key] || "";
+
+  const contactEmail = text("contactEmail");
+  const voiceType = text(`voiceType_${chorus}`);
+  const rehearsal = text(`rehearsal_${chorus}`);
+
+  const steps = [
+    { title: text("step1Title"), description: text("step1Text") },
+    { title: text("step2Title"), description: text("step2Text") },
+    { title: text("step3Title"), description: text("step3Text") },
+  ];
 
   return (
     <PageTransition>
       <div className="bg-white">
         <HeroSection
-          title={`Join ${info.name}!`}
-          subtitle={info.subtitle}
+          title={text(`heroTitle_${chorus}`)}
+          subtitle={text(`heroSubtitle_${chorus}`)}
           imagePath={bannerImage}
-          imageAlt={`${info.name} Performance`}
+          imageAlt={`${chorusNames[chorus]} Performance`}
         />
 
         {/* Audition Process Section */}
@@ -55,55 +105,26 @@ export default function JoinPage() {
             <ScrollAnimation>
               <div className="max-w-4xl mx-auto">
                 <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-                  Audition Process
+                  {text("auditionTitle")}
                 </h2>
                 <p className="text-lg text-gray-600 mb-8 text-center">
-                  To become a performing member{" "}
-                  {chorus === "voices"
-                    ? "of one of our groups"
-                    : `of ${info.name}`}
-                  , we invite you to go through our audition process:
+                  {text(`auditionIntro_${chorus}`)}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                  {/* Step 1 */}
-                  <div className="bg-gray-50 rounded-lg p-6 text-center">
-                    <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
-                      1
+                  {steps.map((step, index) => (
+                    <div
+                      key={index}
+                      className="bg-gray-50 rounded-lg p-6 text-center"
+                    >
+                      <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
+                        {index + 1}
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        {step.title}
+                      </h3>
+                      <p className="text-gray-600">{step.description}</p>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Performance Skills
-                    </h3>
-                    <p className="text-gray-600">
-                      Learn and demonstrate basic performance
-                      staging/choreography
-                    </p>
-                  </div>
-
-                  {/* Step 2 */}
-                  <div className="bg-gray-50 rounded-lg p-6 text-center">
-                    <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
-                      2
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Quartet Performance
-                    </h3>
-                    <p className="text-gray-600">
-                      Learn and perform your part in a quartet setting
-                    </p>
-                  </div>
-
-                  {/* Step 3 */}
-                  <div className="bg-gray-50 rounded-lg p-6 text-center">
-                    <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
-                      3
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Interview
-                    </h3>
-                    <p className="text-gray-600">
-                      Personal interview with Music Leadership
-                    </p>
-                  </div>
+                  ))}
                 </div>
               </div>
             </ScrollAnimation>
@@ -116,30 +137,30 @@ export default function JoinPage() {
             <ScrollAnimation>
               <div className="max-w-4xl mx-auto text-center">
                 <h2 className="text-3xl font-bold text-gray-900 mb-8">
-                  Ready to Take the Next Step?
+                  {text("ctaTitle")}
                 </h2>
                 <p className="text-lg text-gray-600 mb-8">
-                  If you&apos;d like more information on our audition process
-                  {chorus === "voices"
-                    ? " for either group"
-                    : ` for ${info.name}`}
-                  , contact us:
+                  {text(`ctaText_${chorus}`)}
                 </p>
                 <a
-                  href="mailto:audition@parksideharmony.org"
+                  href={`mailto:${contactEmail}`}
                   className="text-xl text-indigo-600 font-semibold hover:text-indigo-700 transition-colors"
                 >
-                  audition@parksideharmony.org
+                  {contactEmail}
                 </a>
 
-                {chorus !== "voices" && (
+                {chorus !== "voices" && (voiceType || rehearsal) && (
                   <div className="mt-6 p-4 bg-white rounded-lg shadow-sm">
-                    <p className="text-gray-700">
-                      <strong>Voice Parts:</strong> {info.voiceType}
-                    </p>
-                    <p className="text-gray-700">
-                      <strong>Rehearsals:</strong> {info.rehearsal}
-                    </p>
+                    {voiceType && (
+                      <p className="text-gray-700">
+                        <strong>Voice Parts:</strong> {voiceType}
+                      </p>
+                    )}
+                    {rehearsal && (
+                      <p className="text-gray-700">
+                        <strong>Rehearsals:</strong> {rehearsal}
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -148,10 +169,10 @@ export default function JoinPage() {
                     href="/events"
                     className="inline-block bg-indigo-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-indigo-700 transition-colors"
                   >
-                    Check Our Events Calendar
+                    {text("eventsButtonText")}
                   </Link>
                   <p className="text-gray-600 mt-4">
-                    Find our next rehearsal and plan your visit
+                    {text("eventsButtonSubtext")}
                   </p>
                 </div>
               </div>

@@ -41,6 +41,21 @@ export default function PageContentTab({
   // Get field schema for this page
   const schema = PAGE_CONTENT_SCHEMA[pageKey];
 
+  // Group fields by section so long schemas stay scannable.
+  // Fields without a section fall into a single "Page Content" group.
+  const sections = (schema?.fields ?? []).reduce<
+    Array<{ title: string; fields: typeof schema.fields }>
+  >((groups, field) => {
+    const title = field.section || "Page Content";
+    const group = groups.find((g) => g.title === title);
+    if (group) {
+      group.fields.push(field);
+    } else {
+      groups.push({ title, fields: [field] });
+    }
+    return groups;
+  }, []);
+
   useEffect(() => {
     setLocalContent(pageContent);
     setHasChanges(false);
@@ -127,12 +142,12 @@ export default function PageContentTab({
         </div>
       </div>
 
-      {/* Content Fields Section */}
-      {schema && schema.fields.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-md font-medium text-gray-900 mb-4">Page Content</h3>
+      {/* Content Fields Sections */}
+      {sections.map((section) => (
+        <div key={section.title} className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-md font-medium text-gray-900 mb-4">{section.title}</h3>
           <div className="space-y-4">
-            {schema.fields.map((field) => (
+            {section.fields.map((field) => (
               <div key={field.key}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {field.label}
@@ -154,11 +169,14 @@ export default function PageContentTab({
                     placeholder={`Enter ${field.label.toLowerCase()}...`}
                   />
                 )}
+                {field.help && (
+                  <p className="mt-1 text-xs text-gray-500">{field.help}</p>
+                )}
               </div>
             ))}
           </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }

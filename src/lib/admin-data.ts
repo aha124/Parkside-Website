@@ -570,10 +570,46 @@ const DEFAULT_PAGE_CONTENT: AllPageContent = {
     getInvolvedButtonText: "Join Our Chorus",
   },
   join: {
-    heroTitle: "Join Parkside",
-    heroSubtitle: "Become part of our musical family",
-    benefitsTitle: "Member Benefits",
-    ctaButtonText: "Apply Now",
+    // Hero — per chorus
+    heroTitle_harmony: "Join Parkside Harmony!",
+    heroSubtitle_harmony:
+      "Join our award-winning a cappella barbershop chorus and experience the thrill of four-part harmony.",
+    heroTitle_melody: "Join Parkside Melody!",
+    heroSubtitle_melody:
+      "Join our vibrant treble-voiced barbershop ensemble and discover the joy of singing in harmony.",
+    heroTitle_voices: "Join Parkside!",
+    heroSubtitle_voices:
+      "We are proud to have both Parkside Harmony (TTBB) and Parkside Melody (SSAA) ensembles as part of our Parkside Chorus Family.",
+    // Audition process
+    auditionTitle: "Audition Process",
+    auditionIntro_harmony:
+      "To become a performing member of Parkside Harmony, we invite you to go through our audition process:",
+    auditionIntro_melody:
+      "To become a performing member of Parkside Melody, we invite you to go through our audition process:",
+    auditionIntro_voices:
+      "To become a performing member of one of our groups, we invite you to go through our audition process:",
+    step1Title: "Performance Skills",
+    step1Text: "Learn and demonstrate basic performance staging/choreography",
+    step2Title: "Quartet Performance",
+    step2Text: "Learn and perform your part in a quartet setting",
+    step3Title: "Interview",
+    step3Text: "Personal interview with Music Leadership",
+    // Rehearsal / voice part details
+    voiceType_harmony: "TTBB (Tenor, Lead, Baritone, Bass)",
+    rehearsal_harmony: "Tuesdays, 7:00 PM - 9:30 PM",
+    voiceType_melody: "SSAA (Soprano, Alto)",
+    rehearsal_melody: "Thursdays, 7:00 PM - 9:00 PM",
+    // Contact / call to action
+    ctaTitle: "Ready to Take the Next Step?",
+    ctaText_harmony:
+      "If you'd like more information on our audition process for Parkside Harmony, contact us:",
+    ctaText_melody:
+      "If you'd like more information on our audition process for Parkside Melody, contact us:",
+    ctaText_voices:
+      "If you'd like more information on our audition process for either group, contact us:",
+    contactEmail: "audition@parksideharmony.org",
+    eventsButtonText: "Check Our Events Calendar",
+    eventsButtonSubtext: "Find our next rehearsal and plan your visit",
   },
   events: {
     heroTitle: "Upcoming Events",
