@@ -4,6 +4,7 @@ import EventsList from "@/components/events/EventsList";
 import NewsList from "@/components/news/NewsList";
 import HeroSlideshow from "@/components/home/HeroSlideshow";
 import ChorusesSection from "@/components/home/ChorusesSection";
+import FeaturedBanner from "@/components/home/FeaturedBanner";
 import FeaturedAdCampaignBanner from "@/components/home/FeaturedAdCampaignBanner";
 
 export const metadata: Metadata = {
@@ -16,6 +17,9 @@ export default function HomePage() {
     <PageTransition>
       {/* Hero Section with Slideshow */}
       <HeroSlideshow interval={6000} />
+
+      {/* Featured Event Banner (renders only when a banner is live) */}
+      <FeaturedBanner />
 
       {/* Featured Ad Campaign (renders only when one is active + featured) */}
       <FeaturedAdCampaignBanner />
