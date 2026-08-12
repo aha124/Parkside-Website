@@ -946,6 +946,49 @@ The gear page links to two external merchandise stores with flip card animations
 **Why store URLs are hardcoded:**
 Neither Chipply nor CafePress offer public APIs for embedding store content. The URLs rarely change, so they're hardcoded rather than admin-editable to avoid accidental breakage.
 
+### 13. Homepage Featured Banners
+
+The promotional banner between the hero slideshow and "Upcoming Events" — used to promote an upcoming show.
+
+**Managed at:** `/admin/featured-banners` ("Homepage Banners" in the sidebar)
+
+**Storage:** Vercel KV (key: `admin:featured-banners`)
+
+**Files:**
+- `src/types/admin.ts` - `FeaturedBanner` type
+- `src/lib/banner-visibility.ts` - scheduling rules (pure, no KV/React)
+- `src/lib/featured-banner-validation.ts` - shared create/update validation
+- `src/lib/admin-data.ts` - `getFeaturedBanners()` and CRUD
+- `src/app/api/featured-banners/route.ts` - public API (returns the one live banner, or null)
+- `src/app/api/admin/featured-banners/` - admin CRUD API
+- `src/components/home/FeaturedBanner.tsx` - public component
+- `src/components/admin/FeaturedBannerForm.tsx` - admin form
+- `src/app/admin/featured-banners/` - list, new, edit pages
+
+**Scheduling — the point of the feature:**
+Each banner has `isActive` plus optional `startDate` / `endDate`. This replaced a hardcoded `FeaturedEventBanner` that promoted a June 2026 show and was still live two months later, because taking it down required a code change.
+
+Status is derived, never stored:
+
+| Status | Meaning |
+|---|---|
+| `off` | `isActive` is false |
+| `scheduled` | today is before `startDate` |
+| `expired` | today is after `endDate` |
+| `live` | eligible to render |
+
+**Gotchas:**
+
+1. **Dates are calendar days, not timestamps.** `getLocalToday()` formats "now" as `YYYY-MM-DD` in `America/New_York` and compares date strings. Comparing against UTC instants would pull a banner ending June 13 at 8pm on June 12 local time. `endDate` is **inclusive** — a banner ending on the show date shows all of that day.
+
+2. **Filtering happens server-side** in `/api/featured-banners`, not in the browser, so a visitor's clock or timezone can't resurrect an expired banner. The public endpoint also returns display fields only — no scheduling or audit data.
+
+3. **Only one banner renders.** `selectActiveBanner()` picks the live banner with the highest `priority`, breaking ties toward most recently updated. Several banners can be live at once; the admin list flags the others as "Outranked".
+
+4. **`linkUrl` lands in an `href`,** so validation accepts only a site-relative path (`/events`) or an `https://` URL. Protocol-relative (`//evil.com`), `http:`, and `javascript:` are rejected. External links render as `<a target="_blank" rel="noopener noreferrer">`; internal ones use `next/link`.
+
+5. **Validation is shared** between POST and PUT via `validateBannerInput()`. Add new fields there rather than in either route, or create and edit will drift apart.
+
 ## Key Files Quick Reference
 
 | Purpose | File |
@@ -989,6 +1032,11 @@ Neither Chipply nor CafePress offer public APIs for embedding store content. The
 | Leadership API (admin) | `src/app/api/admin/leadership/route.ts` |
 | Leadership API (public) | `src/app/api/leadership/route.ts` |
 | Page content API | `src/app/api/admin/page-content/route.ts` |
+| Homepage banner (public) | `src/components/home/FeaturedBanner.tsx` |
+| Homepage banner admin | `src/app/admin/featured-banners/page.tsx` |
+| Homepage banner form | `src/components/admin/FeaturedBannerForm.tsx` |
+| Banner scheduling rules | `src/lib/banner-visibility.ts` |
+| Banner validation | `src/lib/featured-banner-validation.ts` |
 | Gear page (public) | `src/app/(site)/gear/page.tsx` |
 | Gear tab (admin) | `src/components/admin/branding/GearTab.tsx` |
 | Contact page (public) | `src/app/(site)/contact/page.tsx` |

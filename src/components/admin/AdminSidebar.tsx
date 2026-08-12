@@ -13,6 +13,7 @@ import {
   Home,
   Palette,
   Megaphone,
+  PanelTop,
 } from "lucide-react";
 
 const navItems = [
@@ -21,6 +22,8 @@ const navItems = [
   { href: "/admin/events", label: "Events", icon: Calendar },
   { href: "/admin/videos", label: "Videos", icon: Video },
   { href: "/admin/ad-campaigns", label: "Ad Campaigns", icon: Megaphone },
+  // Kept after Ad Campaigns so the mobile bar (first five items) is unchanged.
+  { href: "/admin/featured-banners", label: "Homepage Banners", icon: PanelTop },
   { href: "/admin/images", label: "Images", icon: Image },
   { href: "/admin/branding", label: "Branding & Content", icon: Palette },
   { href: "/admin/users", label: "Admin Users", icon: Users },

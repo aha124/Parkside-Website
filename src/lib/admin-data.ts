@@ -13,6 +13,7 @@ import type {
   LeadershipMember,
   LeadershipCategory,
   AdCampaign,
+  FeaturedBanner,
 } from "@/types/admin";
 
 // KV Keys
@@ -26,6 +27,7 @@ const KEYS = {
   PAGE_CONTENT: "admin:page-content",
   LEADERSHIP: "admin:leadership",
   AD_CAMPAIGNS: "admin:ad-campaigns",
+  FEATURED_BANNERS: "admin:featured-banners",
 } as const;
 
 // ============ NEWS MANAGEMENT ============
@@ -1025,6 +1027,63 @@ export async function deleteAdCampaign(id: string): Promise<boolean> {
   const filtered = campaigns.filter(c => c.id !== id);
   if (filtered.length === campaigns.length) return false;
   await kv.set(KEYS.AD_CAMPAIGNS, filtered);
+  return true;
+}
+
+// ============ FEATURED BANNER MANAGEMENT ============
+
+export async function getFeaturedBanners(): Promise<FeaturedBanner[]> {
+  try {
+    const banners = await kv.get<FeaturedBanner[]>(KEYS.FEATURED_BANNERS);
+    return banners || [];
+  } catch (error) {
+    console.error("Error fetching featured banners:", error);
+    return [];
+  }
+}
+
+export async function getFeaturedBannerById(id: string): Promise<FeaturedBanner | null> {
+  const banners = await getFeaturedBanners();
+  return banners.find(b => b.id === id) ?? null;
+}
+
+export async function createFeaturedBanner(
+  data: Omit<FeaturedBanner, "id" | "createdAt" | "updatedAt">
+): Promise<FeaturedBanner> {
+  const banners = await getFeaturedBanners();
+
+  const newItem: FeaturedBanner = {
+    ...data,
+    id: uuidv4(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  await kv.set(KEYS.FEATURED_BANNERS, [newItem, ...banners]);
+  return newItem;
+}
+
+export async function updateFeaturedBanner(
+  id: string,
+  data: Partial<FeaturedBanner>
+): Promise<FeaturedBanner | null> {
+  const banners = await getFeaturedBanners();
+  const index = banners.findIndex(b => b.id === id);
+  if (index === -1) return null;
+
+  banners[index] = {
+    ...banners[index],
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
+  await kv.set(KEYS.FEATURED_BANNERS, banners);
+  return banners[index];
+}
+
+export async function deleteFeaturedBanner(id: string): Promise<boolean> {
+  const banners = await getFeaturedBanners();
+  const filtered = banners.filter(b => b.id !== id);
+  if (filtered.length === banners.length) return false;
+  await kv.set(KEYS.FEATURED_BANNERS, filtered);
   return true;
 }
 

@@ -106,6 +106,33 @@ export interface AdCampaign {
   createdBy?: string;
 }
 
+// ============ FEATURED BANNER TYPES ============
+
+/**
+ * A promotional banner on the homepage, e.g. an upcoming concert.
+ *
+ * Replaces the old hardcoded FeaturedEventBanner: banners are now created and
+ * retired from the admin panel. `endDate` lets a banner retire itself once the
+ * show has passed, so a stale promo can't outlive its event unnoticed.
+ */
+export interface FeaturedBanner {
+  id: string;
+  leadIn?: string;      // italic lead-in, e.g. "An Afternoon at"
+  headline: string;     // main headline, e.g. "The Forum"
+  subline?: string;     // e.g. "June 13, 2026 · 3:00 PM · Harrisburg, PA"
+  imageUrl: string;     // background image
+  logoUrl?: string;     // optional logo shown to the left of the text
+  linkUrl: string;      // internal path ("/ParksideAtTheForum") or https:// URL
+  linkLabel?: string;   // call-to-action text, defaults to "Learn More"
+  isActive: boolean;    // master on/off switch
+  startDate?: string;   // "YYYY-MM-DD"; blank = visible as soon as it's active
+  endDate?: string;     // "YYYY-MM-DD" inclusive; blank = until switched off
+  priority: number;     // when several are live, the highest priority renders
+  createdAt: string;
+  updatedAt: string;
+  createdBy?: string;
+}
+
 // API response types
 export interface ApiResponse<T = unknown> {
   success: boolean;
