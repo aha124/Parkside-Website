@@ -24,15 +24,15 @@ export async function GET() {
       const fileContents = fs.readFileSync(filePath, "utf8");
       scrapedNews = JSON.parse(fileContents);
     } catch {
-      console.log("No scraped news file found");
+      // Missing news.json is a normal state (empty fallback); no log needed.
     }
 
     // Get admin-created/edited news from KV
     let adminNews: NewsItem[] = [];
     try {
       adminNews = await getNews();
-    } catch {
-      console.log("Could not fetch admin news from KV");
+    } catch (error) {
+      console.error("Could not fetch admin news from KV:", error);
     }
 
     // Create a set of admin news titles (normalized) to avoid duplicates

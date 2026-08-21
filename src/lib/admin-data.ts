@@ -1,5 +1,6 @@
 import { kv } from "@vercel/kv";
 import { v4 as uuidv4 } from "uuid";
+import { createKvCollection } from "./kv-collection";
 import type {
   NewsItem,
   EventItem,
@@ -32,62 +33,45 @@ const KEYS = {
 
 // ============ NEWS MANAGEMENT ============
 
-export async function getNews(): Promise<NewsItem[]> {
-  try {
-    const news = await kv.get<NewsItem[]>(KEYS.NEWS);
-    return news || [];
-  } catch (error) {
-    console.error("Error fetching news:", error);
-    return [];
-  }
+const newsCollection = createKvCollection<NewsItem>({
+  key: KEYS.NEWS,
+  prepend: true,
+  label: "news",
+});
+
+export function getNews(): Promise<NewsItem[]> {
+  return newsCollection.list();
 }
 
-export async function createNews(data: Omit<NewsItem, "id" | "createdAt" | "updatedAt">): Promise<NewsItem> {
-  const news = await getNews();
-  const newItem: NewsItem = {
-    ...data,
-    id: uuidv4(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  await kv.set(KEYS.NEWS, [newItem, ...news]);
-  return newItem;
+export function createNews(
+  data: Omit<NewsItem, "id" | "createdAt" | "updatedAt">
+): Promise<NewsItem> {
+  return newsCollection.create(data);
 }
 
-export async function updateNews(id: string, data: Partial<NewsItem>): Promise<NewsItem | null> {
-  const news = await getNews();
-  const index = news.findIndex(item => item.id === id);
-  if (index === -1) return null;
-
-  news[index] = {
-    ...news[index],
-    ...data,
-    updatedAt: new Date().toISOString(),
-  };
-  await kv.set(KEYS.NEWS, news);
-  return news[index];
+export function updateNews(
+  id: string,
+  data: Partial<NewsItem>
+): Promise<NewsItem | null> {
+  return newsCollection.update(id, data);
 }
 
-export async function deleteNews(id: string): Promise<boolean> {
-  const news = await getNews();
-  const filtered = news.filter(item => item.id !== id);
-  if (filtered.length === news.length) return false;
-  await kv.set(KEYS.NEWS, filtered);
-  return true;
+export function deleteNews(id: string): Promise<boolean> {
+  return newsCollection.remove(id);
 }
 
 // ============ EVENT OVERRIDES MANAGEMENT ============
 
-export async function getEventOverrides(): Promise<EventItem[]> {
-  try {
-    const overrides = await kv.get<EventItem[]>(KEYS.EVENT_OVERRIDES);
-    return overrides || [];
-  } catch (error) {
-    console.error("Error fetching event overrides:", error);
-    return [];
-  }
+const eventOverridesCollection = createKvCollection<EventItem>({
+  key: KEYS.EVENT_OVERRIDES,
+  label: "event overrides",
+});
+
+export function getEventOverrides(): Promise<EventItem[]> {
+  return eventOverridesCollection.list();
 }
 
+// Custom create: also flags the item as a manual override.
 export async function createEventOverride(data: Omit<EventItem, "id" | "createdAt" | "updatedAt" | "isManualOverride">): Promise<EventItem> {
   const overrides = await getEventOverrides();
   const newItem: EventItem = {
@@ -101,26 +85,12 @@ export async function createEventOverride(data: Omit<EventItem, "id" | "createdA
   return newItem;
 }
 
-export async function updateEventOverride(id: string, data: Partial<EventItem>): Promise<EventItem | null> {
-  const overrides = await getEventOverrides();
-  const index = overrides.findIndex(item => item.id === id);
-  if (index === -1) return null;
-
-  overrides[index] = {
-    ...overrides[index],
-    ...data,
-    updatedAt: new Date().toISOString(),
-  };
-  await kv.set(KEYS.EVENT_OVERRIDES, overrides);
-  return overrides[index];
+export function updateEventOverride(id: string, data: Partial<EventItem>): Promise<EventItem | null> {
+  return eventOverridesCollection.update(id, data);
 }
 
-export async function deleteEventOverride(id: string): Promise<boolean> {
-  const overrides = await getEventOverrides();
-  const filtered = overrides.filter(item => item.id !== id);
-  if (filtered.length === overrides.length) return false;
-  await kv.set(KEYS.EVENT_OVERRIDES, filtered);
-  return true;
+export function deleteEventOverride(id: string): Promise<boolean> {
+  return eventOverridesCollection.remove(id);
 }
 
 // Hide a scraped event by its original ID
@@ -149,94 +119,59 @@ export async function hideScrapedEvent(originalId: string, createdBy?: string): 
 
 // ============ VIDEO MANAGEMENT ============
 
-export async function getVideos(): Promise<VideoItem[]> {
-  try {
-    const videos = await kv.get<VideoItem[]>(KEYS.VIDEOS);
-    return videos || [];
-  } catch (error) {
-    console.error("Error fetching videos:", error);
-    return [];
-  }
+const videosCollection = createKvCollection<VideoItem>({
+  key: KEYS.VIDEOS,
+  prepend: true,
+  label: "videos",
+});
+
+export function getVideos(): Promise<VideoItem[]> {
+  return videosCollection.list();
 }
 
-export async function createVideo(data: Omit<VideoItem, "id" | "createdAt" | "updatedAt">): Promise<VideoItem> {
-  const videos = await getVideos();
-  const newItem: VideoItem = {
-    ...data,
-    id: uuidv4(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  await kv.set(KEYS.VIDEOS, [newItem, ...videos]);
-  return newItem;
+export function createVideo(
+  data: Omit<VideoItem, "id" | "createdAt" | "updatedAt">
+): Promise<VideoItem> {
+  return videosCollection.create(data);
 }
 
-export async function updateVideo(id: string, data: Partial<VideoItem>): Promise<VideoItem | null> {
-  const videos = await getVideos();
-  const index = videos.findIndex(item => item.id === id);
-  if (index === -1) return null;
-
-  videos[index] = {
-    ...videos[index],
-    ...data,
-    updatedAt: new Date().toISOString(),
-  };
-  await kv.set(KEYS.VIDEOS, videos);
-  return videos[index];
+export function updateVideo(
+  id: string,
+  data: Partial<VideoItem>
+): Promise<VideoItem | null> {
+  return videosCollection.update(id, data);
 }
 
-export async function deleteVideo(id: string): Promise<boolean> {
-  const videos = await getVideos();
-  const filtered = videos.filter(item => item.id !== id);
-  if (filtered.length === videos.length) return false;
-  await kv.set(KEYS.VIDEOS, filtered);
-  return true;
+export function deleteVideo(id: string): Promise<boolean> {
+  return videosCollection.remove(id);
 }
 
 // ============ IMAGE MANAGEMENT ============
 
-export async function getImages(): Promise<SiteImage[]> {
-  try {
-    const images = await kv.get<SiteImage[]>(KEYS.IMAGES);
-    return images || [];
-  } catch (error) {
-    console.error("Error fetching images:", error);
-    return [];
-  }
+const imagesCollection = createKvCollection<SiteImage>({
+  key: KEYS.IMAGES,
+  label: "images",
+});
+
+export function getImages(): Promise<SiteImage[]> {
+  return imagesCollection.list();
 }
 
-export async function createImage(data: Omit<SiteImage, "id" | "createdAt" | "updatedAt">): Promise<SiteImage> {
-  const images = await getImages();
-  const newItem: SiteImage = {
-    ...data,
-    id: uuidv4(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  await kv.set(KEYS.IMAGES, [...images, newItem]);
-  return newItem;
+export function createImage(
+  data: Omit<SiteImage, "id" | "createdAt" | "updatedAt">
+): Promise<SiteImage> {
+  return imagesCollection.create(data);
 }
 
-export async function updateImage(id: string, data: Partial<SiteImage>): Promise<SiteImage | null> {
-  const images = await getImages();
-  const index = images.findIndex(item => item.id === id);
-  if (index === -1) return null;
-
-  images[index] = {
-    ...images[index],
-    ...data,
-    updatedAt: new Date().toISOString(),
-  };
-  await kv.set(KEYS.IMAGES, images);
-  return images[index];
+export function updateImage(
+  id: string,
+  data: Partial<SiteImage>
+): Promise<SiteImage | null> {
+  return imagesCollection.update(id, data);
 }
 
-export async function deleteImage(id: string): Promise<boolean> {
-  const images = await getImages();
-  const filtered = images.filter(item => item.id !== id);
-  if (filtered.length === images.length) return false;
-  await kv.set(KEYS.IMAGES, filtered);
-  return true;
+export function deleteImage(id: string): Promise<boolean> {
+  return imagesCollection.remove(id);
 }
 
 // ============ ADMIN USER MANAGEMENT ============
@@ -960,14 +895,15 @@ export async function seedLeadership(createdBy?: string): Promise<{ seeded: bool
 
 // ============ AD CAMPAIGN MANAGEMENT ============
 
-export async function getAdCampaigns(): Promise<AdCampaign[]> {
-  try {
-    const campaigns = await kv.get<AdCampaign[]>(KEYS.AD_CAMPAIGNS);
-    return campaigns || [];
-  } catch (error) {
-    console.error("Error fetching ad campaigns:", error);
-    return [];
-  }
+// create/update are custom (slug-uniqueness checks); list/remove reuse the helper.
+const adCampaignsCollection = createKvCollection<AdCampaign>({
+  key: KEYS.AD_CAMPAIGNS,
+  prepend: true,
+  label: "ad campaigns",
+});
+
+export function getAdCampaigns(): Promise<AdCampaign[]> {
+  return adCampaignsCollection.list();
 }
 
 export async function getAdCampaignBySlug(slug: string): Promise<AdCampaign | null> {
@@ -1022,12 +958,8 @@ export async function updateAdCampaign(
   return campaigns[index];
 }
 
-export async function deleteAdCampaign(id: string): Promise<boolean> {
-  const campaigns = await getAdCampaigns();
-  const filtered = campaigns.filter(c => c.id !== id);
-  if (filtered.length === campaigns.length) return false;
-  await kv.set(KEYS.AD_CAMPAIGNS, filtered);
-  return true;
+export function deleteAdCampaign(id: string): Promise<boolean> {
+  return adCampaignsCollection.remove(id);
 }
 
 // ============ FEATURED BANNER MANAGEMENT ============

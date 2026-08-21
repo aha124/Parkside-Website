@@ -1,17 +1,22 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { validateContactSubmission } from "@/lib/contact-validation";
 
-// Initialize Resend with API key
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazily construct the Resend client. Doing this at module scope throws at
+// build time ("Missing API key") when RESEND_API_KEY isn't set (e.g. in CI),
+// so defer it until a request actually needs to send mail.
+let resendClient: Resend | null = null;
+function getResend(): Resend {
+  if (!resendClient) {
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendClient;
+}
 
-// Input length limits
-const MAX_LENGTHS = {
-  firstName: 100,
-  lastName: 100,
-  email: 254, // RFC 5321 max
-  subject: 100,
-  message: 5000,
-};
+// Per-IP submission limits (defaults: 5 submissions / hour). See .env.example.
+const RATE_LIMIT = Number(process.env.CONTACT_RATE_LIMIT) || 5;
+const RATE_WINDOW_SECONDS = Number(process.env.CONTACT_RATE_WINDOW_SECONDS) || 3600;
 
 // Escape HTML to prevent XSS in email
 function escapeHtml(text: string): string {
@@ -33,52 +38,38 @@ const DESTINATION_EMAIL = process.env.CONTACT_FORM_EMAIL || "info@parksideharmon
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { firstName, lastName, email, subject, message, chorus } = body;
+    const { chorus, website } = body ?? {};
 
-    // Validate required fields
-    if (!firstName || !lastName || !email || !subject || !message) {
+    // Honeypot: `website` is a hidden field real users never see or fill.
+    // If it has a value, treat the submission as a bot and drop it silently
+    // (return a success-shaped response so we don't reveal the trap).
+    if (typeof website === "string" && website.trim() !== "") {
+      return NextResponse.json({
+        success: true,
+        message: "Thank you for your message! We'll get back to you soon.",
+      });
+    }
+
+    // Rate limit per client IP before doing any work or sending email.
+    const ip = getClientIp(request);
+    const { allowed } = await checkRateLimit(
+      `ratelimit:contact:${ip}`,
+      RATE_LIMIT,
+      RATE_WINDOW_SECONDS
+    );
+    if (!allowed) {
       return NextResponse.json(
-        { error: "All fields are required" },
-        { status: 400 }
+        { error: "Too many submissions. Please try again later." },
+        { status: 429 }
       );
     }
 
-    // Validate types
-    if (
-      typeof firstName !== "string" ||
-      typeof lastName !== "string" ||
-      typeof email !== "string" ||
-      typeof subject !== "string" ||
-      typeof message !== "string"
-    ) {
-      return NextResponse.json(
-        { error: "Invalid field types" },
-        { status: 400 }
-      );
+    // Validate required fields, types, lengths, and email format
+    const validation = validateContactSubmission(body);
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
-
-    // Validate lengths
-    if (
-      firstName.length > MAX_LENGTHS.firstName ||
-      lastName.length > MAX_LENGTHS.lastName ||
-      email.length > MAX_LENGTHS.email ||
-      subject.length > MAX_LENGTHS.subject ||
-      message.length > MAX_LENGTHS.message
-    ) {
-      return NextResponse.json(
-        { error: "One or more fields exceed maximum length" },
-        { status: 400 }
-      );
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: "Invalid email address" },
-        { status: 400 }
-      );
-    }
+    const { firstName, lastName, email, subject, message } = validation.data;
 
     // Format subject line based on inquiry type
     const subjectLabels: Record<string, string> = {
@@ -145,8 +136,12 @@ export async function POST(request: Request) {
       </div>
     `;
 
-    // Send the email using Resend
-    const { data, error } = await resend.emails.send({
+    // Send the email using Resend.
+    // TODO(domain-verify): `onboarding@resend.dev` is Resend's shared sandbox
+    // sender — on the free tier it can only deliver to the Resend account owner's
+    // address. Once parksideharmony.org is verified in Resend, switch `from` to a
+    // sender on that domain (e.g. "Parkside Website <noreply@parksideharmony.org>").
+    const { error } = await getResend().emails.send({
       from: "Parkside Website <onboarding@resend.dev>",
       to: DESTINATION_EMAIL,
       replyTo: email,
@@ -161,8 +156,6 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
-
-    console.log("Email sent successfully:", data?.id);
 
     return NextResponse.json({
       success: true,
