@@ -119,17 +119,34 @@ All in `src/app/api/`:
 Events are scraped from parksideharmony.org and can be edited via admin.
 
 **Files:**
-- `src/app/api/admin/events/sync/route.ts` - Scrapes events, delta checking, 180-day cleanup
+- `scripts/syncEvents.js` - **The actual scraper.** Writes `public/data/events.json`
+- `.github/workflows/update-events.yml` - Runs the scraper nightly at 00:00 UTC and commits any change
+- `src/app/api/admin/events/sync/route.ts` - Triggers that workflow; does **not** scrape
 - `src/app/api/events/route.ts` - Public API merging scraped + overrides
 - `src/components/admin/SyncEventsButton.tsx` - UI for triggering sync
 - `src/components/events/EventsList.tsx` - Displays events with filtering
 
+**Where syncing actually happens:**
+
+The scrape runs in GitHub Actions, not in the app. The workflow scrapes parksideharmony.org with cheerio, replaces `public/data/events.json`, commits it, and the resulting push redeploys the site. `/api/events` reads that file out of the deployment bundle at request time.
+
+**The app cannot scrape inline.** Vercel's filesystem is read-only outside `/tmp`, so `fs.writeFileSync` on `public/data/events.json` throws `EROFS`. This route previously did exactly that, which meant the admin "Sync Events" button had never once worked in production — it returned a generic 500 on every click. Even a successful write would be pointless: the container is ephemeral and the file is rebuilt on the next deploy.
+
+So the admin button dispatches `update-events.yml` via the GitHub API instead. It is fire-and-forget — the response can't report how many events changed, because the work happens after the request returns. Events appear once the workflow commits and Vercel redeploys (a few minutes).
+
+**Requires `GITHUB_SYNC_TOKEN`** in the Vercel environment: a GitHub token with permission to run workflows on this repo (fine-grained with *Actions: read and write*, or classic with the `workflow` scope). Without it the button returns a 503 explaining that events still sync nightly — it degrades to the automatic schedule rather than appearing broken.
+
 **Features:**
-- **Sync from source**: Fetches events from parksideharmony.org using cheerio
-- **Delta checking**: Only adds events not already present (by title+date)
-- **180-day cleanup**: Automatically removes events older than 180 days during sync
+- **Sync from source**: Nightly, plus on demand from the admin button
+- **Full replace**: Each sync replaces events.json with what the source currently lists — an event dropped from the source disappears on the next run
+- **180-day cleanup**: Events older than 180 days are filtered out during sync
 - **Admin overrides**: Edit scraped events; changes stored in KV and merged at display time
 - **Past events tab**: Toggle between "Upcoming" and "Past" events on public page
+
+**Debugging "events aren't syncing":**
+1. Check the workflow's run history — it may be succeeding with "No changes to commit", which is correct when the source hasn't changed.
+2. Compare the source against `public/data/events.json` before assuming breakage. Up to 24 hours of lag is normal without a manual sync.
+3. A past event lingering on the site usually means it dropped off the source after the last run; the next run removes it.
 
 **Usage:**
 ```tsx

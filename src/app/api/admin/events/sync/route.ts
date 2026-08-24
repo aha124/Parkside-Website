@@ -1,162 +1,23 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import fs from "fs";
-import path from "path";
-import * as cheerio from "cheerio";
 
-const EVENTS_URL = 'https://parksideharmony.org/events';
+/**
+ * Kicks off an events sync from parksideharmony.org.
+ *
+ * The scraping itself lives in the "Update Events from Website" GitHub Action
+ * (.github/workflows/update-events.yml), which writes public/data/events.json
+ * and commits it. This route only triggers that workflow.
+ *
+ * It cannot do the scraping inline: /api/events serves events.json out of the
+ * deployment bundle, and Vercel's filesystem is read-only outside /tmp. The
+ * previous version of this route wrote the file directly, which threw EROFS on
+ * every production call — the sync button had never worked once deployed.
+ */
 
-const DEFAULT_IMAGES: Record<string, string> = {
-  'Harmony': '/images/harmony-performance.jpg',
-  'Melody': '/images/melody-performance.jpg',
-  'Both': '/images/hero-bg.jpg',
-  'default': '/images/hero-bg.jpg'
-};
-
-interface ScrapedEvent {
-  id: string;
-  title: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  description: string;
-  location: string;
-  imageUrl: string;
-  chorus: string;
-  url: string;
-}
-
-function determineChorus(text: string): string {
-  text = text.toLowerCase();
-  if (text.includes('harmony') && !text.includes('melody')) return 'Harmony';
-  if (text.includes('melody') && !text.includes('harmony')) return 'Melody';
-  if (text.includes('harmony') && text.includes('melody')) return 'Both';
-  if (text.includes('parkside')) return 'Both';
-  return 'Both';
-}
-
-function parseDateTime(dateTimeStr: string): { formattedDate: string; startTime: string; endTime: string } {
-  try {
-    const parts = dateTimeStr.match(/([A-Za-z]+)\s+(\d+)\s+(\d+)\s+-\s+(\d+:\d+[ap]m)\s+to\s+(\d+:\d+[ap]m)/i);
-    if (!parts) {
-      const simpleParts = dateTimeStr.match(/([A-Za-z]+)\s+(\d+)\s+(\d+)/);
-      if (simpleParts) {
-        return { formattedDate: `${simpleParts[1]} ${simpleParts[2]}, ${simpleParts[3]}`, startTime: '', endTime: '' };
-      }
-      return { formattedDate: dateTimeStr.trim(), startTime: '', endTime: '' };
-    }
-    return {
-      formattedDate: `${parts[1]} ${parts[2]}, ${parts[3]}`,
-      startTime: parts[4],
-      endTime: parts[5]
-    };
-  } catch {
-    return { formattedDate: dateTimeStr.trim(), startTime: '', endTime: '' };
-  }
-}
-
-function generateEventId(title: string, date: string): string {
-  // Create a deterministic ID based on title and date for delta checking
-  const normalized = `${title.toLowerCase().replace(/\s+/g, '-')}-${date.replace(/[^a-zA-Z0-9]/g, '')}`;
-  return normalized;
-}
-
-async function fetchEventsPage(): Promise<string> {
-  const response = await fetch(EVENTS_URL, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (compatible; ParksideWebsiteBot/1.0)'
-    }
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to fetch events page: ${response.status}`);
-  }
-  return response.text();
-}
-
-function parseEventsFromHtml(html: string): ScrapedEvent[] {
-  const $ = cheerio.load(html);
-  const events: ScrapedEvent[] = [];
-  const rows = $('table.views-table tbody tr');
-
-  rows.each((_, row) => {
-    const dateCell = $(row).find('td.views-field-field-event-date');
-    const titleCell = $(row).find('td.views-field-title');
-
-    const dateTimeText = dateCell.text().trim();
-    const title = titleCell.find('a').text().trim();
-    let url = titleCell.find('a').attr('href');
-
-    if (!title || !url) return;
-
-    if (!url.startsWith('http')) {
-      url = `https://parksideharmony.org${url}`;
-    }
-
-    const { formattedDate, startTime, endTime } = parseDateTime(dateTimeText);
-    const chorus = determineChorus(title);
-    const eventId = generateEventId(title, formattedDate);
-
-    events.push({
-      id: eventId,
-      title,
-      date: formattedDate,
-      startTime,
-      endTime,
-      description: startTime && endTime
-        ? `${title} from ${startTime} to ${endTime}. Contact parksideharmony@parksideharmony.org for more information.`
-        : `${title}. Contact parksideharmony@parksideharmony.org for more information.`,
-      location: 'Christ Presbyterian Church, 421 Deerfield Road, Camp Hill, PA 17011',
-      imageUrl: DEFAULT_IMAGES[chorus] || DEFAULT_IMAGES.default,
-      chorus,
-      url
-    });
-  });
-
-  return events;
-}
-
-function getExistingEvents(): ScrapedEvent[] {
-  try {
-    const filePath = path.join(process.cwd(), 'public', 'data', 'events.json');
-    const data = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
-
-function saveEvents(events: ScrapedEvent[]): void {
-  const filePath = path.join(process.cwd(), 'public', 'data', 'events.json');
-  const dir = path.dirname(filePath);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  fs.writeFileSync(filePath, JSON.stringify(events, null, 2));
-}
-
-function parseEventDate(dateStr: string): Date {
-  // Handle various date formats like "Jan 15, 2025", "January 15, 2025", "Mar 5-7, 2025"
-  // For date ranges, use the first date
-  const cleanDate = dateStr.split('-')[0].trim().replace(/,\s*$/, '');
-  const parsed = new Date(cleanDate.replace(/(\w{3,})\s+(\d+),?\s+(\d{4})/, "$1 $2 $3"));
-  return isNaN(parsed.getTime()) ? new Date(dateStr) : parsed;
-}
-
-function filterOldEvents(events: ScrapedEvent[], maxAgeDays: number = 180): { filtered: ScrapedEvent[], removedCount: number } {
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - maxAgeDays);
-  cutoffDate.setHours(0, 0, 0, 0);
-
-  const filtered = events.filter(event => {
-    const eventDate = parseEventDate(event.date);
-    return eventDate >= cutoffDate;
-  });
-
-  return {
-    filtered,
-    removedCount: events.length - filtered.length
-  };
-}
+const REPO_OWNER = "aha124";
+const REPO_NAME = "Parkside-Website";
+const WORKFLOW_FILE = "update-events.yml";
+const WORKFLOW_REF = "master";
 
 export async function POST() {
   const session = await auth();
@@ -164,52 +25,77 @@ export async function POST() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
-    // Get existing events before sync (for comparison)
-    const existingEvents = getExistingEvents();
-
-    // Fetch and parse new events from source
-    const html = await fetchEventsPage();
-    const newScrapedEvents = parseEventsFromHtml(html);
-
-    // Clean up events older than 180 days
-    const { filtered: cleanedEvents, removedCount } = filterOldEvents(newScrapedEvents, 180);
-
-    // Sort by date
-    cleanedEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    // Replace the entire file with current source data
-    // (Manual events are stored separately in KV and merged at runtime)
-    saveEvents(cleanedEvents);
-
-    // Calculate what changed
-    const addedCount = cleanedEvents.filter(
-      e => !existingEvents.some(existing => generateEventId(existing.title, existing.date) === generateEventId(e.title, e.date))
-    ).length;
-
-    const deletedCount = existingEvents.filter(
-      e => !cleanedEvents.some(current => generateEventId(current.title, current.date) === generateEventId(e.title, e.date))
-    ).length;
-
-    return NextResponse.json({
-      success: true,
-      message: `Sync complete. Source has ${cleanedEvents.length} events. Added ${addedCount}, removed ${deletedCount + removedCount} (${deletedCount} deleted + ${removedCount} aged out).`,
-      stats: {
-        sourceCount: cleanedEvents.length,
-        existingCount: existingEvents.length,
-        addedCount,
-        deletedCount,
-        agedOutCount: removedCount,
-        totalCount: cleanedEvents.length
-      }
-    });
-
-  } catch (error) {
-    console.error("Error syncing events:", error);
-    // Don't expose internal error details to client
+  const token = process.env.GITHUB_SYNC_TOKEN;
+  if (!token) {
     return NextResponse.json(
-      { error: "Failed to sync events. Please try again later." },
-      { status: 500 }
+      {
+        error:
+          "Event syncing isn't set up yet. Events still update automatically each night.",
+      },
+      { status: 503 }
+    );
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/workflows/${WORKFLOW_FILE}/dispatches`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/vnd.github+json",
+          Authorization: `Bearer ${token}`,
+          "X-GitHub-Api-Version": "2022-11-28",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ref: WORKFLOW_REF }),
+      }
+    );
+
+    // A successful dispatch returns 204 with no body.
+    if (response.status === 204) {
+      return NextResponse.json({
+        success: true,
+        message:
+          "Sync started. New events appear in a few minutes, once the site finishes updating.",
+      });
+    }
+
+    // Log the real reason server-side; show the admin something actionable
+    // without leaking token or API details.
+    const detail = await response.text().catch(() => "");
+    console.error(
+      `Events sync dispatch failed: ${response.status} ${response.statusText} ${detail}`
+    );
+
+    if (response.status === 401 || response.status === 403) {
+      return NextResponse.json(
+        {
+          error:
+            "The sync couldn't be authorized. The access token may have expired or lost permission.",
+        },
+        { status: 502 }
+      );
+    }
+
+    if (response.status === 404) {
+      return NextResponse.json(
+        {
+          error:
+            "Couldn't find the sync job. It may have been renamed or moved.",
+        },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: "Couldn't start the sync. Please try again in a few minutes." },
+      { status: 502 }
+    );
+  } catch (error) {
+    console.error("Error dispatching events sync:", error);
+    return NextResponse.json(
+      { error: "Couldn't reach the sync service. Please try again later." },
+      { status: 502 }
     );
   }
 }

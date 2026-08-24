@@ -1,24 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RefreshCw, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface SyncResult {
   success: boolean;
   message?: string;
   error?: string;
-  stats?: {
-    sourceCount: number;
-    existingCount: number;
-    addedCount: number;
-    removedCount: number;
-    totalCount: number;
-  };
 }
+
+// Each click queues a real workflow run, so ignore impatient repeat clicks.
+const COOLDOWN_SECONDS = 30;
 
 export default function SyncEventsButton() {
   const [syncing, setSyncing] = useState(false);
   const [result, setResult] = useState<SyncResult | null>(null);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -35,10 +38,7 @@ export default function SyncEventsButton() {
         setResult({ success: false, error: data.error || 'Sync failed' });
       } else {
         setResult(data);
-        // Refresh the page after a short delay to show new events
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
+        setCooldown(COOLDOWN_SECONDS);
       }
     } catch (error) {
       setResult({
@@ -53,22 +53,15 @@ export default function SyncEventsButton() {
   return (
     <div className="flex items-center gap-3">
       {result && (
-        <div className={`flex items-center gap-2 text-sm ${result.success ? 'text-green-600' : 'text-red-600'}`}>
+        <div className={`flex items-start gap-2 text-sm max-w-sm ${result.success ? 'text-green-600' : 'text-red-600'}`}>
           {result.success ? (
             <>
-              <CheckCircle className="w-4 h-4" />
-              <span>
-                {result.stats?.addedCount === 0 && result.stats?.removedCount === 0
-                  ? 'No changes'
-                  : [
-                      result.stats?.addedCount ? `Added ${result.stats.addedCount} new` : '',
-                      result.stats?.removedCount ? `Removed ${result.stats.removedCount} old` : ''
-                    ].filter(Boolean).join(', ') || 'Sync complete'}
-              </span>
+              <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{result.message || 'Sync started.'}</span>
             </>
           ) : (
             <>
-              <AlertCircle className="w-4 h-4" />
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{result.error}</span>
             </>
           )}
@@ -76,8 +69,8 @@ export default function SyncEventsButton() {
       )}
       <button
         onClick={handleSync}
-        disabled={syncing}
-        className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={syncing || cooldown > 0}
+        className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
         title="Sync events from parksideharmony.org"
       >
         {syncing ? (
@@ -85,7 +78,13 @@ export default function SyncEventsButton() {
         ) : (
           <RefreshCw className="w-5 h-5" />
         )}
-        <span>{syncing ? 'Syncing...' : 'Sync Events'}</span>
+        <span>
+          {syncing
+            ? 'Starting...'
+            : cooldown > 0
+            ? `Syncing (${cooldown}s)`
+            : 'Sync Events'}
+        </span>
       </button>
     </div>
   );
