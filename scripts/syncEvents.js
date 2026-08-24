@@ -94,7 +94,7 @@ function parseEventsFromHtml(html) {
       description: startTime && endTime
         ? `${title} from ${startTime} to ${endTime}. Contact parksideharmony@parksideharmony.org for more information.`
         : `${title}. Contact parksideharmony@parksideharmony.org for more information.`,
-      location: 'Christ Presbyterian Church, 421 Deerfield Road, Camp Hill, PA 17011',
+      location: '', // filled in from each event's own page — see addLocations()
       imageUrl: DEFAULT_IMAGES[chorus] || DEFAULT_IMAGES.default,
       chorus,
       url
@@ -102,6 +102,89 @@ function parseEventsFromHtml(html) {
   });
 
   return events;
+}
+
+/**
+ * Pull the venue out of a single event's page.
+ *
+ * The listing table only carries date and title, so the venue has to come from
+ * the event's own page. Those use hCard/adr microformat markup, which the source
+ * site emits for every event.
+ *
+ * Returns null when there's no address block, so callers can leave the location
+ * blank rather than assert something wrong.
+ */
+function parseLocationFromHtml(html) {
+  const $ = cheerio.load(html);
+  const adr = $('.adr').first();
+  if (!adr.length) return null;
+
+  // Every lookup is scoped to .adr: ".region" also matches unrelated
+  // "Members only" blocks elsewhere on the page.
+  const field = (selector) =>
+    adr.find(selector).first().text().trim().replace(/\s+/g, ' ');
+
+  const venue = field('.fn');
+  const street = field('.street-address');
+  const city = field('.locality');
+  const state = field('.region');
+  const zip = field('.postal-code');
+
+  const cityState = [city, state].filter(Boolean).join(', ');
+  const tail = [cityState, zip].filter(Boolean).join(' ');
+
+  return [venue, street, tail].filter(Boolean).join(', ') || null;
+}
+
+/**
+ * Fetch each event's page and fill in its real location.
+ *
+ * Previously every event was stamped with one hardcoded address. When the
+ * chorus moved rehearsals, every event on the site silently pointed at the old
+ * venue — so this is read from the source rather than assumed.
+ *
+ * Pages are fetched one at a time to stay polite to the source site, and a
+ * failure on any single event leaves that location blank instead of failing
+ * the whole sync.
+ */
+async function addLocations(events) {
+  // Many events share a venue page-for-page; cache by URL so a re-listed event
+  // isn't fetched twice.
+  const cache = new Map();
+  let failures = 0;
+
+  for (const event of events) {
+    if (cache.has(event.url)) {
+      event.location = cache.get(event.url);
+      continue;
+    }
+
+    try {
+      const response = await fetch(event.url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ParksideWebsiteBot/1.0)' }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const location = parseLocationFromHtml(await response.text()) || '';
+      if (!location) {
+        failures++;
+        console.warn(`  No location found for "${event.title}" (${event.url})`);
+      }
+
+      cache.set(event.url, location);
+      event.location = location;
+    } catch (error) {
+      failures++;
+      console.warn(`  Could not read location for "${event.title}": ${error.message}`);
+      cache.set(event.url, '');
+      event.location = '';
+    }
+  }
+
+  return { failures };
 }
 
 function parseEventDate(dateStr) {
@@ -141,6 +224,14 @@ async function main() {
       console.log(`Removed ${removedCount} old events`);
     }
 
+    // Read each event's venue from its own page. Done after filtering so we
+    // don't fetch pages for events that are about to be dropped.
+    console.log(`Reading locations for ${cleanedEvents.length} events...`);
+    const { failures } = await addLocations(cleanedEvents);
+    if (failures > 0) {
+      console.log(`Could not read a location for ${failures} of ${cleanedEvents.length} events`);
+    }
+
     // Sort by date
     cleanedEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -160,4 +251,15 @@ async function main() {
   }
 }
 
-main();
+// Only run when invoked directly, so the parsing helpers can be required and
+// tested without kicking off a live scrape.
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  parseLocationFromHtml,
+  parseEventsFromHtml,
+  parseDateTime,
+  determineChorus,
+};
