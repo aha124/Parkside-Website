@@ -140,6 +140,18 @@ So the admin button dispatches `update-events.yml` via the GitHub API instead. I
 - **Sync from source**: Nightly, plus on demand from the admin button
 - **Full replace**: Each sync replaces events.json with what the source currently lists — an event dropped from the source disappears on the next run
 - **180-day cleanup**: Events older than 180 days are filtered out during sync
+- **Per-event locations**: Each event's venue is read from its own page (see below)
+
+**Locations are scraped, not assumed:**
+
+The listing table carries only date and title, so `addLocations()` fetches each event's own page and reads the venue from its hCard/`adr` microformat markup.
+
+This used to be a single hardcoded address stamped onto every event. When the chorus moved rehearsals from Camp Hill to York, all 19 events kept advertising the old venue 25 miles away — nothing failed, the data was just quietly wrong. Never reintroduce a default address: when a location can't be parsed the field is left blank, and `EventsList` renders nothing rather than a wrong address.
+
+Two things to know when touching `parseLocationFromHtml()`:
+
+1. **Scope every lookup to `.adr`.** The source page has ~11 `.region` elements and most are "Members only" navigation blocks appearing *before* the address. An unscoped `$('.region')` puts "Members only" in the middle of the street address.
+2. The parsing helpers are exported from `scripts/syncEvents.js` and `main()` only runs under `require.main === module`, so they can be required and tested without triggering a live scrape.
 - **Admin overrides**: Edit scraped events; changes stored in KV and merged at display time
 - **Past events tab**: Toggle between "Upcoming" and "Past" events on public page
 
