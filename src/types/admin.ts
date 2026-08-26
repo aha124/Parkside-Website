@@ -10,7 +10,8 @@ export interface NewsItem {
   summary: string;
   content?: string;
   imageUrl: string;
-  url?: string;
+  url?: string;    // scraped articles link out to parksideharmony.org
+  slug?: string;   // stable URL segment for articles hosted here (/news/<slug>)
   chorus: ChorusTag;
   createdAt: string;
   updatedAt: string;

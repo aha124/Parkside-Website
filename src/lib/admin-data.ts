@@ -1,5 +1,6 @@
 import { kv } from "@vercel/kv";
 import { v4 as uuidv4 } from "uuid";
+import { uniqueNewsSlug } from "@/lib/news-links";
 import type {
   NewsItem,
   EventItem,
@@ -46,6 +47,10 @@ export async function createNews(data: Omit<NewsItem, "id" | "createdAt" | "upda
   const news = await getNews();
   const newItem: NewsItem = {
     ...data,
+    // A stable slug so the article has a readable, permanent URL. Assigned once
+    // at creation and never regenerated, so renaming a headline later doesn't
+    // break links people have already shared.
+    slug: data.slug || uniqueNewsSlug(data.title, news.map(n => n.slug).filter(Boolean) as string[]),
     id: uuidv4(),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -62,6 +67,15 @@ export async function updateNews(id: string, data: Partial<NewsItem>): Promise<N
   news[index] = {
     ...news[index],
     ...data,
+    // Backfill a slug for articles created before slugs existed. An existing
+    // slug is kept as-is so shared links keep working after an edit.
+    slug:
+      news[index].slug ||
+      data.slug ||
+      uniqueNewsSlug(
+        data.title || news[index].title,
+        news.filter((_, i) => i !== index).map(n => n.slug).filter(Boolean) as string[]
+      ),
     updatedAt: new Date().toISOString(),
   };
   await kv.set(KEYS.NEWS, news);
