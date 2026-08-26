@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import PageTransition from "@/components/ui/PageTransition";
 import { getMergedNews, type MergedNewsItem } from "@/lib/news-source";
 import { matchesNewsParam } from "@/lib/news-links";
+import { parseArticleContent } from "@/lib/article-content";
 
 /**
  * A single news article.
@@ -58,10 +59,10 @@ export default async function NewsArticlePage({
 
   const isExternalUrl = (url: string) => /^https?:\/\//i.test(url);
 
-  // Admin articles carry the full story in `content`; blank lines separate
-  // paragraphs, matching how the admin textarea is written.
+  // Admin articles carry the full story in `content`. Blank lines separate
+  // paragraphs and any YouTube link becomes a player where it was written.
   const body = "content" in newsItem ? (newsItem.content ?? "").trim() : "";
-  const paragraphs = body ? body.split(/\n\s*\n/).filter(Boolean) : [];
+  const blocks = parseArticleContent(body);
   const imageUrl = newsItem.imageUrl || "/images/news1.jpg";
 
   return (
@@ -111,11 +112,42 @@ export default async function NewsArticlePage({
 
               {/* The full story, when there is one. An article with only a
                   summary simply ends here rather than showing filler. */}
-              {paragraphs.map((paragraph, index) => (
-                <p key={index} className="text-gray-700 mb-6 whitespace-pre-line">
-                  {paragraph}
-                </p>
-              ))}
+              {blocks.map((block, index) =>
+                block.type === "video" ? (
+                  <div
+                    key={index}
+                    className="relative w-full mb-6 rounded-lg overflow-hidden bg-black"
+                    style={{ aspectRatio: "16 / 9" }}
+                  >
+                    <iframe
+                      src={`https://www.youtube-nocookie.com/embed/${block.videoId}`}
+                      title="YouTube video player"
+                      className="absolute inset-0 w-full h-full"
+                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : (
+                  <p key={index} className="text-gray-700 mb-6 whitespace-pre-line">
+                    {block.segments.map((segment, i) =>
+                      segment.type === "link" ? (
+                        <a
+                          key={i}
+                          href={segment.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-600 hover:text-indigo-500 underline break-words"
+                        >
+                          {segment.text}
+                        </a>
+                      ) : (
+                        <span key={i}>{segment.text}</span>
+                      )
+                    )}
+                  </p>
+                )
+              )}
 
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <Link
