@@ -154,6 +154,10 @@ export default function NewNewsPage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               placeholder="Full article content (optional)"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Paste a YouTube link on its own line and it appears as a playable
+              video there. Separate paragraphs with a blank line.
+            </p>
           </div>
 
           <div>
