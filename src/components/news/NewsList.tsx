@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import { useChorus } from "@/lib/chorus-context";
+import { getNewsHref, isExternalHref } from "@/lib/news-links";
 
 // Define the News type
 export interface NewsItem {
@@ -13,9 +14,13 @@ export interface NewsItem {
   date: string;
   summary: string;
   imageUrl: string;
-  url: string;
+  url?: string;   // scraped items only; admin articles are hosted here
+  slug?: string;
   chorus?: string; // e.g., "harmony", "melody", or "voices"
 }
+
+/** A news item with its "Read More" destination already resolved. */
+type DisplayNewsItem = NewsItem & { href: string };
 
 interface NewsListProps {
   title?: string;
@@ -30,8 +35,8 @@ export default function NewsList({
   showViewAllButton = false,
   viewAllUrl = "/news"
 }: NewsListProps) {
-  const [allNews, setAllNews] = useState<NewsItem[]>([]);
-  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [allNews, setAllNews] = useState<DisplayNewsItem[]>([]);
+  const [newsItems, setNewsItems] = useState<DisplayNewsItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   // Note: We show all news regardless of chorus selection - badges indicate which chorus each article is for
@@ -90,20 +95,6 @@ export default function NewsList({
     return "/images/news1.jpg";
   };
 
-  // Helper function to get the correct URL for news items
-  const getNewsUrl = (url: string) => {
-    // If it's an external URL, use it directly
-    if (isExternalUrl(url)) return url;
-    
-    // If it's a node URL from Parkside Harmony (e.g., /node/6061)
-    if (url.startsWith('/node/')) {
-      return `https://parksideharmony.org${url}`;
-    }
-    
-    // If it's a local URL, use it as is
-    return url;
-  };
-
   useEffect(() => {
     const fetchNews = async () => {
       setLoading(true);
@@ -122,21 +113,22 @@ export default function NewsList({
           const processedNews = fetchedNews.map((item: NewsItem) => ({
             ...item,
             imageUrl: getValidImageUrl(item.imageUrl),
-            // Ensure the URL is properly formatted
-            url: item.url || '/news'
+            // Resolve where "Read More" goes. Previously a missing url fell
+            // back to '/news', which sent readers back to this same listing.
+            href: getNewsHref(item),
           }));
 
           setAllNews(processedNews);
         } else {
           // Otherwise use static news
-          setAllNews(staticNews);
+          setAllNews(staticNews.map((item) => ({ ...item, href: getNewsHref(item) })));
         }
 
         setError(null);
       } catch (err) {
         console.error("Error fetching news:", err);
         setError("Failed to load news. Using fallback data.");
-        setAllNews(staticNews);
+        setAllNews(staticNews.map((item) => ({ ...item, href: getNewsHref(item) })));
       } finally {
         setLoading(false);
       }
@@ -228,9 +220,9 @@ export default function NewsList({
                     <p className="text-gray-600 mb-4">{item.summary}</p>
                   </div>
                   <div className="px-6 pb-6">
-                    {isExternalUrl(item.url) || item.url.startsWith('/node/') ? (
-                      <a 
-                        href={getNewsUrl(item.url)}
+                    {isExternalHref(item.href) ? (
+                      <a
+                        href={item.href}
                         className="text-indigo-600 font-medium hover:text-indigo-500"
                         target="_blank"
                         rel="noopener noreferrer"
@@ -238,8 +230,8 @@ export default function NewsList({
                         Read More →
                       </a>
                     ) : (
-                      <Link 
-                        href={item.url}
+                      <Link
+                        href={item.href}
                         className="text-indigo-600 font-medium hover:text-indigo-500"
                       >
                         Read More →
