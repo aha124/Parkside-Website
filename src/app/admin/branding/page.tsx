@@ -513,8 +513,13 @@ export default function BrandingPage() {
       {/* Last Updated */}
       {settings?.updatedAt && (
         <div className="px-6 pb-6">
+          {/* Scoped deliberately: this timestamp is the site-settings record
+              (logos, banners and images). Leadership members and page text are
+              stored separately and don't move it — labelling it a bare "Last
+              updated" under a tabbed page reads as "nothing I just saved took". */}
           <p className="text-sm text-gray-500">
-            Last updated: {new Date(settings.updatedAt).toLocaleString()}
+            Banner &amp; image settings last saved:{" "}
+            {new Date(settings.updatedAt).toLocaleString()}
             {settings.updatedBy && ` by ${settings.updatedBy}`}
           </p>
         </div>
