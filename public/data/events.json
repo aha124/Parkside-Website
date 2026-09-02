@@ -1,29 +1,5 @@
 [
   {
-    "id": "parkside-harmony-rehearsal-Aug312026",
-    "title": "Parkside Harmony Rehearsal",
-    "date": "Aug 31, 2026",
-    "startTime": "7:00pm",
-    "endTime": "10:00pm",
-    "description": "Parkside Harmony Rehearsal from 7:00pm to 10:00pm. Contact parksideharmony@parksideharmony.org for more information.",
-    "location": "Asbury United Methodist Church, 340 E Market St, York, PA 17403",
-    "imageUrl": "/images/harmony-performance.jpg",
-    "chorus": "Harmony",
-    "url": "https://parksideharmony.org/PHAugust312026"
-  },
-  {
-    "id": "parkside-melody-rehearsal-Aug312026",
-    "title": "Parkside Melody Rehearsal",
-    "date": "Aug 31, 2026",
-    "startTime": "7:00pm",
-    "endTime": "10:00pm",
-    "description": "Parkside Melody Rehearsal from 7:00pm to 10:00pm. Contact parksideharmony@parksideharmony.org for more information.",
-    "location": "Asbury United Methodist Church, 340 E Market St, York, PA 17403",
-    "imageUrl": "/images/melody-performance.jpg",
-    "chorus": "Melody",
-    "url": "https://parksideharmony.org/node/6233"
-  },
-  {
     "id": "parkside-harmony-rehearsal-Sep132026",
     "title": "Parkside Harmony Rehearsal",
     "date": "Sep 13, 2026",
