@@ -11,8 +11,8 @@ import type { PageContent } from "@/types/admin";
 // Fallback content used before the API responds or if it fails.
 // Keep in sync with DEFAULT_PAGE_CONTENT.contact in src/lib/admin-data.ts.
 const defaultContent: PageContent = {
-  rehearsalVenue: "Christ Presbyterian Church",
-  rehearsalAddress: "421 Deerfield Road\nCamp Hill, PA 17011",
+  rehearsalVenue: "Asbury United Methodist Church",
+  rehearsalAddress: "340 E Market St\nYork, PA 17403",
   rehearsalNote: "*Unless otherwise noted in the rehearsal event",
   rehearsalWelcome: "Visitors and prospective members are always welcome!",
   contactEmail: "info@parksideharmony.org",
