@@ -337,8 +337,23 @@ export const PAGE_CONTENT_SCHEMA: Record<PageKey, { fields: Array<{ key: string;
   events: { fields: [] },
   // Media: Banner images only, content managed separately
   media: { fields: [] },
-  // Contact: Banner images only, form is static
-  contact: { fields: [] },
+  // Contact: the "Contact Information" column is editable; the form itself is static
+  contact: {
+    fields: [
+      { key: "rehearsalVenue", label: "Rehearsal Venue Name", type: "text", section: "Rehearsal Location" },
+      {
+        key: "rehearsalAddress",
+        label: "Rehearsal Address",
+        type: "textarea",
+        section: "Rehearsal Location",
+        help: "Put each line of the address on its own line.",
+      },
+      { key: "rehearsalNote", label: "Fine Print", type: "text", section: "Rehearsal Location", help: "Shown in small italics under the address. Leave blank to hide." },
+      { key: "rehearsalWelcome", label: "Visitor Message", type: "text", section: "Rehearsal Location", help: "Leave blank to hide." },
+      { key: "contactEmail", label: "Email Address", type: "text", section: "Email Us" },
+      { key: "responseNote", label: "Response Time Message", type: "text", section: "Email Us", help: "Leave blank to hide." },
+    ],
+  },
   // Donate: Banner images only, content is static
   donate: { fields: [] },
   // Gear: Banner images only, shop content managed separately

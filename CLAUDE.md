@@ -862,7 +862,8 @@ The admin branding page uses a tabbed interface for managing all site content.
 - **About** - Page banners + "Our Story" section (per-chorus images and text)
 - **Leadership** - Leadership member management only (no editable page content)
 - **Join** - Page banners + all Join page text (hero, audition steps, rehearsal times, contact info) grouped into sections
-- **Banner-only tabs** (Events, Media, Contact, Donate, Gear) - Only banner images per chorus; page content is static in code
+- **Contact** - Page banners + the "Contact Information" column (rehearsal venue, address, fine print, visitor message, email, response-time message). The contact form itself is static. Clearing an optional field hides it on the site.
+- **Banner-only tabs** (Events, Media, Donate, Gear) - Only banner images per chorus; page content is static in code
 
 **Files:**
 - `src/app/admin/branding/page.tsx` - Main page with tab logic and image picker handling

@@ -1,16 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useChorus } from "@/lib/chorus-context";
 import { usePageBanner } from "@/hooks/usePageBanner";
 import PageTransition from "@/components/ui/PageTransition";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
+import type { PageContent } from "@/types/admin";
+
+// Fallback content used before the API responds or if it fails.
+// Keep in sync with DEFAULT_PAGE_CONTENT.contact in src/lib/admin-data.ts.
+const defaultContent: PageContent = {
+  rehearsalVenue: "Christ Presbyterian Church",
+  rehearsalAddress: "421 Deerfield Road\nCamp Hill, PA 17011",
+  rehearsalNote: "*Unless otherwise noted in the rehearsal event",
+  rehearsalWelcome: "Visitors and prospective members are always welcome!",
+  contactEmail: "info@parksideharmony.org",
+  responseNote: "We aim to respond to all inquiries within 24-48 hours.",
+};
 
 export default function ContactPage() {
   const { chorus } = useChorus();
   const bannerImage = usePageBanner("contact");
   const joinBannerImage = usePageBanner("join");
+  const [pageContent, setPageContent] = useState<PageContent | null>(null);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await fetch("/api/page-content");
+        const data = await response.json();
+        if (data.success) {
+          setPageContent(data.data.contact);
+        }
+      } catch (error) {
+        console.error("Error fetching contact page content:", error);
+      }
+    };
+    fetchContent();
+  }, []);
+
+  // The API already merges saved content over the defaults, so a field an admin
+  // deliberately cleared comes back as "" and stays hidden. Defaults only apply
+  // until the API responds or if it fails.
+  const text = (key: string) =>
+    (pageContent ? pageContent[key] : defaultContent[key])?.trim() ?? "";
+
+  const rehearsalVenue = text("rehearsalVenue");
+  const rehearsalAddressLines = text("rehearsalAddress")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const rehearsalNote = text("rehearsalNote");
+  const rehearsalWelcome = text("rehearsalWelcome");
+  const contactEmail = text("contactEmail");
+  const responseNote = text("responseNote");
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -289,18 +333,23 @@ export default function ContactPage() {
                         Rehearsal Location
                       </h3>
                       <p className="mt-1 text-gray-600">
-                        Christ Presbyterian Church
-                        <br />
-                        421 Deerfield Road
-                        <br />
-                        Camp Hill, PA 17011
+                        {[rehearsalVenue, ...rehearsalAddressLines]
+                          .filter(Boolean)
+                          .map((line, i, lines) => (
+                            <span key={i}>
+                              {line}
+                              {i < lines.length - 1 && <br />}
+                            </span>
+                          ))}
                       </p>
-                      <p className="mt-1 text-sm text-gray-500 italic">
-                        *Unless otherwise noted in the rehearsal event
-                      </p>
-                      <p className="mt-3 text-gray-600">
-                        Visitors and prospective members are always welcome!
-                      </p>
+                      {rehearsalNote && (
+                        <p className="mt-1 text-sm text-gray-500 italic">
+                          {rehearsalNote}
+                        </p>
+                      )}
+                      {rehearsalWelcome && (
+                        <p className="mt-3 text-gray-600">{rehearsalWelcome}</p>
+                      )}
                     </div>
                   </div>
 
@@ -324,17 +373,19 @@ export default function ContactPage() {
                       <h3 className="text-lg font-medium text-gray-900">
                         Email Us
                       </h3>
-                      <p className="mt-1 text-gray-600">
-                        <a
-                          href="mailto:info@parksideharmony.org"
-                          className="text-indigo-600 hover:text-indigo-500"
-                        >
-                          info@parksideharmony.org
-                        </a>
-                      </p>
-                      <p className="mt-1 text-gray-600">
-                        We aim to respond to all inquiries within 24-48 hours.
-                      </p>
+                      {contactEmail && (
+                        <p className="mt-1 text-gray-600">
+                          <a
+                            href={`mailto:${contactEmail}`}
+                            className="text-indigo-600 hover:text-indigo-500"
+                          >
+                            {contactEmail}
+                          </a>
+                        </p>
+                      )}
+                      {responseNote && (
+                        <p className="mt-1 text-gray-600">{responseNote}</p>
+                      )}
                     </div>
                   </div>
                 </div>

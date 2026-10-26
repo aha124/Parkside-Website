@@ -642,6 +642,12 @@ const DEFAULT_PAGE_CONTENT: AllPageContent = {
     heroSubtitle: "We'd love to hear from you",
     formTitle: "Send us a Message",
     formIntro: "Have questions? Fill out the form below and we'll get back to you.",
+    rehearsalVenue: "Christ Presbyterian Church",
+    rehearsalAddress: "421 Deerfield Road\nCamp Hill, PA 17011",
+    rehearsalNote: "*Unless otherwise noted in the rehearsal event",
+    rehearsalWelcome: "Visitors and prospective members are always welcome!",
+    contactEmail: "info@parksideharmony.org",
+    responseNote: "We aim to respond to all inquiries within 24-48 hours.",
   },
   donate: {
     heroTitle: "Support Parkside",
