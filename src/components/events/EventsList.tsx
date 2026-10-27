@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ScrollAnimation from "@/components/ui/ScrollAnimation";
 import { useChorus } from "@/lib/chorus-context";
+import { isEventPast, eventSortKey } from "@/lib/event-dates";
 
 // Define the Event type
 export interface Event {
@@ -57,22 +58,6 @@ export default function EventsList({
   const [activeFilter, setActiveFilter] = useState<string>(() => getInitialFilter(selectedChorus));
   const [timePeriod, setTimePeriod] = useState<"upcoming" | "past">("upcoming");
 
-  // Helper function to parse event date string to Date object
-  const parseEventDate = (dateStr: string): Date => {
-    // Handle various date formats like "Jan 15, 2025", "January 15, 2025", "March 5-7, 2025"
-    // For date ranges, use the first date
-    const cleanDate = dateStr.split('-')[0].trim().replace(/,\s*$/, '');
-    const parsed = new Date(cleanDate.replace(/(\w{3,})\s+(\d+),?\s+(\d{4})/, "$1 $2 $3"));
-    return isNaN(parsed.getTime()) ? new Date(dateStr) : parsed;
-  };
-
-  // Check if an event is in the past
-  const isEventPast = (event: Event): boolean => {
-    const eventDate = parseEventDate(event.date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Start of today
-    return eventDate < today;
-  };
 
   // Static fallback events in case the fetch fails
   const staticEvents: Event[] = [
@@ -135,7 +120,7 @@ export default function EventsList({
   const applyFilters = (allEvents: Event[], filter: string, period: "upcoming" | "past") => {
     // First, filter by time period
     let filtered = allEvents.filter(event => {
-      const isPast = isEventPast(event);
+      const isPast = isEventPast(event.date);
       return period === "past" ? isPast : !isPast;
     });
 
@@ -158,11 +143,11 @@ export default function EventsList({
 
     // Sort: upcoming events ascending (soonest first), past events descending (most recent first)
     filtered.sort((a, b) => {
-      const dateA = parseEventDate(a.date);
-      const dateB = parseEventDate(b.date);
+      const dateA = eventSortKey(a.date);
+      const dateB = eventSortKey(b.date);
       return period === "past"
-        ? dateB.getTime() - dateA.getTime()  // Past: most recent first
-        : dateA.getTime() - dateB.getTime(); // Upcoming: soonest first
+        ? dateB - dateA  // Past: most recent first
+        : dateA - dateB; // Upcoming: soonest first
     });
 
     return filtered;

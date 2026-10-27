@@ -153,6 +153,8 @@ Two things to know when touching `parseLocationFromHtml()`:
 1. **Scope every lookup to `.adr`.** The source page has ~11 `.region` elements and most are "Members only" navigation blocks appearing *before* the address. An unscoped `$('.region')` puts "Members only" in the middle of the street address.
 2. The parsing helpers are exported from `scripts/syncEvents.js` and `main()` only runs under `require.main === module`, so they can be required and tested without triggering a live scrape.
 - **Admin overrides**: Edit scraped events; changes stored in KV and merged at display time
+- **Admin-created events**: Stored under the same KV key as overrides but with no `originalId`. `/api/events` appends these to the scraped list (they were silently dropped until Oct 2026). Overrides with `isHidden` remove the scraped event.
+- **Free-text dates**: The admin date field is free text ("Sunday, November 22, 2026", "Oct. 30 - Nov. 1, 2026"). Always parse with `src/lib/event-dates.ts`, never `new Date()` directly. Multi-day events count as upcoming until their last day ends.
 - **Past events tab**: Toggle between "Upcoming" and "Past" events on public page
 
 **Debugging "events aren't syncing":**
