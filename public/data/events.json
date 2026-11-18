@@ -12,18 +12,6 @@
     "url": "https://parksideharmony.org/PHNovember302026"
   },
   {
-    "id": "parkside-melody-rehearsal-Nov302026",
-    "title": "Parkside Melody Rehearsal",
-    "date": "Nov 30, 2026",
-    "startTime": "7:00pm",
-    "endTime": "10:00pm",
-    "description": "Parkside Melody Rehearsal from 7:00pm to 10:00pm. Contact parksideharmony@parksideharmony.org for more information.",
-    "location": "Asbury United Methodist Church, 340 E Market St, York, PA 17403",
-    "imageUrl": "/images/melody-performance.jpg",
-    "chorus": "Melody",
-    "url": "https://parksideharmony.org/node/6239"
-  },
-  {
     "id": "parkside-harmony-rehearsal-Dec142026",
     "title": "Parkside Harmony Rehearsal",
     "date": "Dec 14, 2026",
@@ -36,18 +24,6 @@
     "url": "https://parksideharmony.org/PHDecember142026"
   },
   {
-    "id": "parkside-melody-rehearsal-Dec142026",
-    "title": "Parkside Melody Rehearsal",
-    "date": "Dec 14, 2026",
-    "startTime": "7:00pm",
-    "endTime": "10:00pm",
-    "description": "Parkside Melody Rehearsal from 7:00pm to 10:00pm. Contact parksideharmony@parksideharmony.org for more information.",
-    "location": "Asbury United Methodist Church, 340 E Market St, York, PA 17403",
-    "imageUrl": "/images/melody-performance.jpg",
-    "chorus": "Melody",
-    "url": "https://parksideharmony.org/node/6240"
-  },
-  {
     "id": "parkside-harmony-rehearsal-Jan42027",
     "title": "Parkside Harmony Rehearsal",
     "date": "Jan 4, 2027",
@@ -58,18 +34,6 @@
     "imageUrl": "/images/harmony-performance.jpg",
     "chorus": "Harmony",
     "url": "https://parksideharmony.org/PHJanuary42027"
-  },
-  {
-    "id": "parkside-melody-rehearsal-Jan42027",
-    "title": "Parkside Melody Rehearsal",
-    "date": "Jan 4, 2027",
-    "startTime": "7:00pm",
-    "endTime": "10:00pm",
-    "description": "Parkside Melody Rehearsal from 7:00pm to 10:00pm. Contact parksideharmony@parksideharmony.org for more information.",
-    "location": "Asbury United Methodist Church, 340 E Market St, York, PA 17403",
-    "imageUrl": "/images/melody-performance.jpg",
-    "chorus": "Melody",
-    "url": "https://parksideharmony.org/PMJanuary42027"
   },
   {
     "id": "parkside-harmony-rehearsal-Jan182027",
